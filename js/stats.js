@@ -169,6 +169,7 @@ GeneaAzul.stats = (function() {
     var $el = $('#personalities-list').empty();
     if (!data || data.length === 0) { $el.html('<p class="text-muted">Sin datos disponibles.</p>'); return; }
 
+    var $tbody = $('<tbody>').attr('id', 'personalities-tbody');
     var $table = $('<table>').addClass('table table-sm table-hover').attr('id', 'personalities-table')
       .append($('<thead>').append(
         $('<tr>')
@@ -176,11 +177,11 @@ GeneaAzul.stats = (function() {
           .append($('<th>').addClass('d-none d-sm-table-cell').html('Año nac.'))
           .append($('<th>').addClass('d-none d-md-table-cell').html('Lugar de nacimiento'))
       ))
-      .append($('<tbody>').attr('id', 'personalities-tbody'));
+      .append($tbody);
 
     data.forEach(function(p) {
       var name = (p.title ? p.title + ' ' : '') + p.name + (p.nickname ? ' <em>&ldquo;' + p.nickname + '&rdquo;</em>' : '');
-      $('#personalities-tbody').append(
+      $tbody.append(
         $('<tr>').attr('data-name', name.toLowerCase())
           .append($('<td>').html('<span class="fw-semibold">' + name + '</span>'))
           .append($('<td>').addClass('d-none d-sm-table-cell small text-muted').html(p.birthYear || '—'))
@@ -215,17 +216,18 @@ GeneaAzul.stats = (function() {
     var $el = $('#surnames-list').empty();
     if (!data || data.length === 0) { $el.html('<p class="text-muted">Sin datos disponibles.</p>'); return; }
 
+    var $tbody = $('<tbody>').attr('id', 'surnames-tbody');
     var $table = $('<table>').addClass('table table-sm table-hover').attr('id', 'surnames-table')
       .append($('<thead>').append(
         $('<tr>')
           .append($('<th>').html('Apellido'))
           .append($('<th>').addClass('d-none d-sm-table-cell').html('Variantes'))
       ))
-      .append($('<tbody>').attr('id', 'surnames-tbody'));
+      .append($tbody);
 
     data.forEach(function(s) {
       var variants = s.variants && s.variants.length > 0 ? s.variants.join(', ') : '<span class="text-muted">—</span>';
-      $('#surnames-tbody').append(
+      $tbody.append(
         $('<tr>').attr('data-surname', s.surname.toLowerCase())
           .append($('<td>').html('<span class="fw-semibold">' + s.surname + '</span>'))
           .append($('<td>').addClass('d-none d-sm-table-cell small text-muted').html(variants))
