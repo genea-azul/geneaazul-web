@@ -168,6 +168,33 @@ GeneaAzul.search = (function() {
       e.preventDefault();
       doSearch();
     });
+    $(document).on('click', '#clearFormBtn', function(e) {
+      e.preventDefault();
+      clearForm();
+    });
+  }
+
+  function clearForm() {
+    var $section = $('#buscar-section');
+    // Clear text and number inputs
+    $section.find('input[type=text], input[type=number]').val('');
+    // Uncheck checkboxes and re-enable year-of-death fields
+    $section.find('input[type=checkbox]').prop('checked', false);
+    $section.find('input[type=number][id$="YearOfDeath"]').prop('disabled', false);
+    // Deselect radio buttons (sex toggles)
+    $section.find('input[type=radio]').prop('checked', false);
+    // Reset card sex colors
+    $('#individualCard, #spouseCard').removeClass('ga-sex-male ga-sex-female');
+    $section.find('i.card-header-icon')
+      .removeClass('bi-gender-male bi-gender-female').addClass('bi-person');
+    // Collapse spouse / grandparents panels
+    $('#spouseContainerShowBtn, #grandparentsContainerShowBtn').prop('checked', false);
+    $('#spouseContainer, #grandparentsContainer').addClass('d-none');
+    // Collapse advanced section
+    $('#search-advanced').addClass('d-none');
+    $('#advancedToggleIcon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+    // Hide result card
+    $('#searchResultCard').addClass('d-none').find('div.card-body').empty();
   }
 
   function doSearch() {
@@ -570,11 +597,12 @@ GeneaAzul.search = (function() {
       { surnames: surnames },
       function(data) {
         var $container = $('#searchSurnamesResultCard div.card-body').empty();
-        if (!data.results || data.results.length === 0) {
+        var results = data.surnames || data.results || [];
+        if (results.length === 0) {
           $container.html('<p class="text-muted small mb-0">No se encontró información de apellidos.</p>');
           return;
         }
-        data.results.forEach(function(r, idx) {
+        results.forEach(function(r, idx) {
           $container.append(buildSurnameComponent(r, idx));
         });
       },
