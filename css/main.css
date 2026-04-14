@@ -525,4 +525,7 @@ a:hover { color: var(--ga-accent); }
   .ga-step { padding: 1rem .5rem; }
   /* Give every lazy-loaded section consistent inset on narrow screens */
   .ga-section.container-xl { padding-left: 1rem !important; padding-right: 1rem !important; }
+  /* Immigration table: hide bars on mobile, keep percentage text */
+  .ga-immigration-bar { display: none !important; }
+  #immigration-list td[style] { min-width: 0 !important; }
 }
