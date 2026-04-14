@@ -12,7 +12,11 @@ GeneaAzul.config = {
     obfuscateLiving: true,
     familyTreeProcessPersonsBySec: 225,
     familyTreeProcessFixedDelayMillis: 3250,
-    minMillisToDisplayWaitCountDown: 7500
+    minMillisToDisplayWaitCountDown: 7500,
+    // Optional: MapTiler API key for Spanish map labels.
+    // Get a free key (no credit card) at https://cloud.maptiler.com/account/credentials/
+    // Leave empty to use CartoDB tiles (English/local-language labels).
+    mapTilerKey: ''
 };
 
 /* ── App bootstrap ─────────────────────────────────────────────────
