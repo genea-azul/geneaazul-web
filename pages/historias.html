@@ -1,0 +1,25 @@
+<section class="ga-section container-xl" id="historias-section" aria-label="Historias familiares">
+
+  <!-- Stories index (shown when no story selected) -->
+  <div id="historias-index">
+    <div class="mb-4">
+      <h2 class="ga-section-title">Historias familiares</h2>
+      <p class="ga-section-subtitle">Relatos sobre familias, apellidos y personajes que forman parte del árbol genealógico de Azul.</p>
+    </div>
+
+    <div id="stories-list" class="row g-4">
+      <div class="ga-page-loading"><div class="spinner-border spinner-border-sm" role="status"></div><span>Cargando historias...</span></div>
+    </div>
+  </div>
+
+  <!-- Individual story (shown when a story is loaded) -->
+  <div id="historias-story" class="d-none">
+    <div class="mb-3">
+      <button class="btn btn-sm btn-outline-secondary" id="stories-back-btn">
+        <i class="bi bi-arrow-left me-1"></i>Volver a historias
+      </button>
+    </div>
+    <article class="ga-story-article" id="story-content"></article>
+  </div>
+
+</section>

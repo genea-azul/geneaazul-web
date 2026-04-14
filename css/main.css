@@ -1,0 +1,505 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Genea Azul — main.css
+   Shared layout, components, and animations (theme-independent)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── CSS Custom Properties (overridden by themes) ──────────────── */
+:root {
+  --ga-primary:        #1a365d;
+  --ga-primary-hover:  #152b4a;
+  --ga-accent:         #c9a227;
+  --ga-accent-hover:   #b08d1f;
+  --ga-bg:             #faf8f0;
+  --ga-card-bg:        #ffffff;
+  --ga-text:           #2d2d2d;
+  --ga-text-muted:     #6b5b4f;
+  --ga-border:         #e0d5c5;
+  --ga-shadow:         0 2px 12px rgba(26,54,93,.12);
+  --ga-shadow-hover:   0 6px 24px rgba(26,54,93,.18);
+  --ga-radius:         8px;
+  --ga-radius-lg:      12px;
+  --ga-font-heading:   'Playfair Display', Georgia, serif;
+  --ga-font-body:      'Source Sans 3', 'Segoe UI', sans-serif;
+  --ga-transition:     .2s ease;
+  --ga-navbar-bg:      #1a365d;
+  --ga-navbar-text:    rgba(255,255,255,.87);
+  --ga-footer-bg:      #1a365d;
+  --ga-footer-text:    rgba(255,255,255,.82);
+}
+
+/* ─── Base ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--ga-font-body);
+  color: var(--ga-text);
+  background-color: var(--ga-bg);
+  line-height: 1.65;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-family: var(--ga-font-heading);
+  color: var(--ga-primary);
+  line-height: 1.25;
+}
+
+a { color: var(--ga-primary); }
+a:hover { color: var(--ga-accent); }
+
+/* ─── Navbar ─────────────────────────────────────────────────────── */
+.ga-navbar {
+  background-color: var(--ga-navbar-bg);
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  padding: .6rem 0;
+}
+
+.ga-navbar .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,0.87)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+.ga-navbar .navbar-toggler { color: var(--ga-navbar-text); }
+
+.ga-brand { display: flex; align-items: center; gap: .5rem; }
+.ga-brand-text {
+  font-family: var(--ga-font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+}
+.ga-logo-nav { height: 44px; width: auto; }
+
+.ga-navbar .nav-link {
+  color: var(--ga-navbar-text) !important;
+  font-weight: 400;
+  font-size: .95rem;
+  padding: .4rem .75rem;
+  border-radius: var(--ga-radius);
+  transition: background-color var(--ga-transition), color var(--ga-transition);
+}
+.ga-navbar .nav-link:hover,
+.ga-navbar .nav-link.active {
+  background-color: rgba(255,255,255,.12);
+  color: #fff !important;
+}
+.ga-navbar .dropdown-menu {
+  border: none;
+  box-shadow: var(--ga-shadow-hover);
+  border-radius: var(--ga-radius);
+  background-color: var(--ga-card-bg);
+  min-width: 14rem;
+}
+.ga-navbar .dropdown-item {
+  font-size: .9rem;
+  color: var(--ga-text);
+  padding: .45rem .9rem;
+}
+.ga-navbar .dropdown-item:hover { background-color: var(--ga-bg); color: var(--ga-primary); }
+
+/* Navbar becomes slightly more opaque on scroll */
+.ga-navbar.scrolled { box-shadow: 0 4px 16px rgba(0,0,0,.28); }
+
+.ga-social-link {
+  color: var(--ga-navbar-text);
+  font-size: 1.1rem;
+  padding: .25rem .35rem;
+  border-radius: var(--ga-radius);
+  transition: color var(--ga-transition);
+  text-decoration: none;
+}
+.ga-social-link:hover { color: #fff; }
+
+/* ─── Hero ───────────────────────────────────────────────────────── */
+.ga-hero {
+  padding: 4rem 0 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.ga-logo-hero {
+  height: 100px;
+  width: auto;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.15));
+}
+
+.ga-hero-title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 700;
+  margin-bottom: .75rem;
+  color: var(--ga-primary);
+}
+
+.ga-hero-subtitle {
+  font-size: 1.1rem;
+  color: var(--ga-text-muted);
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.7;
+}
+
+.ga-cta-hero {
+  font-size: 1.1rem;
+  padding: .75rem 2rem;
+}
+
+/* ─── Stat cards ─────────────────────────────────────────────────── */
+.ga-stat-card {
+  background: var(--ga-card-bg);
+  border-radius: var(--ga-radius-lg);
+  padding: 1.5rem 1rem;
+  box-shadow: var(--ga-shadow);
+  border: 1px solid var(--ga-border);
+  transition: box-shadow var(--ga-transition), transform var(--ga-transition);
+}
+.ga-stat-card:hover { box-shadow: var(--ga-shadow-hover); transform: translateY(-2px); }
+
+.ga-stat-number {
+  font-family: var(--ga-font-heading);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 700;
+  color: var(--ga-primary);
+  line-height: 1.1;
+}
+.ga-stat-label {
+  font-size: .85rem;
+  color: var(--ga-text-muted);
+  margin-top: .3rem;
+  font-weight: 500;
+}
+
+/* ─── How it works ───────────────────────────────────────────────── */
+.ga-step { padding: 1.5rem 1rem; }
+
+.ga-step-icon {
+  font-size: 2.4rem;
+  color: var(--ga-accent);
+  margin-bottom: 1rem;
+}
+.ga-step-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: .5rem;
+  color: var(--ga-primary);
+}
+.ga-step-desc { font-size: .9rem; color: var(--ga-text-muted); margin: 0; }
+
+/* ─── Highlights ─────────────────────────────────────────────────── */
+.ga-highlight-card {
+  background: var(--ga-card-bg);
+  border: 1px solid var(--ga-border);
+  border-radius: var(--ga-radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--ga-shadow);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.ga-highlight-header {
+  font-family: var(--ga-font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ga-primary);
+  margin-bottom: .6rem;
+}
+.ga-highlight-body {
+  font-size: .9rem;
+  color: var(--ga-text-muted);
+  flex: 1;
+  margin-bottom: .75rem;
+  line-height: 1.6;
+}
+.ga-highlight-link {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--ga-accent);
+  text-decoration: none;
+}
+.ga-highlight-link:hover { color: var(--ga-accent-hover); text-decoration: underline; }
+
+/* ─── CTA text ───────────────────────────────────────────────────── */
+.ga-cta-text {
+  font-family: var(--ga-font-heading);
+  font-size: 1.2rem;
+  color: var(--ga-text-muted);
+  margin-bottom: 1rem;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────── */
+.ga-btn-primary {
+  background-color: var(--ga-primary);
+  border-color: var(--ga-primary);
+  color: #fff;
+  border-radius: 50px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  transition: background-color var(--ga-transition), transform var(--ga-transition), box-shadow var(--ga-transition);
+}
+.ga-btn-primary:hover, .ga-btn-primary:focus {
+  background-color: var(--ga-primary-hover);
+  border-color: var(--ga-primary-hover);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(26,54,93,.3);
+}
+
+.ga-btn-accent {
+  background-color: var(--ga-accent);
+  border-color: var(--ga-accent);
+  color: #fff;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: background-color var(--ga-transition);
+}
+.ga-btn-accent:hover { background-color: var(--ga-accent-hover); border-color: var(--ga-accent-hover); color: #fff; }
+
+/* ─── Page content (lazy-loaded area) ───────────────────────────── */
+.ga-page-content {
+  min-height: 60vh;
+}
+
+/* fade-in animation when pages load */
+.ga-page-fade-in {
+  animation: gaFadeIn .25s ease forwards;
+}
+@keyframes gaFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ─── Page section wrapper ───────────────────────────────────────── */
+.ga-section {
+  padding: 3rem 0;
+}
+.ga-section-title {
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: var(--ga-primary);
+  margin-bottom: .5rem;
+}
+.ga-section-subtitle {
+  color: var(--ga-text-muted);
+  font-size: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+/* ─── Page loading spinner ───────────────────────────────────────── */
+.ga-page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  color: var(--ga-text-muted);
+  gap: .75rem;
+}
+.ga-page-loading .spinner-border { color: var(--ga-primary); }
+
+/* ─── Search result person cards ─────────────────────────────────── */
+.ga-result-card {
+  border-radius: var(--ga-radius-lg);
+  box-shadow: var(--ga-shadow);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.ga-result-card .card-header {
+  font-weight: 600;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.ga-result-card .card-body { font-size: .88rem; line-height: 1.6; }
+
+/* Connection chain card */
+.ga-connection-step {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .6rem .5rem;
+  border-radius: var(--ga-radius);
+  margin-bottom: .4rem;
+  background: var(--ga-card-bg);
+  border: 1px solid var(--ga-border);
+}
+.ga-connection-label {
+  font-size: .78rem;
+  color: var(--ga-text-muted);
+  white-space: nowrap;
+  min-width: 5rem;
+  text-align: right;
+  padding-top: .1rem;
+}
+.ga-connection-name { font-weight: 600; color: var(--ga-primary); font-size: .9rem; }
+.ga-connection-data { font-size: .8rem; color: var(--ga-text-muted); }
+.ga-connection-arrow {
+  text-align: center;
+  color: var(--ga-accent);
+  font-size: 1rem;
+  padding: .25rem 0;
+}
+
+/* ─── Person card coloring (sex) ─────────────────────────────────── */
+.ga-person-form-card.male  > .card-header { background-color: var(--bs-secondary); color: #fff; }
+.ga-person-form-card.female > .card-header { background-color: var(--bs-danger); color: #fff; }
+
+/* ─── Family story article ───────────────────────────────────────── */
+.ga-story-article {
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+.ga-story-article h1 { font-size: 2rem; margin-bottom: .3rem; }
+.ga-story-article h2 { font-size: 1.4rem; margin-top: 2rem; }
+.ga-story-article blockquote {
+  border-left: 4px solid var(--ga-accent);
+  padding: .5rem 1.2rem;
+  color: var(--ga-text-muted);
+  margin: 1.5rem 0;
+  font-style: italic;
+  background: var(--ga-bg);
+  border-radius: 0 var(--ga-radius) var(--ga-radius) 0;
+}
+
+/* ─── Testimonial cards ──────────────────────────────────────────── */
+.ga-testimonial {
+  background: var(--ga-card-bg);
+  border: 1px solid var(--ga-border);
+  border-radius: var(--ga-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--ga-shadow);
+  position: relative;
+}
+.ga-testimonial::before {
+  content: '\201C';
+  font-family: var(--ga-font-heading);
+  font-size: 5rem;
+  color: var(--ga-accent);
+  opacity: .25;
+  position: absolute;
+  top: -.5rem;
+  left: .75rem;
+  line-height: 1;
+}
+.ga-testimonial-text { font-size: 1rem; font-style: italic; line-height: 1.7; color: var(--ga-text); margin-bottom: .75rem; }
+.ga-testimonial-author { font-size: .85rem; font-weight: 600; color: var(--ga-text-muted); }
+
+/* ─── Contribute cards ───────────────────────────────────────────── */
+.ga-contribute-card {
+  background: var(--ga-card-bg);
+  border: 1px solid var(--ga-border);
+  border-radius: var(--ga-radius-lg);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: var(--ga-shadow);
+  height: 100%;
+  transition: box-shadow var(--ga-transition), transform var(--ga-transition);
+}
+.ga-contribute-card:hover { box-shadow: var(--ga-shadow-hover); transform: translateY(-3px); }
+.ga-contribute-icon { font-size: 2.8rem; color: var(--ga-accent); margin-bottom: 1rem; display: block; }
+.ga-contribute-title { font-size: 1.1rem; font-weight: 700; color: var(--ga-primary); margin-bottom: .5rem; }
+.ga-contribute-desc { font-size: .9rem; color: var(--ga-text-muted); margin-bottom: 1.25rem; }
+
+/* ─── Stats page ─────────────────────────────────────────────────── */
+.ga-stat-number-lg {
+  font-family: var(--ga-font-heading);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ga-primary);
+  line-height: 1;
+}
+.ga-stat-label-lg { font-size: .8rem; color: var(--ga-text-muted); margin-top: .25rem; }
+
+.ga-immigration-bar { background: var(--ga-border); border-radius: 50px; height: 8px; overflow: hidden; margin-top: .35rem; }
+.ga-immigration-bar-fill { height: 100%; border-radius: 50px; background: var(--ga-accent); transition: width .6s ease; }
+
+/* ─── Map page ───────────────────────────────────────────────────── */
+.ga-map-wrapper { position: relative; overflow: hidden; border-radius: var(--ga-radius-lg); background: var(--ga-card-bg); box-shadow: var(--ga-shadow); }
+.ga-map-wrapper svg { display: block; width: 100%; height: auto; }
+.ga-map-tooltip {
+  position: absolute;
+  background: rgba(26,54,93,.95);
+  color: #fff;
+  font-size: .8rem;
+  padding: .5rem .75rem;
+  border-radius: var(--ga-radius);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 100;
+  display: none;
+  max-width: 220px;
+  white-space: normal;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────── */
+.ga-footer {
+  background-color: var(--ga-footer-bg);
+  color: var(--ga-footer-text);
+  padding: 3rem 0 1.5rem;
+  margin-top: 4rem;
+}
+.ga-footer a { color: var(--ga-footer-text); text-decoration: none; }
+.ga-footer a:hover { color: #fff; }
+.ga-footer-heading {
+  font-family: var(--ga-font-heading);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  font-size: .8rem;
+}
+.ga-footer-desc { font-size: .88rem; line-height: 1.65; margin-bottom: .75rem; }
+.ga-footer-declaration { opacity: .75; line-height: 1.5; }
+.ga-footer-cta { color: var(--ga-accent); font-weight: 500; }
+.ga-footer-nav { display: flex; flex-direction: column; gap: .3rem; }
+.ga-footer-nav a { font-size: .88rem; opacity: .8; }
+.ga-footer-nav a:hover { opacity: 1; }
+.ga-footer-social { display: flex; flex-direction: column; gap: .6rem; }
+.ga-footer-social-link { font-size: .9rem; opacity: .85; display: flex; align-items: center; }
+.ga-footer-social-link:hover { opacity: 1; color: #fff; }
+.ga-footer-divider { border-color: rgba(255,255,255,.12); margin: 1.5rem 0 1rem; }
+.ga-footer-copy { opacity: .55; }
+.ga-logo-footer { height: 48px; width: auto; opacity: .9; }
+
+/* ─── Theme toggle ───────────────────────────────────────────────── */
+.ga-theme-toggle { display: flex; align-items: center; gap: .3rem; }
+.ga-theme-btn { font-size: .75rem; padding: .2rem .6rem; color: rgba(255,255,255,.6); border-color: rgba(255,255,255,.2); background: transparent; border-radius: 50px; }
+.ga-theme-btn:hover, .ga-theme-btn.active { color: #fff; border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
+
+/* ─── Obfuscation notice ─────────────────────────────────────────── */
+.ga-obfuscated-notice {
+  font-size: .82rem;
+  color: var(--ga-text-muted);
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .4rem .75rem;
+  background: var(--ga-bg);
+  border-radius: var(--ga-radius);
+  border: 1px solid var(--ga-border);
+}
+
+/* ─── Vacancy / loading states ───────────────────────────────────── */
+.ga-server-status {
+  border-radius: var(--ga-radius-lg);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* ─── Profile picture small ──────────────────────────────────────── */
+.profile-picture-small {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ─── Responsive tweaks ──────────────────────────────────────────── */
+@media (max-width: 575.98px) {
+  .ga-hero { padding: 2.5rem 0 1.5rem; }
+  .ga-logo-hero { height: 70px; }
+  .ga-footer { padding: 2rem 0 1rem; }
+  .ga-section { padding: 2rem 0; }
+  .ga-step { padding: 1rem .5rem; }
+}

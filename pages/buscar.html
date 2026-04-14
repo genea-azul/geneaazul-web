@@ -1,0 +1,392 @@
+<section class="ga-section container-xl" id="buscar-section" aria-label="Buscador de personas">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+
+      <!-- Page header -->
+      <div class="mb-4">
+        <h2 class="ga-section-title">Buscá personas en el árbol</h2>
+        <p class="ga-section-subtitle">Ingresá el apellido y al menos un dato más para encontrar a quien buscás. Usá la búsqueda avanzada para agregar padres, pareja o abuelos.</p>
+      </div>
+
+      <!-- Obfuscation notice -->
+      <div class="ga-obfuscated-notice mb-3" id="obfuscated-info">
+        <i class="bi bi-shield-lock"></i>
+        <span>Los datos de nacimiento de personas que podrían estar vivas están ocultos para proteger su privacidad.</span>
+      </div>
+
+      <!-- ═══ LOADING / VACATIONS STATE ═══ -->
+      <div id="search-loading-container" class="ga-server-status text-center py-5">
+        <div class="spinner-border mb-3" role="status" id="search-spinner" style="visibility:hidden"></div>
+        <div id="search-spinner-msg"></div>
+      </div>
+
+      <!-- ═══ VACATIONS STATE ═══ -->
+      <div id="search-vacations-container" class="d-none alert alert-warning">
+        <i class="bi bi-emoji-sunglasses me-2"></i>
+        <strong>¡Estamos de vacaciones!</strong> El buscador estará disponible pronto. Seguinos en
+        <a href="https://instagram.com/_u/genea.azul" target="_blank" rel="noopener" class="alert-link">@genea.azul</a>
+        para novedades.
+      </div>
+
+      <!-- ═══ SEARCH FORM ═══ -->
+      <div id="search-form-container" class="d-none">
+
+        <!-- ── STEP 1: Main person ── -->
+        <div id="search-step-1">
+          <div class="card ga-person-form-card" id="individualCard">
+            <div class="card-header d-flex align-items-center gap-2">
+              <i class="bi bi-person card-header-icon" id="individualCardIcon"></i>
+              <span>Persona principal</span>
+              <!-- Sex selector inline in header -->
+              <div class="ms-auto d-flex gap-3">
+                <div class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="individualSex" id="individualSexM" value="M">
+                  <label class="form-check-label text-white" for="individualSexM"><i class="bi bi-gender-male"></i></label>
+                </div>
+                <div class="form-check form-check-inline mb-0">
+                  <input class="form-check-input" type="radio" name="individualSex" id="individualSexF" value="F">
+                  <label class="form-check-label text-white" for="individualSexF"><i class="bi bi-gender-female"></i></label>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row g-2">
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="individualGivenName">Nombre</label>
+                  <input type="text" class="form-control form-control-sm" id="individualGivenName" placeholder="Ej: María José" autocomplete="given-name">
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="individualSurname">Apellido <span class="text-muted fw-normal">(requerido)</span></label>
+                  <input type="text" class="form-control form-control-sm" id="individualSurname" placeholder="Ej: Valicenti" autocomplete="family-name">
+                </div>
+                <div class="col-sm-4">
+                  <label class="form-label small fw-semibold" for="individualYearOfBirth">Año de nac.</label>
+                  <input type="number" class="form-control form-control-sm" id="individualYearOfBirth" placeholder="Ej: 1950" min="1600" max="2026" maxlength="4">
+                </div>
+                <div class="col-sm-4">
+                  <label class="form-label small fw-semibold" for="individualYearOfDeath">Año de fal.</label>
+                  <input type="number" class="form-control form-control-sm" id="individualYearOfDeath" placeholder="Ej: 2005" min="1600" max="2026" maxlength="4">
+                </div>
+                <div class="col-sm-4 d-flex align-items-end pb-1">
+                  <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="individualIsAlive">
+                    <label class="form-check-label small" for="individualIsAlive">Vive</label>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="individualPlaceOfBirth">País de nacimiento</label>
+                  <input type="text" class="form-control form-control-sm" id="individualPlaceOfBirth" placeholder="Ej: Italia">
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="individualContact">Tu contacto (opcional)</label>
+                  <input type="text" class="form-control form-control-sm" id="individualContact" placeholder="Email o @instagram">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toggle advanced search -->
+          <div class="text-center my-3">
+            <button class="btn btn-outline-secondary btn-sm" type="button" id="advancedSearchToggle">
+              <i class="bi bi-sliders me-1"></i>Búsqueda avanzada
+              <i class="bi bi-chevron-down ms-1" id="advancedToggleIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── STEP 2: Advanced (parents, spouse, grandparents) ── -->
+        <div id="search-advanced" class="d-none">
+
+          <!-- Pareja / Spouse -->
+          <div class="mb-2">
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" role="switch" id="spouseContainerShowBtn">
+              <label class="form-check-label small fw-semibold" for="spouseContainerShowBtn"><i class="bi bi-heart me-1"></i>Agregar pareja</label>
+            </div>
+            <div id="spouseContainerShowBtnContainer" class="d-none">
+              <!-- Show-toggle button placeholder already handled by JS -->
+            </div>
+            <div id="spouseContainer">
+              <div class="card ga-person-form-card" id="spouseCard">
+                <div class="card-header d-flex align-items-center gap-2">
+                  <i class="bi bi-person card-header-icon" id="spouseCardIcon"></i>
+                  <span>Pareja</span>
+                  <div class="ms-auto d-flex gap-3">
+                    <div class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="spouseSex" id="spouseSexM" value="M">
+                      <label class="form-check-label text-white" for="spouseSexM"><i class="bi bi-gender-male"></i></label>
+                    </div>
+                    <div class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="radio" name="spouseSex" id="spouseSexF" value="F">
+                      <label class="form-check-label text-white" for="spouseSexF"><i class="bi bi-gender-female"></i></label>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="row g-2">
+                    <div class="col-sm-6">
+                      <label class="form-label small fw-semibold" for="spouseGivenName">Nombre</label>
+                      <input type="text" class="form-control form-control-sm" id="spouseGivenName" placeholder="Nombre">
+                    </div>
+                    <div class="col-sm-6">
+                      <label class="form-label small fw-semibold" for="spouseSurname">Apellido</label>
+                      <input type="text" class="form-control form-control-sm" id="spouseSurname" placeholder="Apellido">
+                    </div>
+                    <div class="col-sm-4">
+                      <label class="form-label small fw-semibold" for="spouseYearOfBirth">Año de nac.</label>
+                      <input type="number" class="form-control form-control-sm" id="spouseYearOfBirth" placeholder="AAAA" min="1600" max="2026">
+                    </div>
+                    <div class="col-sm-4">
+                      <label class="form-label small fw-semibold" for="spouseYearOfDeath">Año de fal.</label>
+                      <input type="number" class="form-control form-control-sm" id="spouseYearOfDeath" placeholder="AAAA" min="1600" max="2026">
+                    </div>
+                    <div class="col-sm-4 d-flex align-items-end pb-1">
+                      <div class="form-check form-check-inline mb-0">
+                        <input class="form-check-input" type="checkbox" id="spouseIsAlive">
+                        <label class="form-check-label small" for="spouseIsAlive">Vive</label>
+                      </div>
+                    </div>
+                    <div class="col-sm-6">
+                      <label class="form-label small fw-semibold" for="spousePlaceOfBirth">País de nacimiento</label>
+                      <input type="text" class="form-control form-control-sm" id="spousePlaceOfBirth" placeholder="Ej: Italia">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Padre / Father -->
+          <div class="card ga-person-form-card mb-2" id="fatherCard" style="--bs-card-border-color: var(--bs-secondary)">
+            <div class="card-header text-bg-secondary d-flex align-items-center gap-2">
+              <i class="bi bi-gender-male me-1"></i><span>Padre</span>
+            </div>
+            <div class="card-body">
+              <div class="row g-2">
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="fatherGivenName">Nombre</label>
+                  <input type="text" class="form-control form-control-sm" id="fatherGivenName" placeholder="Nombre">
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="fatherSurname">Apellido</label>
+                  <input type="text" class="form-control form-control-sm" id="fatherSurname" placeholder="Apellido">
+                </div>
+                <div class="col-sm-4">
+                  <label class="form-label small fw-semibold" for="fatherYearOfBirth">Año de nac.</label>
+                  <input type="number" class="form-control form-control-sm" id="fatherYearOfBirth" placeholder="AAAA" min="1600" max="2026">
+                </div>
+                <div class="col-sm-4">
+                  <label class="form-label small fw-semibold" for="fatherYearOfDeath">Año de fal.</label>
+                  <input type="number" class="form-control form-control-sm" id="fatherYearOfDeath" placeholder="AAAA" min="1600" max="2026">
+                </div>
+                <div class="col-sm-4 d-flex align-items-end pb-1">
+                  <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="fatherIsAlive">
+                    <label class="form-check-label small" for="fatherIsAlive">Vive</label>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="fatherPlaceOfBirth">País de nacimiento</label>
+                  <input type="text" class="form-control form-control-sm" id="fatherPlaceOfBirth" placeholder="Ej: Italia">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Madre / Mother -->
+          <div class="card ga-person-form-card mb-2" id="motherCard" style="--bs-card-border-color: var(--bs-danger)">
+            <div class="card-header text-bg-danger d-flex align-items-center gap-2">
+              <i class="bi bi-gender-female me-1"></i><span>Madre</span>
+            </div>
+            <div class="card-body">
+              <div class="row g-2">
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="motherGivenName">Nombre</label>
+                  <input type="text" class="form-control form-control-sm" id="motherGivenName" placeholder="Nombre">
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="motherSurname">Apellido</label>
+                  <input type="text" class="form-control form-control-sm" id="motherSurname" placeholder="Apellido">
+                </div>
+                <div class="col-sm-4">
+                  <label class="form-label small fw-semibold" for="motherYearOfBirth">Año de nac.</label>
+                  <input type="number" class="form-control form-control-sm" id="motherYearOfBirth" placeholder="AAAA" min="1600" max="2026">
+                </div>
+                <div class="col-sm-4">
+                  <label class="form-label small fw-semibold" for="motherYearOfDeath">Año de fal.</label>
+                  <input type="number" class="form-control form-control-sm" id="motherYearOfDeath" placeholder="AAAA" min="1600" max="2026">
+                </div>
+                <div class="col-sm-4 d-flex align-items-end pb-1">
+                  <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="checkbox" id="motherIsAlive">
+                    <label class="form-check-label small" for="motherIsAlive">Vive</label>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold" for="motherPlaceOfBirth">País de nacimiento</label>
+                  <input type="text" class="form-control form-control-sm" id="motherPlaceOfBirth" placeholder="Ej: Italia">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toggle abuelos -->
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="grandparentsContainerShowBtn">
+            <label class="form-check-label small fw-semibold" for="grandparentsContainerShowBtn"><i class="bi bi-people me-1"></i>Agregar abuelos</label>
+          </div>
+          <div id="grandparentsContainerShowBtnContainer"></div>
+          <div id="grandparentsContainer">
+            <!-- Abuelo paterno -->
+            <div class="card ga-person-form-card mb-2">
+              <div class="card-header text-bg-secondary d-flex align-items-center gap-2">
+                <i class="bi bi-gender-male me-1"></i><span>Abuelo paterno</span>
+              </div>
+              <div class="card-body">
+                <div class="row g-2">
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandfatherGivenName" placeholder="Nombre">
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandfatherSurname" placeholder="Apellido">
+                  </div>
+                  <div class="col-sm-4">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandfatherYearOfBirth" placeholder="Año nac." min="1600" max="2026">
+                  </div>
+                  <div class="col-sm-4">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandfatherYearOfDeath" placeholder="Año fal." min="1600" max="2026">
+                  </div>
+                  <div class="col-sm-4 d-flex align-items-center">
+                    <div class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="checkbox" id="paternalGrandfatherIsAlive">
+                      <label class="form-check-label small" for="paternalGrandfatherIsAlive">Vive</label>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandfatherPlaceOfBirth" placeholder="País de nacimiento">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Abuela paterna -->
+            <div class="card ga-person-form-card mb-2">
+              <div class="card-header text-bg-danger d-flex align-items-center gap-2">
+                <i class="bi bi-gender-female me-1"></i><span>Abuela paterna</span>
+              </div>
+              <div class="card-body">
+                <div class="row g-2">
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandmotherGivenName" placeholder="Nombre">
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandmotherSurname" placeholder="Apellido">
+                  </div>
+                  <div class="col-sm-4">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandmotherYearOfBirth" placeholder="Año nac." min="1600" max="2026">
+                  </div>
+                  <div class="col-sm-4">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandmotherYearOfDeath" placeholder="Año fal." min="1600" max="2026">
+                  </div>
+                  <div class="col-sm-4 d-flex align-items-center">
+                    <div class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="checkbox" id="paternalGrandmotherIsAlive">
+                      <label class="form-check-label small" for="paternalGrandmotherIsAlive">Vive</label>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandmotherPlaceOfBirth" placeholder="País de nacimiento">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Abuelo materno -->
+            <div class="card ga-person-form-card mb-2">
+              <div class="card-header text-bg-secondary d-flex align-items-center gap-2">
+                <i class="bi bi-gender-male me-1"></i><span>Abuelo materno</span>
+              </div>
+              <div class="card-body">
+                <div class="row g-2">
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandfatherGivenName" placeholder="Nombre">
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandfatherSurname" placeholder="Apellido">
+                  </div>
+                  <div class="col-sm-4">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandfatherYearOfBirth" placeholder="Año nac." min="1600" max="2026">
+                  </div>
+                  <div class="col-sm-4">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandfatherYearOfDeath" placeholder="Año fal." min="1600" max="2026">
+                  </div>
+                  <div class="col-sm-4 d-flex align-items-center">
+                    <div class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="checkbox" id="maternalGrandfatherIsAlive">
+                      <label class="form-check-label small" for="maternalGrandfatherIsAlive">Vive</label>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandfatherPlaceOfBirth" placeholder="País de nacimiento">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Abuela materna -->
+            <div class="card ga-person-form-card mb-2">
+              <div class="card-header text-bg-danger d-flex align-items-center gap-2">
+                <i class="bi bi-gender-female me-1"></i><span>Abuela materna</span>
+              </div>
+              <div class="card-body">
+                <div class="row g-2">
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandmotherGivenName" placeholder="Nombre">
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandmotherSurname" placeholder="Apellido">
+                  </div>
+                  <div class="col-sm-4">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandmotherYearOfBirth" placeholder="Año nac." min="1600" max="2026">
+                  </div>
+                  <div class="col-sm-4">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandmotherYearOfDeath" placeholder="Año fal." min="1600" max="2026">
+                  </div>
+                  <div class="col-sm-4 d-flex align-items-center">
+                    <div class="form-check form-check-inline mb-0">
+                      <input class="form-check-input" type="checkbox" id="maternalGrandmotherIsAlive">
+                      <label class="form-check-label small" for="maternalGrandmotherIsAlive">Vive</label>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandmotherPlaceOfBirth" placeholder="País de nacimiento">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /grandparents -->
+        </div><!-- /search-advanced -->
+
+        <!-- ── SEARCH BUTTON ── -->
+        <div class="d-grid mt-4">
+          <button class="btn ga-btn-primary btn-lg" id="searchBtn" type="button">
+            <i class="bi bi-search me-2"></i>Buscar
+          </button>
+        </div>
+
+        <!-- ── RESULTS ── -->
+        <div class="card mt-4 d-none" id="searchResultCard">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-list-ul me-1"></i>
+            <span>Resultados</span>
+          </div>
+          <div class="card-body overflow-auto" style="max-height: 70vh;"></div>
+        </div>
+
+      </div><!-- /search-form-container -->
+
+    </div>
+  </div>
+
+</section>

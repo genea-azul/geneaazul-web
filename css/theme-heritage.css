@@ -1,0 +1,93 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Genea Azul — theme-heritage.css
+   Warm / classic theme: deep navy, warm gold, parchment background
+   ═══════════════════════════════════════════════════════════════════ */
+body.theme-heritage {
+  --ga-primary:        #1a365d;
+  --ga-primary-hover:  #152b4a;
+  --ga-accent:         #c9a227;
+  --ga-accent-hover:   #b08d1f;
+  --ga-bg:             #faf8f0;
+  --ga-card-bg:        #ffffff;
+  --ga-text:           #2d2d2d;
+  --ga-text-muted:     #6b5b4f;
+  --ga-border:         #e0d5c5;
+  --ga-shadow:         0 2px 12px rgba(26,54,93,.10);
+  --ga-shadow-hover:   0 6px 24px rgba(26,54,93,.18);
+  --ga-radius:         8px;
+  --ga-radius-lg:      12px;
+  --ga-navbar-bg:      #1a365d;
+  --ga-navbar-text:    rgba(255,255,255,.87);
+  --ga-footer-bg:      #12263f;
+  --ga-footer-text:    rgba(255,255,255,.80);
+  --ga-font-heading:   'Playfair Display', Georgia, serif;
+  --ga-font-body:      'Source Sans 3', 'Segoe UI', sans-serif;
+}
+
+/* Hero: subtle parchment texture via CSS gradient */
+body.theme-heritage .ga-hero {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(201,162,39,.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(26,54,93,.07) 0%, transparent 55%),
+    var(--ga-bg);
+}
+
+/* Accent underline on headings */
+body.theme-heritage .ga-section-title::after {
+  content: '';
+  display: block;
+  width: 3.5rem;
+  height: 3px;
+  background: var(--ga-accent);
+  border-radius: 2px;
+  margin-top: .5rem;
+}
+
+/* Warm border accent on stat cards */
+body.theme-heritage .ga-stat-card {
+  border-top: 3px solid var(--ga-accent);
+}
+
+/* Navbar brand font */
+body.theme-heritage .ga-brand-text {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Highlight card: left gold border */
+body.theme-heritage .ga-highlight-card {
+  border-left: 4px solid var(--ga-accent);
+}
+
+/* Immigration bar: warm gradient */
+body.theme-heritage .ga-immigration-bar-fill {
+  background: linear-gradient(90deg, var(--ga-accent), #e8b945);
+}
+
+/* Step icon: warm glow */
+body.theme-heritage .ga-step {
+  position: relative;
+}
+body.theme-heritage .ga-step-icon {
+  display: inline-flex;
+  width: 64px;
+  height: 64px;
+  background: rgba(201,162,39,.12);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+/* Search form cards */
+body.theme-heritage .card {
+  border-radius: var(--ga-radius-lg);
+  border-color: var(--ga-border);
+}
+body.theme-heritage .card-header {
+  border-bottom-color: var(--ga-border);
+}
+
+/* Contribute card top accent */
+body.theme-heritage .ga-contribute-card {
+  border-top: 3px solid var(--ga-accent);
+}

@@ -1,0 +1,99 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Genea Azul — theme-modern.css
+   Clean / modern theme: bright blue, teal, white background
+   ═══════════════════════════════════════════════════════════════════ */
+body.theme-modern {
+  --ga-primary:        #2563eb;
+  --ga-primary-hover:  #1d4fd8;
+  --ga-accent:         #0d9488;
+  --ga-accent-hover:   #0b8076;
+  --ga-bg:             #f8fafc;
+  --ga-card-bg:        #ffffff;
+  --ga-text:           #1e293b;
+  --ga-text-muted:     #64748b;
+  --ga-border:         #e2e8f0;
+  --ga-shadow:         0 1px 8px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04);
+  --ga-shadow-hover:   0 4px 20px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+  --ga-radius:         10px;
+  --ga-radius-lg:      14px;
+  --ga-navbar-bg:      #1e293b;
+  --ga-navbar-text:    rgba(255,255,255,.85);
+  --ga-footer-bg:      #1e293b;
+  --ga-footer-text:    rgba(255,255,255,.75);
+  --ga-font-heading:   'Inter', 'Segoe UI', system-ui, sans-serif;
+  --ga-font-body:      'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Override heading font */
+body.theme-modern h1,
+body.theme-modern h2,
+body.theme-modern h3,
+body.theme-modern h4,
+body.theme-modern h5,
+body.theme-modern h6 {
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 700;
+}
+
+/* Hero: clean gradient background */
+body.theme-modern .ga-hero {
+  background: linear-gradient(135deg, #f0f6ff 0%, #f8fafc 60%, #f0fdfa 100%);
+}
+
+/* Pill-shaped buttons override */
+body.theme-modern .ga-btn-primary,
+body.theme-modern .ga-btn-accent {
+  border-radius: 50px;
+  box-shadow: 0 2px 8px rgba(37,99,235,.2);
+}
+
+/* Stat cards: flat top, colored accent */
+body.theme-modern .ga-stat-card {
+  border-top: none;
+  border-left: 4px solid var(--ga-accent);
+}
+
+/* Highlight card: top accent border */
+body.theme-modern .ga-highlight-card {
+  border-top: 3px solid var(--ga-primary);
+}
+
+/* Immigration bar: teal gradient */
+body.theme-modern .ga-immigration-bar-fill {
+  background: linear-gradient(90deg, var(--ga-accent), #14b8a6);
+}
+
+/* Step icons: blue circle */
+body.theme-modern .ga-step-icon {
+  display: inline-flex;
+  width: 64px;
+  height: 64px;
+  background: rgba(37,99,235,.08);
+  border-radius: 14px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: var(--ga-primary);
+}
+
+/* Section title: no underline, larger weight */
+body.theme-modern .ga-section-title::after {
+  content: none;
+}
+
+/* Contribute card top accent */
+body.theme-modern .ga-contribute-card {
+  border-top: 3px solid var(--ga-primary);
+  border-radius: var(--ga-radius-lg);
+}
+
+/* Cards: crisp, minimal */
+body.theme-modern .card {
+  border-radius: var(--ga-radius-lg);
+  border-color: var(--ga-border);
+}
+
+/* Testimonial */
+body.theme-modern .ga-testimonial::before {
+  color: var(--ga-primary);
+}

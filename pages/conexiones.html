@@ -1,0 +1,92 @@
+<section class="ga-section container-xl" id="conexiones-section" aria-label="Búsqueda de conexiones">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+
+      <div class="mb-4">
+        <h2 class="ga-section-title">Conexiones entre personas</h2>
+        <p class="ga-section-subtitle">¿Cómo están emparentadas dos personas? Ingresá nombre, apellido y año de nacimiento de cada una para descubrir el vínculo.</p>
+      </div>
+
+      <!-- Vacations -->
+      <div id="conn-vacations-container" class="d-none alert alert-warning">
+        <i class="bi bi-emoji-sunglasses me-2"></i>
+        <strong>¡Estamos de vacaciones!</strong> El buscador estará disponible pronto.
+      </div>
+
+      <!-- Loading -->
+      <div id="conn-loading-container" class="text-center py-4">
+        <div class="spinner-border" role="status" id="conn-spinner" style="visibility:hidden"></div>
+        <div id="conn-spinner-msg"></div>
+      </div>
+
+      <!-- Form -->
+      <div id="conn-form-container" class="d-none">
+        <div class="row g-3">
+
+          <!-- Persona 1 -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header text-bg-dark d-flex align-items-center gap-2">
+                <i class="bi bi-person me-1"></i>Persona 1
+              </div>
+              <div class="card-body">
+                <div class="mb-2">
+                  <label class="form-label small fw-semibold" for="person1GivenName">Nombre</label>
+                  <input type="text" class="form-control form-control-sm" id="person1GivenName" placeholder="Ej: Juan">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small fw-semibold" for="person1Surname">Apellido</label>
+                  <input type="text" class="form-control form-control-sm" id="person1Surname" placeholder="Ej: Valicenti">
+                </div>
+                <div>
+                  <label class="form-label small fw-semibold" for="person1YearOfBirth">Año de nacimiento</label>
+                  <input type="number" class="form-control form-control-sm" id="person1YearOfBirth" placeholder="Ej: 1920" min="1600" max="2026">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Persona 2 -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header text-bg-dark d-flex align-items-center gap-2">
+                <i class="bi bi-person me-1"></i>Persona 2
+              </div>
+              <div class="card-body">
+                <div class="mb-2">
+                  <label class="form-label small fw-semibold" for="person2GivenName">Nombre</label>
+                  <input type="text" class="form-control form-control-sm" id="person2GivenName" placeholder="Ej: María">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small fw-semibold" for="person2Surname">Apellido</label>
+                  <input type="text" class="form-control form-control-sm" id="person2Surname" placeholder="Ej: García">
+                </div>
+                <div>
+                  <label class="form-label small fw-semibold" for="person2YearOfBirth">Año de nacimiento</label>
+                  <input type="number" class="form-control form-control-sm" id="person2YearOfBirth" placeholder="Ej: 1935" min="1600" max="2026">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-grid mt-4">
+          <button class="btn ga-btn-primary btn-lg" id="searchConnectionsBtn" type="button">
+            <i class="bi bi-diagram-3 me-2"></i>Buscar conexión
+          </button>
+        </div>
+
+        <!-- Results -->
+        <div class="card mt-4 d-none" id="searchConnectionsResultCard">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-diagram-3 me-1"></i>Resultado
+          </div>
+          <div class="card-body overflow-auto" style="max-height: 70vh;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>

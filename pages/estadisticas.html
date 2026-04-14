@@ -1,0 +1,87 @@
+<section class="ga-section container-xl" id="estadisticas-section" aria-label="Estadísticas">
+
+  <div class="mb-5">
+    <h2 class="ga-section-title">Estadísticas del árbol</h2>
+    <p class="ga-section-subtitle">Datos del árbol genealógico de Azul actualizados desde el servidor.</p>
+  </div>
+
+  <!-- Live stat cards -->
+  <div class="row g-3 mb-5" id="stats-live-row">
+    <div class="col-6 col-sm-3">
+      <div class="ga-stat-card text-center">
+        <div class="ga-stat-number" id="st-persons">—</div>
+        <div class="ga-stat-label">Personas</div>
+      </div>
+    </div>
+    <div class="col-6 col-sm-3">
+      <div class="ga-stat-card text-center">
+        <div class="ga-stat-number" id="st-families">—</div>
+        <div class="ga-stat-label">Familias</div>
+      </div>
+    </div>
+    <div class="col-6 col-sm-3">
+      <div class="ga-stat-card text-center">
+        <div class="ga-stat-number" id="st-surnames">4.557</div>
+        <div class="ga-stat-label">Apellidos</div>
+      </div>
+    </div>
+    <div class="col-6 col-sm-3">
+      <div class="ga-stat-card text-center">
+        <div class="ga-stat-number" id="st-immigrants">7.041</div>
+        <div class="ga-stat-label">Inmigrantes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick navigation to detail pages -->
+  <div class="row g-3 mb-5">
+    <div class="col-md-4">
+      <a href="#estadisticas/inmigracion" data-route="estadisticas-inmigracion" class="ga-highlight-card text-decoration-none d-block">
+        <div class="ga-highlight-header"><i class="bi bi-globe-americas me-2"></i>Inmigración</div>
+        <div class="ga-highlight-body">¿De dónde vienen las familias de Azul? Ranking de 44 países de origen con los apellidos más frecuentes.</div>
+        <div class="ga-highlight-link">Ver detalle <i class="bi bi-arrow-right ms-1"></i></div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="#estadisticas/personalidades" data-route="estadisticas-personalidades" class="ga-highlight-card text-decoration-none d-block">
+        <div class="ga-highlight-header"><i class="bi bi-star me-2"></i>Personalidades</div>
+        <div class="ga-highlight-body">Personas históricas, artistas, deportistas y figuras públicas que forman parte del árbol.</div>
+        <div class="ga-highlight-link">Ver detalle <i class="bi bi-arrow-right ms-1"></i></div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="#estadisticas/apellidos" data-route="estadisticas-apellidos" class="ga-highlight-card text-decoration-none d-block">
+        <div class="ga-highlight-header"><i class="bi bi-fonts me-2"></i>Apellidos</div>
+        <div class="ga-highlight-body">Los apellidos más frecuentes en Azul, con sus variantes y países de origen.</div>
+        <div class="ga-highlight-link">Ver detalle <i class="bi bi-arrow-right ms-1"></i></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Top immigration preview -->
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <h4 class="mb-3"><i class="bi bi-globe-americas me-2"></i>Top países de origen</h4>
+      <div id="stats-immigration-preview">
+        <div class="ga-page-loading"><div class="spinner-border spinner-border-sm" role="status"></div><span>Cargando...</span></div>
+      </div>
+      <div class="text-end mt-2">
+        <a href="#estadisticas/inmigracion" data-route="estadisticas-inmigracion" class="ga-highlight-link small">
+          Ver todos los países <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <h4 class="mb-3"><i class="bi bi-star me-2"></i>Personalidades destacadas</h4>
+      <div id="stats-personalities-preview">
+        <div class="ga-page-loading"><div class="spinner-border spinner-border-sm" role="status"></div><span>Cargando...</span></div>
+      </div>
+      <div class="text-end mt-2">
+        <a href="#estadisticas/personalidades" data-route="estadisticas-personalidades" class="ga-highlight-link small">
+          Ver todas <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</section>
