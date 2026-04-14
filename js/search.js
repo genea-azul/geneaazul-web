@@ -566,7 +566,7 @@ GeneaAzul.search = (function() {
   /* ── Surname search (appended to results) ────────────────────────── */
   function searchSurnames(surnames) {
     utils.apiPost(
-      cfg.apiBaseUrl + '/api/search/surname',
+      cfg.apiBaseUrl + '/api/search/surnames',
       { surnames: surnames },
       function(data) {
         var $container = $('#searchSurnamesResultCard div.card-body').empty();
