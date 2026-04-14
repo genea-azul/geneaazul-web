@@ -85,10 +85,8 @@ GeneaAzul.stats = (function() {
     if (!data || data.length === 0) { $el.html('<p class="text-muted small">Sin datos.</p>'); return; }
     var $list = $('<ul>').addClass('list-unstyled small mb-0');
     data.forEach(function(p) {
-      var name = (p.title ? p.title + ' ' : '') + p.name + (p.nickname ? ' "' + p.nickname + '"' : '');
       $list.append($('<li>').addClass('py-1 border-bottom').html(
-        '<span class="fw-semibold">' + name + '</span>'
-        + (p.birthYear ? '<span class="text-muted ms-1 small">(' + p.birthYear + (p.deathYear ? '&ndash;' + p.deathYear : '') + ')</span>' : '')
+        buildPersonalityNameHtml(p) + buildPersonalityYearsHtml(p)
       ));
     });
     $el.append($list);
@@ -151,6 +149,36 @@ GeneaAzul.stats = (function() {
     });
   }
 
+  /* ── Personality name helpers ───────────────────────────────────── */
+  function buildPersonalityNameHtml(p) {
+    var parts = [];
+    if (p.title) {
+      var abbr = p.titleFull && p.titleFull !== p.title
+        ? '<abbr title="' + p.titleFull + '" tabindex="0">' + p.title + '</abbr>'
+        : p.title;
+      parts.push('<span class="text-secondary small">' + abbr + '</span>');
+    }
+    if (p.givenName) parts.push(p.givenName);
+    if (p.nickname) parts.push('<span class="fst-italic">\u201c' + p.nickname + '\u201d</span>');
+    if (p.surname)  parts.push('<span class="fw-semibold">' + p.surname + '</span>');
+    return parts.join(' ');
+  }
+
+  function buildPersonalityYearsHtml(p) {
+    if (!p.birthYear && !p.deathYear) return '';
+    var birth = p.birthYear
+      ? (p.birthPlace ? '<span title="' + p.birthPlace + '">' + p.birthYear + '</span>' : p.birthYear)
+      : '?';
+    var death = (p.deathYear != null)
+      ? (p.deathPlace ? '<span title="' + p.deathPlace + '">' + p.deathYear + '</span>' : p.deathYear)
+      : 'vive';
+    return ' <span class="small text-secondary ps-1">(' + birth + '&ndash;' + death + ')</span>';
+  }
+
+  function buildPersonalityDataName(p) {
+    return [(p.title || ''), (p.givenName || ''), (p.nickname || ''), (p.surname || '')].join(' ').toLowerCase();
+  }
+
   /* ═══ PERSONALITIES PAGE ════════════════════════════════════════ */
   function initPersonalities() {
     ready();
@@ -158,10 +186,8 @@ GeneaAzul.stats = (function() {
       renderPersonalitiesFull(data);
     });
 
-    // Filter
     $(document).on('input', '#personalities-filter', function() {
-      var q = $(this).val().toLowerCase();
-      filterPersonalitiesRows(q);
+      filterPersonalitiesRows($(this).val().toLowerCase());
     });
   }
 
@@ -169,31 +195,19 @@ GeneaAzul.stats = (function() {
     var $el = $('#personalities-list').empty();
     if (!data || data.length === 0) { $el.html('<p class="text-muted">Sin datos disponibles.</p>'); return; }
 
-    var $tbody = $('<tbody>').attr('id', 'personalities-tbody');
-    var $table = $('<table>').addClass('table table-sm table-hover').attr('id', 'personalities-table')
-      .append($('<thead>').append(
-        $('<tr>')
-          .append($('<th>').html('Nombre'))
-          .append($('<th>').addClass('d-none d-sm-table-cell').html('Año nac.'))
-          .append($('<th>').addClass('d-none d-md-table-cell').html('Lugar de nacimiento'))
-      ))
-      .append($tbody);
-
+    var $ul = $('<ul>').addClass('list-unstyled small mb-0');
     data.forEach(function(p) {
-      var name = (p.title ? p.title + ' ' : '') + p.name + (p.nickname ? ' <em>&ldquo;' + p.nickname + '&rdquo;</em>' : '');
-      $tbody.append(
-        $('<tr>').attr('data-name', name.toLowerCase())
-          .append($('<td>').html('<span class="fw-semibold">' + name + '</span>'))
-          .append($('<td>').addClass('d-none d-sm-table-cell small text-muted').html(p.birthYear || '—'))
-          .append($('<td>').addClass('d-none d-md-table-cell small text-muted').html(p.birthPlace || '—'))
+      $ul.append(
+        $('<li>').addClass('py-1 border-bottom')
+          .attr('data-name', buildPersonalityDataName(p))
+          .html(buildPersonalityNameHtml(p) + buildPersonalityYearsHtml(p))
       );
     });
-
-    $el.append($('<div>').addClass('table-responsive').append($table));
+    $el.append($ul);
   }
 
   function filterPersonalitiesRows(q) {
-    $('#personalities-tbody tr').each(function() {
+    $('#personalities-list li').each(function() {
       var name = $(this).attr('data-name') || '';
       $(this).toggleClass('d-none', q.length > 0 && name.indexOf(q) === -1);
     });
