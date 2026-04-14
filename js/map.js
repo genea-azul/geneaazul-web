@@ -1,138 +1,104 @@
 /* ═══════════════════════════════════════════════════════════════════
    Genea Azul — map.js
-   Immigration map page: bubble map on world SVG + table listing
+   Immigration map: Leaflet.js interactive map + country table
    ═══════════════════════════════════════════════════════════════════ */
 var GeneaAzul = window.GeneaAzul || {};
 
 GeneaAzul.map = (function() {
 
-  /* Rough centroid coordinates for bubble placement [lng, lat] → will be
-     converted to SVG x/y using a simple Mercator-like projection. These are
-     approximate centroids per country ISO code. */
+  var _leafletMap = null;
+
+  /* Approximate centroids [lat, lng] per ISO code */
   var CENTROIDS = {
-    'IT': [12.5, 41.9], 'ES': [-3.7, 40.4], 'FR': [2.3, 46.2], 'PL': [19.1, 52.0],
-    'DE': [10.5, 51.2], 'AT': [14.6, 47.8], 'GB': [-1.5, 52.5], 'RU': [37.6, 55.8],
-    'UA': [31.2, 49.0], 'TR': [35.2, 39.0], 'SY': [38.3, 35.0], 'LB': [35.9, 33.9],
-    'IL': [34.9, 31.5], 'AR': [-64.0, -34.0], 'UY': [-56.2, -32.5], 'BR': [-47.9, -15.8],
-    'CL': [-70.7, -30.0], 'BO': [-65.0, -17.0], 'PY': [-58.4, -23.4], 'PE': [-75.0, -9.2],
-    'US': [-95.7, 37.1], 'CA': [-96.8, 56.1], 'CN': [104.2, 35.9], 'JP': [138.3, 36.2],
-    'HU': [19.5, 47.2], 'RO': [24.9, 45.9], 'CZ': [15.5, 49.8], 'SK': [19.7, 48.7],
-    'YU': [21.0, 44.0], 'HR': [15.2, 45.1], 'GR': [21.8, 38.0], 'PT': [-8.2, 39.4],
-    'DK': [10.0, 56.3], 'NO': [10.8, 60.5], 'SE': [18.7, 59.3], 'FI': [25.7, 61.9],
-    'CH': [8.2, 46.8], 'BE': [4.5, 50.5], 'NL': [5.3, 52.1], 'PK': [69.3, 30.4],
-    'EG': [30.8, 26.8], 'MA': [-7.1, 31.8]
+    'IT':     [41.9,  12.5], 'ES':     [40.4,  -3.7], 'FR':     [46.2,   2.3],
+    'DE':     [51.2,  10.5], 'AT':     [47.8,  14.6], 'CH':     [46.8,   8.2],
+    'NL':     [52.1,   5.3], 'BE':     [50.5,   4.5], 'PT':     [39.4,  -8.2],
+    'GB':     [52.5,  -1.5], 'GB-ENG': [52.5,  -1.5], 'GB-SCT': [57.0,  -4.0],
+    'IE':     [53.2,  -8.0], 'DK':     [56.3,  10.0], 'NO':     [60.5,  10.8],
+    'SE':     [59.3,  18.7], 'FI':     [61.9,  25.7], 'PL':     [52.0,  19.1],
+    'CZ':     [49.8,  15.5], 'SK':     [48.7,  19.7], 'HU':     [47.2,  19.5],
+    'RO':     [45.9,  24.9], 'HR':     [45.1,  15.2], 'YU':     [44.0,  21.0],
+    'RU':     [55.8,  37.6], 'UA':     [49.0,  31.2], 'GR':     [38.0,  21.8],
+    'TR':     [39.0,  35.2], 'SY':     [34.5,  37.0], 'LB':     [33.9,  35.9],
+    'IL':     [31.5,  34.9], 'EG':     [26.8,  30.8], 'MA':     [31.8,  -7.1],
+    'PK':     [30.4,  69.3], 'CN':     [35.9, 104.2], 'JP':     [36.2, 138.3],
+    'US':     [37.1, -95.7], 'CA':     [56.1, -96.8],
+    'AR':     [-34.0, -64.0], 'UY':    [-32.5, -56.2], 'BR':    [-15.8, -47.9],
+    'CL':     [-30.0, -70.7], 'PY':    [-23.4, -58.4], 'BO':    [-17.0, -65.0],
+    'PE':     [-9.2,  -75.0], 'CO':    [ 4.6,  -74.1], 'VE':    [ 8.0,  -66.2]
   };
 
   function init() {
+    // Destroy previous instance if navigating back
+    if (_leafletMap) {
+      _leafletMap.remove();
+      _leafletMap = null;
+    }
+
+    // Initialise Leaflet
+    _leafletMap = L.map('map-container', {
+      scrollWheelZoom: false,    // don't hijack page scroll
+      worldCopyJump: true
+    }).setView([30, 15], 2);
+
+    // CartoDB Positron tiles — free, no API key, elegant light style
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(_leafletMap);
+
     $.getJSON('data/immigration.json', function(data) {
-      renderMap(data);
+      renderBubbles(data);
       renderMapList(data);
     }).fail(function() {
-      $('#map-container').html('<p class="text-muted text-center py-4">No se pudieron cargar los datos del mapa.</p>');
+      $('#map-container').html('<p class="text-muted text-center py-4">No se pudieron cargar los datos.</p>');
     });
   }
 
-  /* ── Bubble map using inline SVG ──────────────────────────────── */
-  function renderMap(data) {
-    var $container = $('#map-container').empty();
-    var W = 800, H = 400;
-
-    // Simple equirectangular projection
-    function project(lng, lat) {
-      var x = (lng + 180) / 360 * W;
-      var y = (90 - lat) / 180 * H;
-      return { x: x, y: y };
-    }
-
-    // Scale bubble sizes
+  /* ── Bubble markers ──────────────────────────────────────────────── */
+  function renderBubbles(data) {
     var maxCount = Math.max.apply(null, data.map(function(d) { return d.count; }));
-    function radius(count) {
-      return Math.max(4, Math.sqrt(count / maxCount) * 28);
-    }
+    var accentColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--ga-accent').trim() || '#c9a227';
 
-    var svgNS = 'http://www.w3.org/2000/svg';
-    var svg = document.createElementNS(svgNS, 'svg');
-    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
-    svg.setAttribute('xmlns', svgNS);
-    svg.style.background = 'var(--ga-card-bg)';
-
-    // Land background (very simple rectangle for now)
-    var bg = document.createElementNS(svgNS, 'rect');
-    bg.setAttribute('width', W); bg.setAttribute('height', H);
-    bg.setAttribute('fill', 'var(--ga-bg)');
-    svg.appendChild(bg);
-
-    // Graticule lines
-    for (var lng = -180; lng <= 180; lng += 30) {
-      var line = document.createElementNS(svgNS, 'line');
-      var p1 = project(lng, 90), p2 = project(lng, -90);
-      line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
-      line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
-      line.setAttribute('stroke', 'var(--ga-border)'); line.setAttribute('stroke-width', '0.5');
-      svg.appendChild(line);
-    }
-    for (var lat = -90; lat <= 90; lat += 30) {
-      var line = document.createElementNS(svgNS, 'line');
-      var p1 = project(-180, lat), p2 = project(180, lat);
-      line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
-      line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
-      line.setAttribute('stroke', 'var(--ga-border)'); line.setAttribute('stroke-width', '0.5');
-      svg.appendChild(line);
-    }
-
-    // Bubbles
     data.forEach(function(row) {
-      var centroid = CENTROIDS[row.isoCode];
-      if (!centroid) return;
-      var pos = project(centroid[0], centroid[1]);
-      var r = radius(row.count);
+      var coords = CENTROIDS[row.isoCode];
+      if (!coords) return;
 
-      var circle = document.createElementNS(svgNS, 'circle');
-      circle.setAttribute('cx', pos.x); circle.setAttribute('cy', pos.y);
-      circle.setAttribute('r', r);
-      circle.setAttribute('fill', 'var(--ga-accent)');
-      circle.setAttribute('fill-opacity', '0.65');
-      circle.setAttribute('stroke', 'var(--ga-accent)');
-      circle.setAttribute('stroke-width', '1.5');
-      circle.setAttribute('stroke-opacity', '0.9');
-      circle.style.cursor = 'pointer';
+      var radius = Math.max(5, Math.sqrt(row.count / maxCount) * 38);
 
-      // Tooltip on hover
-      $(circle)
-        .on('mouseenter', function(e) {
-          var $t = $('#map-tooltip');
-          $t.html(
-            '<strong>' + (row.flag || '') + ' ' + row.country + '</strong><br>'
-            + GeneaAzul.utils.formatNumber(row.count) + ' personas (' + row.percentage.toFixed(1) + '%)'
-            + (row.topSurnames && row.topSurnames.length > 0 ? '<br><small>' + row.topSurnames.slice(0, 4).join(', ') + '</small>' : '')
-          ).css({ display: 'block', top: (e.pageY - 60) + 'px', left: (e.pageX + 12) + 'px' });
-        })
-        .on('mousemove', function(e) {
-          $('#map-tooltip').css({ top: (e.pageY - 60) + 'px', left: (e.pageX + 12) + 'px' });
-        })
-        .on('mouseleave', function() { $('#map-tooltip').hide(); });
+      var marker = L.circleMarker(coords, {
+        radius:      radius,
+        fillColor:   accentColor,
+        color:       accentColor,
+        weight:      1.5,
+        opacity:     0.9,
+        fillOpacity: 0.55
+      }).addTo(_leafletMap);
 
-      svg.appendChild(circle);
+      var surnames = row.topSurnames && row.topSurnames.length > 0
+        ? '<div class="mt-1 text-muted" style="font-size:.8rem">' + row.topSurnames.slice(0, 5).join(', ') + '</div>'
+        : '';
 
-      // Country label for large bubbles
-      if (r > 12) {
-        var text = document.createElementNS(svgNS, 'text');
-        text.setAttribute('x', pos.x); text.setAttribute('y', pos.y + r + 10);
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('font-size', '9');
-        text.setAttribute('fill', 'var(--ga-text-muted)');
-        text.setAttribute('pointer-events', 'none');
-        text.textContent = row.isoCode || row.country.substring(0, 3).toUpperCase();
-        svg.appendChild(text);
-      }
+      marker.bindPopup(
+        '<strong>' + (row.flag || '') + ' ' + row.country + '</strong>'
+        + '<div>' + GeneaAzul.utils.formatNumber(row.count) + ' personas ('
+        + row.percentage.toFixed(1) + '%)</div>'
+        + surnames,
+        { maxWidth: 220 }
+      );
+
+      marker.bindTooltip((row.flag || '') + ' ' + row.country, {
+        direction: 'top', sticky: true
+      });
     });
-
-    $container.append(svg);
   }
 
-  /* ── Tabular list ─────────────────────────────────────────────── */
+  /* ── Country table ───────────────────────────────────────────────── */
   function renderMapList(data) {
     var $el = $('#map-list').empty();
+    var $tbody = $('<tbody>');
     var $table = $('<table>').addClass('table table-sm table-hover')
       .append($('<thead>').append(
         $('<tr>')
@@ -142,15 +108,16 @@ GeneaAzul.map = (function() {
           .append($('<th>').addClass('d-none d-sm-table-cell').html('%'))
           .append($('<th>').addClass('d-none d-md-table-cell').html('Apellidos frecuentes'))
       ))
-      .append($('<tbody>'));
+      .append($tbody);
 
     data.forEach(function(row, idx) {
-      $table.find('tbody').append(
+      $tbody.append(
         $('<tr>')
           .append($('<td>').addClass('text-muted small').html(idx + 1))
           .append($('<td>').html((row.flag || '') + ' <strong>' + row.country + '</strong>'))
           .append($('<td>').addClass('text-end').html(GeneaAzul.utils.formatNumber(row.count)))
-          .append($('<td>').addClass('d-none d-sm-table-cell small text-muted').html(row.percentage.toFixed(1) + '%'))
+          .append($('<td>').addClass('d-none d-sm-table-cell small text-muted')
+            .html(row.percentage.toFixed(1) + '%'))
           .append($('<td>').addClass('d-none d-md-table-cell small text-muted')
             .html(row.topSurnames ? row.topSurnames.slice(0, 5).join(', ') : ''))
       );

@@ -434,8 +434,13 @@ a:hover { color: var(--ga-accent); }
 .ga-immigration-bar-fill { height: 100%; border-radius: 50px; background: var(--ga-accent); transition: width .6s ease; }
 
 /* ─── Map page ───────────────────────────────────────────────────── */
-.ga-map-wrapper { position: relative; overflow: hidden; border-radius: var(--ga-radius-lg); background: var(--ga-card-bg); box-shadow: var(--ga-shadow); }
-.ga-map-wrapper svg { display: block; width: 100%; height: auto; }
+.ga-leaflet-wrap { border-radius: var(--ga-radius-lg); overflow: hidden; box-shadow: var(--ga-shadow); }
+#map-container { height: 440px; }
+@media (max-width: 575.98px) { #map-container { height: 300px; } }
+/* Leaflet popup style overrides to match theme */
+.leaflet-popup-content-wrapper { border-radius: var(--ga-radius); box-shadow: var(--ga-shadow-hover); }
+.leaflet-popup-content { font-family: var(--ga-font-body); font-size: .88rem; margin: .6rem .75rem; }
+.leaflet-control-attribution { font-size: .65rem; }
 .ga-map-tooltip {
   position: absolute;
   background: rgba(26,54,93,.95);
