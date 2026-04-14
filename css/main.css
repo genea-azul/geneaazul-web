@@ -523,7 +523,7 @@ a:hover { color: var(--ga-accent); }
   .ga-footer { padding: 2rem 0 1rem; }
   .ga-section { padding: 2rem 0; }
   .ga-step { padding: 1rem .5rem; }
-  /* Ensure form cards have breathing room from screen edges */
-  #buscar-section .card,
-  #conexiones-section .card { margin-left: .25rem; margin-right: .25rem; }
+  /* Give the entire form column consistent inset on narrow screens */
+  #buscar-section .col-lg-9,
+  #conexiones-section .col-lg-9 { padding-left: 1rem !important; padding-right: 1rem !important; }
 }
