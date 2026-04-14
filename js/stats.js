@@ -235,7 +235,7 @@ GeneaAzul.stats = (function() {
       .append($('<thead>').append(
         $('<tr>')
           .append($('<th>').html('Apellido'))
-          .append($('<th>').addClass('d-none d-sm-table-cell').html('Variantes'))
+          .append($('<th>').html('Variantes'))
       ))
       .append($tbody);
 
@@ -244,7 +244,7 @@ GeneaAzul.stats = (function() {
       $tbody.append(
         $('<tr>').attr('data-surname', s.surname.toLowerCase())
           .append($('<td>').html('<span class="fw-semibold">' + s.surname + '</span>'))
-          .append($('<td>').addClass('d-none d-sm-table-cell small text-muted').html(variants))
+          .append($('<td>').addClass('small text-muted').html(variants))
       );
     });
 

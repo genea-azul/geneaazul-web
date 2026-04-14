@@ -159,6 +159,8 @@ GeneaAzul.router = (function() {
   function init() {
     // Handle nav link clicks that have data-route
     $(document).on('click', '[data-route]', function(e) {
+      // Let Bootstrap handle dropdown toggles — don't navigate on toggle click
+      if ($(this).attr('data-bs-toggle') === 'dropdown') return;
       var route = $(this).attr('data-route');
       if (!route) return;
       // Allow default anchor href to update the hash naturally, only intercept
