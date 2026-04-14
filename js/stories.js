@@ -42,9 +42,12 @@ GeneaAzul.stories = (function() {
       var $card = $('<div>').addClass('col-md-6 col-lg-4')
         .append(
           $('<article>').addClass('ga-highlight-card h-100')
-            .append($('<div>').addClass('ga-highlight-header').html(
-              '<i class="bi bi-book me-2"></i>' + story.title
-            ))
+            .append($('<a>')
+              .addClass('ga-highlight-header d-block text-decoration-none')
+              .attr('href', '#historias/' + story.slug)
+              .attr('data-route-story', story.slug)
+              .html('<i class="bi bi-book me-2"></i>' + story.title)
+            )
             .append($('<div>').addClass('ga-highlight-body').html(story.excerpt || ''))
             .append($('<div>').addClass('d-flex justify-content-between align-items-center mt-2')
               .append($('<small>').addClass('text-muted').html(
@@ -54,7 +57,6 @@ GeneaAzul.stories = (function() {
               .append($('<a>')
                 .addClass('ga-highlight-link small')
                 .attr('href', '#historias/' + story.slug)
-                .attr('data-slug', story.slug)
                 .attr('data-route-story', story.slug)
                 .html('Leer <i class="bi bi-arrow-right ms-1"></i>'))
             )

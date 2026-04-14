@@ -107,13 +107,7 @@ GeneaAzul.router = (function() {
       if (bsCollapse) bsCollapse.hide();
     }
 
-    /* Inicio: show hero */
-    if (routeKey === 'inicio' || !routeMap.hasOwnProperty(routeKey)) {
-      showHero();
-      return;
-    }
-
-    /* Story detail: #historias/slug */
+    /* Story detail: #historias/slug — must be checked before the routeMap fallback */
     if (routeKey.startsWith('historias/')) {
       var slug = routeKey.replace('historias/', '');
       $('#inicio-section').addClass('d-none');
@@ -121,6 +115,12 @@ GeneaAzul.router = (function() {
       if (GeneaAzul.stories) {
         GeneaAzul.stories.loadStory(slug, $pc);
       }
+      return;
+    }
+
+    /* Inicio or unknown route: show hero */
+    if (routeKey === 'inicio' || !routeMap.hasOwnProperty(routeKey)) {
+      showHero();
       return;
     }
 
