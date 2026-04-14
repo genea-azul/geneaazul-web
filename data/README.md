@@ -4,15 +4,15 @@ These JSON files contain static data extracted from the existing Genea Azul site
 
 ## Status
 
-- **`immigration.json`** — COMPLETE (all 38 countries from the current site)
+- **`immigration.json`** — COMPLETE (38 entries covering 44 individual countries — some entries combine related countries, e.g., "Alemania / Rusia", "Siria / Líbano", "Croacia / Eslovenia / Serbia (Yugoslavia)", "República Checa / Eslovaquia (Checoslovaquia)")
 - **`personalities.json`** — SAMPLE ONLY (15 of 245+ entries). Full data must be extracted from the current `index.ftlh` file (lines 743-988 in `gedcom-analyzer/src/main/resources/templates/site-v2/index.ftlh`)
 - **`surnames.json`** — SAMPLE ONLY (25 of 4,557+ entries). Full data must be extracted from the current `index.ftlh` file (lines 1001-1749+ in `gedcom-analyzer/src/main/resources/templates/site-v2/index.ftlh`)
 
 ## How to Extract Full Data
 
-The source HTML file is at:
+The source HTML file is at (sibling project):
 ```
-/path/to/gedcom-analyzer/src/main/resources/templates/site-v2/index.ftlh
+../gedcom-analyzer/src/main/resources/templates/site-v2/index.ftlh
 ```
 
 ### Personalities

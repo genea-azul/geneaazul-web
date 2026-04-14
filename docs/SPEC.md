@@ -333,13 +333,21 @@ This expanded view mirrors the current form's full capability (spouse, father, m
 **Result display**: Each person result shows:
 - Name (with obfuscation: `<private>` → `<nombre privado>`)
 - Date/place of birth and death
-- Parents, spouses, children
+- Parents (with referenceType label), spouses, children
 - Ancestry countries (flags)
-- Number of persons in tree branch
-- Family tree PDF download link (if available)
-- Distinguished persons in their tree
-- Max distant relationship info
+- Number of persons in tree branch, number of surnames
+- Ancestry generations (ascending/descending)
+- Max distant relationship info (complex Spanish relationship name)
+- Distinguished persons in their tree (with profile picture if available)
+- **"Descargar listado de familiares (PDF)"** button — opens PDF in new tab via `/api/search/family-tree/{uuid}/plainPdf`
+- **"Ver árbol genealógico online"** button — opens Pyvis network visualization in new tab via `/family-tree/{uuid}`
 - **"Buscar conexión con esta persona"** button (links to `#conexiones` with prefilled data)
+
+**Family tree button delay**: Both the PDF and network viewer buttons start disabled and are enabled after a calculated delay. The backend generates family tree files asynchronously after a search. The delay formula is:
+```
+timeout = (personsCountInTree / familyTreeProcessPersonsBySec * 1000) + familyTreeProcessFixedDelayMillis
+```
+Only show the wait countdown if `timeout > minMillisToDisplayWaitCountDown`. See `config.js` for the constants.
 
 **Obfuscation notice**: "Los datos de personas vivas serán ocultados" — shown unless `disableObfuscateLiving` is true from the API health check, or URL param `?f=0` is present.
 
@@ -397,7 +405,7 @@ A curated overview page with visual highlights. NOT the full data dumps.
 - Azuleños/as vivos/as: 14.590
 - Jefes comunales de Azul: 48
 - Personas desaparecidas: 26
-- Personalidades destacadas: 255
+- Personalidades destacadas: 255 (245 listed in detail + others referenced)
 - Cantidad de países: 50
 - Cantidad de inmigrantes: 7.041
 - Apellidos azuleños: 4.557
@@ -552,32 +560,47 @@ Each card links to the appropriate contact method (Instagram DM, email).
 ```
 ┌───────────────────────────────────────────────────┐
 │            Sobre Genea Azul                       │
+│          «mi pasatiempo»                          │
 │                                                   │
-│  Genea Azul es una iniciativa comunitaria sin     │
-│  fines de lucro con el fin de investigar,         │
-│  documentar y preservar la historia genealógica   │
-│  del partido de Azul.                             │
-│                                                   │
-│  [History of the project]                         │
-│  [Who maintains it]                               │
-│  [How the tree is built - GEDCOM, MyHeritage]     │
-│  [Community aspect]                               │
-│  [Non-profit nature - no cost, open access]       │
+│  [Full project history narrative — see below]     │
 │                                                   │
 │  Contacto: ...                                    │
 └───────────────────────────────────────────────────┘
 ```
 
 - Static content, hardcoded in HTML
-- Owner will fill in the specific narrative
-- Include placeholder text sections that describe what content should go there
+- **The existing site has a complete "La historia de Genea Azul" narrative** in the "Historia" tab (`#history-tab`). This content MUST be ported to this section. It covers:
+  - How it started in 2014 with a small family tree
+  - The trip to Italy and the connection with Leonardo De Luca
+  - Growth through FamilySearch, Geneanet, Portale Antenati, Filae
+  - DNA testing in 2020
+  - Named "Genea Azul" in February 2022 with ~15,000 persons
+  - Declared "Interés Comunitario, Histórico y Cultural" by Concejo Deliberante de Azul in November 2024
+  - Over 62,000 persons by 2025
+- The narrative is in the current `index.ftlh` at the `#history-tab` section (lines ~6413-6444). Port the text (converting HTML entities to UTF-8) and style it as a readable article.
 
-### 4.12 Footer
+### 4.12 Familias Azuleñas (Intentionally Deferred)
+
+The current site has a "Familias" tab (`#families-tab`) with detailed tables for specific families (Andrich, Cachenaut, etc.), each showing individual records with birth/death dates, places, spouses, and parents — with links to FamilySearch profiles.
+
+**This section is intentionally NOT included in the initial redesign.** Reasons:
+- The data is manually curated (not from an API) and hard to maintain
+- The search feature provides better discovery for individual families
+- The content may be revisited later as a "Familias destacadas" feature or as part of the family stories section
+
+If the owner wants this content preserved, it can be added as a separate page (`#familias`) in a future iteration.
+
+### 4.13 Footer
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │  [Logo small]                                       │
 │  Genea Azul — Estudio de genealogía azuleña         │
+│                                                     │
+│  Declarado de Interés Comunitario, Histórico y      │
+│  Cultural por el Concejo Deliberante de Azul.       │
+│                                                     │
+│  ¡Solicitá acceso al árbol y cargá info!            │
 │                                                     │
 │  Navegación: Inicio | Buscar | Conexiones | ...     │
 │                                                     │
@@ -676,7 +699,7 @@ All loaded from CDN (no local copies, no npm):
 ]
 ```
 
-Full data for all 44 countries must be extracted from the current `index.ftlh` (lines 692-730 in the existing file).
+This file is **already complete** in `data/immigration.json` — 38 entries covering 44 individual countries (some entries combine related countries, e.g., "Alemania / Rusia", "Siria / Líbano", "Croacia / Eslovenia / Serbia").
 
 ### 7.2 `data/personalities.json`
 
@@ -694,7 +717,7 @@ Full data for all 44 countries must be extracted from the current `index.ftlh` (
 ]
 ```
 
-Full data for all 245+ personalities from the existing file.
+**SAMPLE ONLY** — 15 entries provided. Full data (245 entries) must be extracted from the existing `index.ftlh` (accordion section `flush-collapseTwo`). See `data/README.md` for extraction instructions.
 
 ### 7.3 `data/surnames.json`
 
@@ -707,7 +730,7 @@ Full data for all 245+ personalities from the existing file.
 ]
 ```
 
-Full data for all 4,557+ surnames from the existing file.
+**SAMPLE ONLY** — 25 entries provided. Full data (4,557+ entries) must be extracted from the existing `index.ftlh` (accordion section `flush-collapseThree`). See `data/README.md` for extraction instructions.
 
 ### 7.4 `stories/index.json`
 
@@ -829,14 +852,15 @@ Responsibilities:
 
 Port all the Spanish localization functions from the current `index.ftlh`:
 
-- `getRelationshipInSpanish(relationship)` — converts relationship DTO to Spanish text
+- `displayRelationshipInSpanish(relationship)` — converts full `RelationshipDto` (used for `maxDistantRelationship`) to Spanish text. This is the complex one (~100 lines) that handles generation, grade, in-law, half, adoption, and tree side logic.
+- `displayReferenceTypeInSpanish(referenceType, sex)` — converts a `ReferenceType` enum + sex to Spanish label. Used for parent references in search results (e.g., "padre", "madre", "padre adoptivo"). Simpler than `displayRelationshipInSpanish`.
 - `getTreeSideInSpanish(treeSides, defaultValue)` — "padre", "madre", "padre/madre"
 - `getSexSuffixInSpanish(relationship)` — "o" or "a"
 - `getGradeSuffixInSpanish(grade, sexSuffix)` — "segundo/a", "tercero/a", etc.
 - `getAdoptionSuffixInSpanish(adoptionType, sexSuffix)` — "adoptivo/a", "de crianza"
 - `displayErrorCodeInSpanish(errorCode)` — user-friendly error messages
-- `displayNameInSpanish(name)` — obfuscation replacements
-- `displayDateInSpanish(date)` — GEDCOM date format to Spanish
+- `displayNameInSpanish(name)` — obfuscation replacements (`<private>` → `<nombre privado>`, etc.)
+- `displayDateInSpanish(date)` — GEDCOM date format to Spanish (handles ABT, EST, BEF, AFT, BET, month abbreviations)
 
 ### 8.9 `js/utils.js`
 
@@ -864,13 +888,13 @@ Shared utilities:
 
 ### 9.2 `_redirects` File
 
-For SPA routing support on Cloudflare Pages:
+For Cloudflare Pages:
 
 ```
 /* /index.html 200
 ```
 
-This ensures all routes serve `index.html`, allowing the client-side hash router to handle navigation.
+**Note**: Since we use **hash-based routing** (`#buscar`, `#conexiones`, etc.), the browser never sends the hash fragment to the server — all requests hit the root `/` and JavaScript handles routing client-side. This means `_redirects` is technically not needed for the current architecture. However, it's included as a safety net: if a user somehow lands on a non-root URL (e.g., from a misconfigured link), it will serve `index.html` instead of a 404. It also future-proofs the site if we ever switch to path-based routing.
 
 ### 9.3 Development
 
@@ -893,7 +917,9 @@ When building the new site, ensure all current functionality is preserved:
 - [ ] Grandparents card show/hide toggle
 - [ ] Contact field
 - [ ] Search results display (full person card with all details)
-- [ ] Family tree PDF download links
+- [ ] Family tree PDF download links ("Descargar listado de familiares")
+- [ ] Family tree network viewer links ("Ver árbol genealógico online")
+- [ ] Family tree button enable delay (calculated from personsCountInTree)
 - [ ] Surname search results
 - [ ] Obfuscation of living persons' data
 - [ ] URL param `?f=0` to disable obfuscation
@@ -905,6 +931,9 @@ When building the new site, ensure all current functionality is preserved:
 - [ ] Statistics data (all 3 lists: immigration, personalities, surnames)
 - [ ] Social links (Instagram, Facebook, Email)
 - [ ] Persons count display from API metadata
+- [ ] "La historia de Genea Azul" narrative ported to Sobre Nosotros page
+- [ ] "Interés Comunitario" declaration in footer
+- [ ] "Familias" tab content intentionally deferred (document decision)
 
 ---
 
