@@ -336,9 +336,31 @@ a:hover { color: var(--ga-accent); }
   padding: .25rem 0;
 }
 
-/* ─── Person card coloring (sex) ─────────────────────────────────── */
-.ga-person-form-card.male  > .card-header { background-color: var(--bs-secondary); color: #fff; }
-.ga-person-form-card.female > .card-header { background-color: var(--bs-danger); color: #fff; }
+/* ─── Person form cards ──────────────────────────────────────────── */
+/* Default: navy header */
+.ga-person-form-card > .card-header {
+  background-color: var(--ga-primary);
+  color: #fff;
+  border-bottom-color: rgba(255,255,255,.15);
+}
+/* Sex selected: male = slate-gray, female = red */
+.ga-person-form-card.ga-sex-male  > .card-header { background-color: #5a6878; }
+.ga-person-form-card.ga-sex-female > .card-header { background-color: #c0392b; }
+/* Border accent */
+.ga-person-form-card.ga-sex-male  { border-color: #5a6878 !important; }
+.ga-person-form-card.ga-sex-female { border-color: #c0392b !important; }
+
+/* Sex toggle buttons inside card header */
+.ga-sex-toggle .btn-outline-light {
+  padding: .2rem .55rem;
+  font-size: .85rem;
+  border-radius: 50px;
+}
+.ga-sex-toggle .btn-check:checked + .btn-outline-light {
+  background-color: rgba(255,255,255,.25);
+  border-color: #fff;
+  color: #fff;
+}
 
 /* ─── Family story article ───────────────────────────────────────── */
 .ga-story-article {
@@ -501,4 +523,7 @@ a:hover { color: var(--ga-accent); }
   .ga-footer { padding: 2rem 0 1rem; }
   .ga-section { padding: 2rem 0; }
   .ga-step { padding: 1rem .5rem; }
+  /* Ensure form cards have breathing room from screen edges */
+  #buscar-section .card,
+  #conexiones-section .card { margin-left: .25rem; margin-right: .25rem; }
 }

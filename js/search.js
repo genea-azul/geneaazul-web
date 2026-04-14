@@ -102,8 +102,7 @@ GeneaAzul.search = (function() {
 
   function applyCardSexColor(cardSelector, isMale) {
     var $card = $(cardSelector);
-    $card.toggleClass('border-secondary', isMale).toggleClass('border-danger', !isMale).toggleClass('border-dark', false);
-    $card.find('div.card-header').toggleClass('text-bg-secondary', isMale).toggleClass('text-bg-danger', !isMale).toggleClass('text-bg-dark', false);
+    $card.toggleClass('ga-sex-male', isMale).toggleClass('ga-sex-female', !isMale);
     $card.find('i.card-header-icon').toggleClass('bi-gender-male', isMale).toggleClass('bi-gender-female', !isMale);
   }
 

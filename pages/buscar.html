@@ -38,16 +38,11 @@
             <div class="card-header d-flex align-items-center gap-2">
               <i class="bi bi-person card-header-icon" id="individualCardIcon"></i>
               <span>Persona principal</span>
-              <!-- Sex selector inline in header -->
-              <div class="ms-auto d-flex gap-3">
-                <div class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="individualSex" id="individualSexM" value="M">
-                  <label class="form-check-label text-white" for="individualSexM"><i class="bi bi-gender-male"></i></label>
-                </div>
-                <div class="form-check form-check-inline mb-0">
-                  <input class="form-check-input" type="radio" name="individualSex" id="individualSexF" value="F">
-                  <label class="form-check-label text-white" for="individualSexF"><i class="bi bi-gender-female"></i></label>
-                </div>
+              <div class="btn-group btn-group-sm ms-auto ga-sex-toggle" role="group" aria-label="Sexo">
+                <input type="radio" class="btn-check" name="individualSex" id="individualSexM" value="M" autocomplete="off">
+                <label class="btn btn-outline-light" for="individualSexM"><i class="bi bi-gender-male"></i> Masc.</label>
+                <input type="radio" class="btn-check" name="individualSex" id="individualSexF" value="F" autocomplete="off">
+                <label class="btn btn-outline-light" for="individualSexF"><i class="bi bi-gender-female"></i> Fem.</label>
               </div>
             </div>
             <div class="card-body">
@@ -112,15 +107,11 @@
                 <div class="card-header d-flex align-items-center gap-2">
                   <i class="bi bi-person card-header-icon" id="spouseCardIcon"></i>
                   <span>Pareja</span>
-                  <div class="ms-auto d-flex gap-3">
-                    <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="radio" name="spouseSex" id="spouseSexM" value="M">
-                      <label class="form-check-label text-white" for="spouseSexM"><i class="bi bi-gender-male"></i></label>
-                    </div>
-                    <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="radio" name="spouseSex" id="spouseSexF" value="F">
-                      <label class="form-check-label text-white" for="spouseSexF"><i class="bi bi-gender-female"></i></label>
-                    </div>
+                  <div class="btn-group btn-group-sm ms-auto ga-sex-toggle" role="group" aria-label="Sexo">
+                    <input type="radio" class="btn-check" name="spouseSex" id="spouseSexM" value="M" autocomplete="off">
+                    <label class="btn btn-outline-light" for="spouseSexM"><i class="bi bi-gender-male"></i> Masc.</label>
+                    <input type="radio" class="btn-check" name="spouseSex" id="spouseSexF" value="F" autocomplete="off">
+                    <label class="btn btn-outline-light" for="spouseSexF"><i class="bi bi-gender-female"></i> Fem.</label>
                   </div>
                 </div>
                 <div class="card-body">
