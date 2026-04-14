@@ -523,7 +523,6 @@ a:hover { color: var(--ga-accent); }
   .ga-footer { padding: 2rem 0 1rem; }
   .ga-section { padding: 2rem 0; }
   .ga-step { padding: 1rem .5rem; }
-  /* Give the entire form column consistent inset on narrow screens */
-  #buscar-section .col-lg-9,
-  #conexiones-section .col-lg-9 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  /* Give every lazy-loaded section consistent inset on narrow screens */
+  .ga-section.container-xl { padding-left: 1rem !important; padding-right: 1rem !important; }
 }
