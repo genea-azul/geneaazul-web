@@ -101,13 +101,16 @@ GeneaAzul.connections = (function() {
         } else if (!data.connections || data.connections.length === 0) {
           $resultBody.html(
             '<p>&#128270; No se encontr&oacute; conexi&oacute;n entre estas personas. &#128269;</p>'
-            + '<p>Puede que no est&eacute;n en el &aacute;rbol, o no haya un camino conocido que las una. '
+            + '<p>Puede que no est&eacute;n en el &aacute;rbol, o no haya un camino conocido que las une. '
             + 'Contact&aacute;nos para que carguemos la info 😊</p>'
           );
         } else {
-          data.connections.forEach(function(connection, idx) {
-            $resultBody.append(buildConnectionComponent(connection, idx));
-          });
+          var distance = data.connections.length - 1;
+          $resultBody.append(
+            $('<p>').addClass('mb-3 fw-semibold')
+              .text('Distancia entre personas: ' + distance + ' paso' + (distance !== 1 ? 's' : ''))
+          );
+          $resultBody.append(buildConnectionChain(data.connections));
         }
 
         $btn.prop('disabled', false);
@@ -132,52 +135,37 @@ GeneaAzul.connections = (function() {
            !rq.person2 || !rq.person2.givenName || !rq.person2.surname || !rq.person2.yearOfBirth;
   }
 
-  function buildConnectionComponent(connection, idx) {
+  /* Build a single chain card from the flat connections array.
+     Each step: { relationship (string, already in Spanish), personName, personData } */
+  function buildConnectionChain(connections) {
     var $wrap = $('<div>').addClass('card mb-3');
-    if (idx > 0) $wrap.addClass('mt-2');
 
     var $header = $('<div>').addClass('card-header text-bg-dark d-flex align-items-center gap-2');
-    $header.append($('<i>').addClass('bi bi-diagram-3')).append('Camino de conexi&oacute;n');
-    if (connection.relationship) {
-      $header.append($('<span>').addClass('ms-auto badge bg-secondary small').html(i18n.displayRelationshipInSpanish(connection.relationship)));
-    }
+    $header.html('<i class="bi bi-diagram-3"></i> Camino de conexi&oacute;n');
     $wrap.append($header);
 
     var $body = $('<div>').addClass('card-body small p-2');
 
-    if (!connection.persons || connection.persons.length === 0) {
-      $body.html('<p class="text-muted mb-0">Sin datos de conexi&oacute;n.</p>');
-      return $wrap.append($body);
-    }
+    connections.forEach(function(step, idx) {
+      var isEndpoint = (idx === 0 || idx === connections.length - 1);
 
-    connection.persons.forEach(function(person, pIdx) {
-      var isFirst = pIdx === 0;
-      var isLast  = pIdx === connection.persons.length - 1;
-
-      var sexClass = person.sex === 'M' ? 'border-secondary' : (person.sex === 'F' ? 'border-danger' : 'border-light');
-      var bgClass  = person.sex === 'M' ? 'text-bg-secondary' : (person.sex === 'F' ? 'text-bg-danger' : 'text-bg-light');
-
-      var $step = $('<div>').addClass('ga-connection-step ' + (isFirst || isLast ? 'fw-semibold' : ''));
-
-      // Arrow
-      if (pIdx > 0) {
-        $body.append($('<div>').addClass('ga-connection-arrow').html('<i class="bi bi-arrow-down"></i>'));
+      // Arrow + relationship label between steps
+      if (idx > 0) {
+        var relText = step.relationship ? (step.relationship + ' de') : '';
+        $body.append(
+          $('<div>').addClass('d-flex align-items-center gap-1 text-muted py-1 ps-1')
+            .append($('<i>').addClass('bi bi-arrow-down-short'))
+            .append($('<span>').addClass('fst-italic').text(relText))
+        );
       }
 
-      // Relationship label
-      if (person.relationship) {
-        $step.append($('<span>').addClass('ga-connection-label').html(i18n.displayRelationshipInSpanish(person.relationship)));
+      // Person row
+      var nameHtml = '<span class="' + (isEndpoint ? 'fw-semibold' : '') + '">'
+        + step.personName + '</span>';
+      if (step.personData) {
+        nameHtml += ' <span class="text-muted fw-normal">(' + step.personData + ')</span>';
       }
-
-      var $info = $('<div>').addClass('flex-grow-1');
-      $info.append($('<div>').addClass('ga-connection-name').html(i18n.displayNameInSpanish(person.name)));
-      var dateStr = '';
-      if (person.dateOfBirth) dateStr += 'n. ' + i18n.displayDateInSpanish(person.dateOfBirth);
-      if (person.dateOfDeath) dateStr += (dateStr ? ' — ' : '') + 'f. ' + i18n.displayDateInSpanish(person.dateOfDeath);
-      if (dateStr) $info.append($('<div>').addClass('ga-connection-data').html(dateStr));
-
-      $step.append($info);
-      $body.append($step);
+      $body.append($('<div>').addClass('py-1 ps-1').html(nameHtml));
     });
 
     $wrap.append($body);
