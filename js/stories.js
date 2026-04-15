@@ -114,9 +114,10 @@ GeneaAzul.stories = (function() {
           + '</div></div></section>'
         );
 
-        $container.on('click', '#stories-back-btn2', function() {
-          GeneaAzul.router.navigate('#historias');
-        });
+        $container.off('click.stories-back2', '#stories-back-btn2')
+          .on('click.stories-back2', '#stories-back-btn2', function() {
+            GeneaAzul.router.navigate('#historias');
+          });
       },
       error: function() {
         $container.html(

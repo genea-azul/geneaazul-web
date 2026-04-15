@@ -6,12 +6,22 @@ var GeneaAzul = window.GeneaAzul || {};
 
 GeneaAzul.i18n = (function() {
 
-  /* Replaces obfuscated tokens with Spanish equivalents */
+  /* HTML-escaper shared by this module */
+  var escHtml = (GeneaAzul.utils && GeneaAzul.utils.escHtml) || function(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  };
+
+  /* Replaces obfuscated tokens with Spanish equivalents and HTML-escapes the rest */
   function displayNameInSpanish(name) {
     if (!name) return '';
-    name = name.replace('<private>', '&lt;nombre privado&gt;');
-    name = name.replace('<no name>', '&lt;nombre desconocido&gt;');
-    name = name.replace('<no spouse>', '&lt;sin pareja&gt;');
+    // Extract known tokens before escaping so their angle brackets aren't clobbered
+    name = name.replace('<private>',  '\x00A\x00');
+    name = name.replace('<no name>',  '\x00B\x00');
+    name = name.replace('<no spouse>', '\x00C\x00');
+    name = escHtml(name);
+    name = name.replace('\x00A\x00', '&lt;nombre privado&gt;');
+    name = name.replace('\x00B\x00', '&lt;nombre desconocido&gt;');
+    name = name.replace('\x00C\x00', '&lt;sin pareja&gt;');
     return name;
   }
 
@@ -19,6 +29,7 @@ GeneaAzul.i18n = (function() {
   function displayDateInSpanish(date) {
     if (!date) return '';
     if (date === '<private>') return '&lt;fecha de nac. privada&gt;';
+    date = escHtml(date);
 
     date = date.replace(/BET/g, 'entre');
     date = date.replace(/AND/g, 'y');

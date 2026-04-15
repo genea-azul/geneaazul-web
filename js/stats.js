@@ -234,7 +234,8 @@ GeneaAzul.stats = (function() {
 
   /* ── Immigration country name helper ───────────────────────────── */
   function countryHtml(row, bold) {
-    var name = bold ? '<strong>' + row.country + '</strong>' : row.country;
+    var escaped = escAttr(row.country);
+    var name = bold ? '<strong>' + escaped + '</strong>' : escaped;
     if (row.formerly) {
       name = '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="Nombre anterior: ' + escAttr(row.formerly) + '">' + name + '</span>';
     }
@@ -246,13 +247,13 @@ GeneaAzul.stats = (function() {
     var parts = [];
     if (p.title) {
       var titleHtml = p.titleFull && p.titleFull !== p.title
-        ? '<span class="text-secondary small ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.titleFull) + '">' + p.title + '</span>'
-        : '<span class="text-secondary small">' + p.title + '</span>';
+        ? '<span class="text-secondary small ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.titleFull) + '">' + escAttr(p.title) + '</span>'
+        : '<span class="text-secondary small">' + escAttr(p.title) + '</span>';
       parts.push(titleHtml);
     }
-    if (p.givenName) parts.push(p.givenName);
-    if (p.nickname) parts.push('<span class="fst-italic ga-nickname">\u201c' + p.nickname + '\u201d</span>');
-    if (p.surname)  parts.push('<span class="fw-semibold">' + p.surname + '</span>');
+    if (p.givenName) parts.push(escAttr(p.givenName));
+    if (p.nickname) parts.push('<span class="fst-italic ga-nickname">\u201c' + escAttr(p.nickname) + '\u201d</span>');
+    if (p.surname)  parts.push('<span class="fw-semibold">' + escAttr(p.surname) + '</span>');
     return parts.join(' ');
   }
 

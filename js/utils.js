@@ -22,9 +22,19 @@ GeneaAzul.utils = (function() {
   }
 
   function maxLengthCheck(input) {
-    if (input.value.length > input.max.length) {
-      input.value = input.value.slice(0, input.max.length);
+    var limit = Number(input.max).toString().length;
+    if (input.value.length > limit) {
+      input.value = input.value.slice(0, limit);
     }
+  }
+
+  /* HTML-escapes a value for safe insertion into HTML content or attributes */
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   /* Formats a number using Argentine locale: 70.512 */
@@ -112,6 +122,7 @@ GeneaAzul.utils = (function() {
     trimToNull,
     toNumber,
     maxLengthCheck,
+    escHtml,
     formatNumber,
     animateCounter,
     animateCounters,
@@ -126,6 +137,7 @@ GeneaAzul.utils = (function() {
 /* ── Theme switcher ──────────────────────────────────────────────── */
 GeneaAzul.toggleTheme = function(theme) {
   var themes = ['heritage', 'modern'];
+  if (themes.indexOf(theme) === -1) return;
   var $body = $('body');
   themes.forEach(function(t) { $body.removeClass('theme-' + t); });
   $body.addClass('theme-' + theme);

@@ -10,6 +10,8 @@ GeneaAzul.search = (function() {
   var i18n = null;
   var utils = null;
 
+  var _activeTimers = [];
+
   var personsInRequest = [
     'individual', 'spouse', 'father', 'mother',
     'paternalGrandfather', 'paternalGrandmother',
@@ -202,6 +204,9 @@ GeneaAzul.search = (function() {
   }
 
   function doSearch() {
+    _activeTimers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
+    _activeTimers = [];
+
     var $btn = $('#searchBtn');
     var $resultCard = $('#searchResultCard');
     var $resultBody = $resultCard.find('div.card-body');
@@ -442,7 +447,7 @@ GeneaAzul.search = (function() {
 
     // Place of birth
     if (person.placeOfBirth) {
-      $body.append($('<div>').addClass('mt-1').html('Pa&iacute;s de nacimiento: ' + person.placeOfBirth));
+      $body.append($('<div>').addClass('mt-1').html('Pa&iacute;s de nacimiento: ' + utils.escHtml(person.placeOfBirth)));
     }
 
     // Parents
@@ -515,7 +520,7 @@ GeneaAzul.search = (function() {
     // Ancestry countries
     if (person.ancestryCountries && person.ancestryCountries.length > 0) {
       var $cul = $('<ul>').addClass('mb-0');
-      person.ancestryCountries.forEach(function(c) { $cul.append($('<li>').html(c)); });
+      person.ancestryCountries.forEach(function(c) { $cul.append($('<li>').text(c)); });
       $body.append($('<div>').addClass('mt-1').html('Pa&iacute;ses en su ascendencia: ').append($cul));
     }
 
@@ -555,7 +560,7 @@ GeneaAzul.search = (function() {
     var totalMs = currentTimeoutMs + delayMs;
 
     if (totalMs < cfg.minMillisToDisplayWaitCountDown) {
-      setTimeout(function() { activateFamilyTreeButtons(uuid); }, totalMs);
+      _activeTimers.push(setTimeout(function() { activateFamilyTreeButtons(uuid); }, totalMs));
     } else {
       var remaining = Math.ceil(totalMs / 1000);
       $('#search-family-tree-wait-sign-' + uuid).append(
@@ -566,7 +571,8 @@ GeneaAzul.search = (function() {
         $('#search-family-tree-countdown-' + uuid).text(remaining);
         if (remaining <= 0) clearInterval(interval);
       }, 1000);
-      setTimeout(function() { activateFamilyTreeButtons(uuid); }, totalMs);
+      _activeTimers.push(interval);
+      _activeTimers.push(setTimeout(function() { activateFamilyTreeButtons(uuid); }, totalMs));
     }
 
     return delayMs;
