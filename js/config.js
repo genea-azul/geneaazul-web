@@ -27,7 +27,7 @@ GeneaAzul.app = (function() {
 
   function init() {
     animateHeroStats();
-    fetchLivePersonCount();
+    fetchLiveStats();
     initNavbarScroll();
   }
 
@@ -35,19 +35,38 @@ GeneaAzul.app = (function() {
     GeneaAzul.utils.animateCounters($('#hero-stats'));
   }
 
-  function fetchLivePersonCount() {
+  function fetchLiveStats() {
     if (GeneaAzul.config.onVacations) return;
+
+    // Persons count from API
     GeneaAzul.utils.apiGet(
       GeneaAzul.config.apiBaseUrl + '/api/gedcom-analyzer/metadata',
       function(meta) {
         if (meta && meta.personsCount) {
-          var $el = $('#stat-persons');
-          GeneaAzul.utils.animateCounter($el, meta.personsCount);
-          // Also update visible target attribute so re-animation works
-          $el.attr('data-target', meta.personsCount);
+          updateHeroStat('#stat-persons', meta.personsCount);
         }
       }
     );
+
+    // Immigrants + countries count from immigration.json
+    $.getJSON('data/immigration.json', function(data) {
+      var immigrants = data.reduce(function(acc, r) { return acc + r.count; }, 0);
+      var countries  = data.reduce(function(acc, r) { return acc + r.country.split('/').length; }, 0);
+      updateHeroStat('#stat-immigrants', immigrants);
+      updateHeroStat('#stat-countries', countries);
+    });
+
+    // Surnames count from surnames.json
+    $.getJSON('data/surnames.json', function(data) {
+      updateHeroStat('#stat-surnames', data.length);
+    });
+  }
+
+  function updateHeroStat(selector, value) {
+    var $el = $(selector);
+    if (!$el.length) return;
+    $el.attr('data-target', value);
+    GeneaAzul.utils.animateCounter($el, value);
   }
 
   function initNavbarScroll() {

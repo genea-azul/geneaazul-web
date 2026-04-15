@@ -176,8 +176,8 @@ GeneaAzul.search = (function() {
 
   function clearForm() {
     var $section = $('#buscar-section');
-    // Clear text and number inputs
-    $section.find('input[type=text], input[type=number]').val('');
+    // Clear text and number inputs (preserve contact)
+    $section.find('input[type=text]:not(#individualContact), input[type=number]').val('');
     // Uncheck checkboxes and re-enable year-of-death fields
     $section.find('input[type=checkbox]').prop('checked', false);
     $section.find('input[type=number][id$="YearOfDeath"]').prop('disabled', false);
@@ -211,6 +211,13 @@ GeneaAzul.search = (function() {
 
     if (isRequestEmpty(rq)) {
       $resultBody.html('<p><b>Error:</b> Llen&aacute; por lo menos un dato.</p>');
+      finalizeSearch($btn, $resultCard);
+      return;
+    }
+
+    if (!rq.contact) {
+      $resultBody.html('<p><b>Error:</b> Ingres&aacute; tu contacto (email, WhatsApp o @instagram) para poder avisarte si encontramos familia.</p>');
+      $('#individualContact').trigger('focus');
       finalizeSearch($btn, $resultCard);
       return;
     }

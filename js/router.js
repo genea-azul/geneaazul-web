@@ -22,6 +22,7 @@ GeneaAzul.router = (function() {
     'historias':                 'historias',
     'testimonios':               'testimonios',
     'colabora':                  'colabora',
+    'recursos':                  'recursos',
     'sobre-nosotros':            'sobre-nosotros'
   };
 
@@ -73,11 +74,14 @@ GeneaAzul.router = (function() {
   function updateNavActive(routeKey) {
     var $links = $('#main-navbar').find('[data-route]');
     $links.removeClass('active');
-    // Match exact and parent routes (e.g. estadisticas/inmigracion → estadisticas)
     $links.each(function() {
       var r = $(this).attr('data-route');
-      if (r === routeKey || routeKey.indexOf(r) === 0) {
-        $(this).addClass('active');
+      if ($(this).hasClass('dropdown-item')) {
+        // Exact match only — prevents parent route bleeding into sibling items
+        if (r === routeKey) $(this).addClass('active');
+      } else {
+        // Prefix match for top-level nav links and the dropdown toggle
+        if (r === routeKey || routeKey.indexOf(r + '/') === 0) $(this).addClass('active');
       }
     });
   }

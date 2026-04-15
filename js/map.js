@@ -62,7 +62,6 @@ GeneaAzul.map = (function() {
 
     $.getJSON('data/immigration.json', function(data) {
       renderBubbles(data);
-      renderMapList(data);
     }).fail(function() {
       $('#map-container').html('<p class="text-muted text-center py-4">No se pudieron cargar los datos.</p>');
     });
@@ -90,13 +89,18 @@ GeneaAzul.map = (function() {
       }).addTo(_leafletMap);
 
       var surnames = row.topSurnames && row.topSurnames.length > 0
-        ? '<div class="mt-1 text-muted" style="font-size:.8rem">' + row.topSurnames.slice(0, 5).join(', ') + '</div>'
+        ? '<div class="mt-1 text-muted" style="font-size:.8rem">' + row.topSurnames.slice(0, 16).join(', ') + '</div>'
+        : '';
+
+      var formerlyHtml = row.formerly
+        ? '<div style="font-size:.75rem;opacity:.7;margin-top:.1rem">Nombre anterior: ' + row.formerly + '</div>'
         : '';
 
       marker.bindPopup(
         '<strong>' + (row.flag || '') + ' ' + row.country + '</strong>'
+        + formerlyHtml
         + '<div>' + GeneaAzul.utils.formatNumber(row.count) + ' personas ('
-        + row.percentage.toFixed(1) + '%)</div>'
+        + row.percentage.toFixed(row.percentage < 0.05 ? 2 : 1) + '%)</div>'
         + surnames,
         { maxWidth: 220 }
       );
@@ -105,37 +109,6 @@ GeneaAzul.map = (function() {
         direction: 'top', sticky: true
       });
     });
-  }
-
-  /* ── Country table ───────────────────────────────────────────────── */
-  function renderMapList(data) {
-    var $el = $('#map-list').empty();
-    var $tbody = $('<tbody>');
-    var $table = $('<table>').addClass('table table-sm table-hover')
-      .append($('<thead>').append(
-        $('<tr>')
-          .append($('<th>').html('#'))
-          .append($('<th>').html('País'))
-          .append($('<th>').addClass('text-end').html('Personas'))
-          .append($('<th>').addClass('d-none d-sm-table-cell').html('%'))
-          .append($('<th>').addClass('d-none d-md-table-cell').html('Apellidos frecuentes'))
-      ))
-      .append($tbody);
-
-    data.forEach(function(row, idx) {
-      $tbody.append(
-        $('<tr>')
-          .append($('<td>').addClass('text-muted small').html(idx + 1))
-          .append($('<td>').html((row.flag || '') + ' <strong>' + row.country + '</strong>'))
-          .append($('<td>').addClass('text-end').html(GeneaAzul.utils.formatNumber(row.count)))
-          .append($('<td>').addClass('d-none d-sm-table-cell small text-muted')
-            .html(row.percentage.toFixed(1) + '%'))
-          .append($('<td>').addClass('d-none d-md-table-cell small text-muted')
-            .html(row.topSurnames ? row.topSurnames.slice(0, 5).join(', ') : ''))
-      );
-    });
-
-    $el.append($('<div>').addClass('table-responsive').append($table));
   }
 
   return { init };

@@ -73,9 +73,9 @@
             </a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="#estadisticas" data-route="estadisticas"><i class="bi bi-grid me-1"></i>Resumen</a></li>
-              <li><a class="dropdown-item" href="#estadisticas/inmigracion" data-route="estadisticas-inmigracion"><i class="bi bi-globe-americas me-1"></i>Inmigración</a></li>
-              <li><a class="dropdown-item" href="#estadisticas/personalidades" data-route="estadisticas-personalidades"><i class="bi bi-star me-1"></i>Personalidades</a></li>
-              <li><a class="dropdown-item" href="#estadisticas/apellidos" data-route="estadisticas-apellidos"><i class="bi bi-fonts me-1"></i>Apellidos</a></li>
+              <li><a class="dropdown-item" href="#estadisticas/inmigracion" data-route="estadisticas/inmigracion"><i class="bi bi-globe-americas me-1"></i>Inmigración</a></li>
+              <li><a class="dropdown-item" href="#estadisticas/personalidades" data-route="estadisticas/personalidades"><i class="bi bi-star me-1"></i>Personalidades</a></li>
+              <li><a class="dropdown-item" href="#estadisticas/apellidos" data-route="estadisticas/apellidos"><i class="bi bi-fonts me-1"></i>Apellidos</a></li>
             </ul>
           </li>
           <li class="nav-item">
@@ -83,6 +83,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#historias" data-route="historias"><i class="bi bi-book me-1"></i>Historias</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#recursos" data-route="recursos"><i class="bi bi-link-45deg me-1"></i>Recursos</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#sobre-nosotros" data-route="sobre-nosotros"><i class="bi bi-info-circle me-1"></i>Sobre nosotros</a>
@@ -127,28 +130,28 @@
         <!-- Stat counters -->
         <div class="ga-stats-grid row g-3 justify-content-center mb-5" id="hero-stats">
           <div class="col-6 col-sm-3">
-            <div class="ga-stat-card text-center">
+            <a href="#estadisticas" data-route="estadisticas" class="ga-stat-card ga-stat-card-link text-center text-decoration-none">
               <div class="ga-stat-number" id="stat-persons" data-target="70512">70.000+</div>
               <div class="ga-stat-label">Personas</div>
-            </div>
+            </a>
           </div>
           <div class="col-6 col-sm-3">
-            <div class="ga-stat-card text-center">
-              <div class="ga-stat-number" id="stat-countries" data-target="50">50</div>
-              <div class="ga-stat-label">Países de origen</div>
-            </div>
-          </div>
-          <div class="col-6 col-sm-3">
-            <div class="ga-stat-card text-center">
+            <a href="#estadisticas/apellidos" data-route="estadisticas/apellidos" class="ga-stat-card ga-stat-card-link text-center text-decoration-none">
               <div class="ga-stat-number" id="stat-surnames" data-target="4557">4.500+</div>
               <div class="ga-stat-label">Apellidos</div>
-            </div>
+            </a>
           </div>
           <div class="col-6 col-sm-3">
-            <div class="ga-stat-card text-center">
+            <a href="#estadisticas/inmigracion" data-route="estadisticas/inmigracion" class="ga-stat-card ga-stat-card-link text-center text-decoration-none">
               <div class="ga-stat-number" id="stat-immigrants" data-target="7041">7.000+</div>
               <div class="ga-stat-label">Inmigrantes</div>
-            </div>
+            </a>
+          </div>
+          <div class="col-6 col-sm-3">
+            <a href="#estadisticas/inmigracion" data-route="estadisticas/inmigracion" class="ga-stat-card ga-stat-card-link text-center text-decoration-none">
+              <div class="ga-stat-number" id="stat-countries" data-target="50">50</div>
+              <div class="ga-stat-label">Países de origen</div>
+            </a>
           </div>
         </div>
 
@@ -181,9 +184,9 @@
         <div class="ga-highlights row g-3 mb-5">
           <div class="col-md-4">
             <div class="ga-highlight-card">
-              <div class="ga-highlight-header">
+              <a href="#estadisticas/inmigracion" data-route="estadisticas-inmigracion" class="ga-highlight-header text-decoration-none">
                 <i class="bi bi-globe-americas me-2"></i>Inmigración
-              </div>
+              </a>
               <div class="ga-highlight-body">
                 <span class="me-2">🇮🇹 Italia 56%</span>
                 <span class="me-2">🇪🇸 España 19%</span>
@@ -197,9 +200,9 @@
           </div>
           <div class="col-md-4">
             <div class="ga-highlight-card">
-              <div class="ga-highlight-header">
+              <a href="#mapa" data-route="mapa" class="ga-highlight-header text-decoration-none">
                 <i class="bi bi-map me-2"></i>Mapa migratorio
-              </div>
+              </a>
               <div class="ga-highlight-body">
                 Visualizá en un mapa interactivo los países de origen de los más de 7.000 inmigrantes registrados en el árbol.
               </div>
@@ -210,9 +213,9 @@
           </div>
           <div class="col-md-4">
             <div class="ga-highlight-card">
-              <div class="ga-highlight-header">
+              <a href="#estadisticas/personalidades" data-route="estadisticas-personalidades" class="ga-highlight-header text-decoration-none">
                 <i class="bi bi-star me-2"></i>Personalidades destacadas
-              </div>
+              </a>
               <div class="ga-highlight-body">
                 Soy Rada, Federico Delbonis, Luli Fernández, Papa Francisco, Evita…
               </div>
@@ -226,7 +229,7 @@
         <!-- Final CTA -->
         <div class="text-center pb-5">
           <p class="ga-cta-text">¿Tenés raíces azuleñas? Buscá a tu familia en el árbol</p>
-          <a href="#buscar" data-route="buscar" class="btn ga-btn-primary btn-lg">
+          <a href="#buscar" data-route="buscar" class="btn ga-btn-primary btn-lg ga-cta-hero">
             <i class="bi bi-search me-2"></i>Buscar mi familia
           </a>
         </div>
@@ -272,6 +275,7 @@
             <li><a href="#historias" data-route="historias">Historias familiares</a></li>
             <li><a href="#testimonios" data-route="testimonios">Testimonios</a></li>
             <li><a href="#colabora" data-route="colabora">Colaborá</a></li>
+            <li><a href="#recursos" data-route="recursos">Recursos genealógicos</a></li>
             <li><a href="#sobre-nosotros" data-route="sobre-nosotros">Sobre nosotros</a></li>
           </ul>
         </div>

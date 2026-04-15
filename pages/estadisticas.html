@@ -6,61 +6,144 @@
   </div>
 
   <!-- Live stat cards -->
-  <div class="row g-3 mb-5" id="stats-live-row">
-    <div class="col-6 col-sm-3">
-      <div class="ga-stat-card text-center">
-        <div class="ga-stat-number" id="st-persons">—</div>
-        <div class="ga-stat-label">Personas</div>
+  <div id="stats-live-row" class="mb-5">
+
+    <!-- Group 1: General -->
+    <div class="ga-stats-group-heading"><i class="bi bi-globe me-2"></i>Datos generales</div>
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-persons">—</div>
+          <div class="ga-stat-label">Personas</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-hombres">—</div>
+          <div class="ga-stat-pct" id="st-hombres-pct"></div>
+          <div class="ga-stat-label">Hombres</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-mujeres">—</div>
+          <div class="ga-stat-pct" id="st-mujeres-pct"></div>
+          <div class="ga-stat-label">Mujeres</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-fallecidas">—</div>
+          <div class="ga-stat-pct" id="st-fallecidas-pct"></div>
+          <div class="ga-stat-label">Fallecidas</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-vivas">—</div>
+          <div class="ga-stat-pct" id="st-vivas-pct"></div>
+          <div class="ga-stat-label">Vivas</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-families">—</div>
+          <div class="ga-stat-label">Familias</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-personalities">—</div>
+          <div class="ga-stat-label">Personalidades</div>
+        </div>
       </div>
     </div>
-    <div class="col-6 col-sm-3">
-      <div class="ga-stat-card text-center">
-        <div class="ga-stat-number" id="st-families">—</div>
-        <div class="ga-stat-label">Familias</div>
+
+    <!-- Group 2: Relative to Azul -->
+    <div class="ga-stats-group-heading"><i class="bi bi-geo-alt me-2"></i>Relativos a Azul</div>
+    <div class="row g-3">
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-azulenos">—</div>
+          <div class="ga-stat-pct" id="st-azulenos-pct"></div>
+          <div class="ga-stat-label">Azuleños/as</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-azulenos-vivos">—</div>
+          <div class="ga-stat-pct" id="st-azulenos-vivos-pct"></div>
+          <div class="ga-stat-label">Azuleños/as vivos/as</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-surnames">—</div>
+          <div class="ga-stat-label">Apellidos</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-immigrants">—</div>
+          <div class="ga-stat-label">Inmigrantes</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-countries">—</div>
+          <div class="ga-stat-label">Países de origen</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-jefes">—</div>
+          <div class="ga-stat-label">Jefes comunales</div>
+        </div>
+      </div>
+      <div class="col-6 col-sm-4 col-md-3 col-lg">
+        <div class="ga-stat-card text-center">
+          <div class="ga-stat-number" id="st-desaparecidos">—</div>
+          <div class="ga-stat-label">Desaparecidos/as</div>
+        </div>
       </div>
     </div>
-    <div class="col-6 col-sm-3">
-      <div class="ga-stat-card text-center">
-        <div class="ga-stat-number" id="st-surnames">4.557</div>
-        <div class="ga-stat-label">Apellidos</div>
-      </div>
-    </div>
-    <div class="col-6 col-sm-3">
-      <div class="ga-stat-card text-center">
-        <div class="ga-stat-number" id="st-immigrants">7.041</div>
-        <div class="ga-stat-label">Inmigrantes</div>
-      </div>
-    </div>
+
   </div>
 
   <!-- Quick navigation to detail pages -->
   <div class="row g-3 mb-5">
     <div class="col-md-4">
-      <a href="#estadisticas/inmigracion" data-route="estadisticas-inmigracion" class="ga-highlight-card text-decoration-none d-block">
-        <div class="ga-highlight-header"><i class="bi bi-globe-americas me-2"></i>Inmigración</div>
-        <div class="ga-highlight-body">¿De dónde vienen las familias de Azul? Ranking de 44 países de origen con los apellidos más frecuentes.</div>
-        <div class="ga-highlight-link">Ver detalle <i class="bi bi-arrow-right ms-1"></i></div>
-      </a>
+      <div class="ga-highlight-card">
+        <a href="#estadisticas/inmigracion" data-route="estadisticas-inmigracion" class="ga-highlight-header text-decoration-none">
+          <i class="bi bi-globe-americas me-2"></i>Inmigración
+        </a>
+        <div class="ga-highlight-body">¿De dónde vienen las familias de Azul? Ranking de países de origen con los apellidos más frecuentes.</div>
+        <a href="#estadisticas/inmigracion" data-route="estadisticas-inmigracion" class="ga-highlight-link">Ver detalle <i class="bi bi-arrow-right ms-1"></i></a>
+      </div>
     </div>
     <div class="col-md-4">
-      <a href="#estadisticas/personalidades" data-route="estadisticas-personalidades" class="ga-highlight-card text-decoration-none d-block">
-        <div class="ga-highlight-header"><i class="bi bi-star me-2"></i>Personalidades</div>
+      <div class="ga-highlight-card">
+        <a href="#estadisticas/personalidades" data-route="estadisticas-personalidades" class="ga-highlight-header text-decoration-none">
+          <i class="bi bi-star me-2"></i>Personalidades
+        </a>
         <div class="ga-highlight-body">Personas históricas, artistas, deportistas y figuras públicas que forman parte del árbol.</div>
-        <div class="ga-highlight-link">Ver detalle <i class="bi bi-arrow-right ms-1"></i></div>
-      </a>
+        <a href="#estadisticas/personalidades" data-route="estadisticas-personalidades" class="ga-highlight-link">Ver detalle <i class="bi bi-arrow-right ms-1"></i></a>
+      </div>
     </div>
     <div class="col-md-4">
-      <a href="#estadisticas/apellidos" data-route="estadisticas-apellidos" class="ga-highlight-card text-decoration-none d-block">
-        <div class="ga-highlight-header"><i class="bi bi-fonts me-2"></i>Apellidos</div>
+      <div class="ga-highlight-card">
+        <a href="#estadisticas/apellidos" data-route="estadisticas-apellidos" class="ga-highlight-header text-decoration-none">
+          <i class="bi bi-fonts me-2"></i>Apellidos
+        </a>
         <div class="ga-highlight-body">Los apellidos más frecuentes en Azul, con sus variantes y países de origen.</div>
-        <div class="ga-highlight-link">Ver detalle <i class="bi bi-arrow-right ms-1"></i></div>
-      </a>
+        <a href="#estadisticas/apellidos" data-route="estadisticas-apellidos" class="ga-highlight-link">Ver detalle <i class="bi bi-arrow-right ms-1"></i></a>
+      </div>
     </div>
   </div>
 
   <!-- Top immigration preview -->
   <div class="row g-4">
-    <div class="col-lg-8">
+    <div class="col-lg-7">
       <h4 class="mb-3"><i class="bi bi-globe-americas me-2"></i>Top países de origen</h4>
       <div id="stats-immigration-preview">
         <div class="ga-page-loading"><div class="spinner-border spinner-border-sm" role="status"></div><span>Cargando...</span></div>
@@ -71,7 +154,7 @@
         </a>
       </div>
     </div>
-    <div class="col-lg-4">
+    <div class="col-lg-5">
       <h4 class="mb-3"><i class="bi bi-star me-2"></i>Personalidades destacadas</h4>
       <div id="stats-personalities-preview">
         <div class="ga-page-loading"><div class="spinner-border spinner-border-sm" role="status"></div><span>Cargando...</span></div>

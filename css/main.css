@@ -32,6 +32,8 @@
 
 html { scroll-behavior: smooth; }
 
+::placeholder { color: var(--ga-text-muted); opacity: .45; }
+
 body {
   font-family: var(--ga-font-body);
   color: var(--ga-text);
@@ -93,7 +95,9 @@ a:hover { color: var(--ga-accent); }
   color: var(--ga-text);
   padding: .45rem .9rem;
 }
-.ga-navbar .dropdown-item:hover { background-color: var(--ga-bg); color: var(--ga-primary); }
+.ga-navbar .dropdown-item:hover                { background-color: var(--ga-bg); color: var(--ga-primary); }
+.ga-navbar .dropdown-item.active               { background-color: var(--ga-primary); color: #fff; }
+.ga-navbar .dropdown-item.active:hover         { background-color: var(--ga-primary-hover); color: #fff; }
 
 /* Navbar becomes slightly more opaque on scroll */
 .ga-navbar.scrolled { box-shadow: 0 4px 16px rgba(0,0,0,.28); }
@@ -149,8 +153,15 @@ a:hover { color: var(--ga-accent); }
   box-shadow: var(--ga-shadow);
   border: 1px solid var(--ga-border);
   transition: box-shadow var(--ga-transition), transform var(--ga-transition);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .ga-stat-card:hover { box-shadow: var(--ga-shadow-hover); transform: translateY(-2px); }
+.ga-stat-card-link { cursor: pointer; display: block; color: inherit; }
+.ga-stat-card-link:hover .ga-stat-number { color: var(--ga-accent); }
 
 .ga-stat-number {
   font-family: var(--ga-font-heading);
@@ -158,6 +169,11 @@ a:hover { color: var(--ga-accent); }
   font-weight: 700;
   color: var(--ga-primary);
   line-height: 1.1;
+}
+.ga-stat-pct {
+  font-size: .78rem;
+  color: var(--ga-text-muted);
+  min-height: 1em;
 }
 .ga-stat-label {
   font-size: .85rem;
@@ -200,6 +216,7 @@ a:hover { color: var(--ga-accent); }
   color: var(--ga-primary);
   margin-bottom: .6rem;
 }
+a.ga-highlight-header:hover { color: var(--ga-accent); }
 .ga-highlight-body {
   font-size: .9rem;
   color: var(--ga-text-muted);
@@ -308,6 +325,13 @@ a:hover { color: var(--ga-accent); }
 }
 .ga-result-card .card-body { font-size: .88rem; line-height: 1.6; }
 
+/* Shared primary card header (matches ga-person-form-card header) */
+.ga-card-header-primary {
+  background-color: var(--ga-primary);
+  color: #fff;
+  border-bottom-color: rgba(255,255,255,.15);
+}
+
 /* Connection chain card */
 .ga-connection-step {
   display: flex;
@@ -344,11 +368,11 @@ a:hover { color: var(--ga-accent); }
   border-bottom-color: rgba(255,255,255,.15);
 }
 /* Sex selected: male = slate-gray, female = red */
-.ga-person-form-card.ga-sex-male  > .card-header { background-color: #5a6878; }
-.ga-person-form-card.ga-sex-female > .card-header { background-color: #c0392b; }
+.ga-person-form-card.ga-sex-male  > .card-header { background-color: #2e6da4; }
+.ga-person-form-card.ga-sex-female > .card-header { background-color: #8c5070; }
 /* Border accent */
-.ga-person-form-card.ga-sex-male  { border-color: #5a6878 !important; }
-.ga-person-form-card.ga-sex-female { border-color: #c0392b !important; }
+.ga-person-form-card.ga-sex-male  { border-color: #2e6da4 !important; }
+.ga-person-form-card.ga-sex-female { border-color: #8c5070 !important; }
 
 /* Sex toggle buttons inside card header */
 .ga-sex-toggle .btn-outline-light {
@@ -369,8 +393,10 @@ a:hover { color: var(--ga-accent); }
   font-size: 1.05rem;
   line-height: 1.8;
 }
+.ga-story-article p { text-align: justify; }
 .ga-story-article h1 { font-size: 2rem; margin-bottom: .3rem; }
 .ga-story-article h2 { font-size: 1.4rem; margin-top: 2rem; }
+.ga-story-article h3 { margin-top: 2rem; }
 .ga-story-article blockquote {
   border-left: 4px solid var(--ga-accent);
   padding: .5rem 1.2rem;
@@ -420,7 +446,55 @@ a:hover { color: var(--ga-accent); }
 .ga-contribute-title { font-size: 1.1rem; font-weight: 700; color: var(--ga-primary); margin-bottom: .5rem; }
 .ga-contribute-desc { font-size: .9rem; color: var(--ga-text-muted); margin-bottom: 1.25rem; }
 
+/* ─── Tooltips ───────────────────────────────────────────────────── */
+abbr[title], abbr[data-bs-title] { text-decoration: none; }
+.ga-tooltip { cursor: default; border-bottom: 1px dotted var(--ga-text-muted); }
+.ga-nickname { margin-right: 0.15em; }
+
+/* ─── Shared list header (matches ga-table thead) ───────────────── */
+.ga-list-header {
+  background-color: var(--ga-primary);
+  color: #fff;
+  border-radius: var(--ga-radius) var(--ga-radius) 0 0;
+  padding: .45rem .5rem;
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+}
+
+/* ─── Shared table styles ────────────────────────────────────────── */
+.ga-table thead th {
+  background-color: var(--ga-primary);
+  color: #fff;
+  border-color: rgba(255,255,255,.15);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+/* Expandable rows (mobile surname reveal) */
+.ga-expandable-row { cursor: pointer; user-select: none; }
+.ga-expandable-row:hover { background-color: rgba(0,0,0,.03); }
+.ga-expand-icon { opacity: .45; font-size: .75rem; vertical-align: middle; transition: transform .2s; }
+.ga-expand-row td {
+  border-top: none !important;
+  background-color: rgba(0,0,0,.025) !important;
+  font-style: italic;
+}
+
 /* ─── Stats page ─────────────────────────────────────────────────── */
+.ga-stats-group-heading {
+  font-family: var(--ga-font-heading);
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--ga-primary);
+  border-bottom: 2px solid var(--ga-accent);
+  padding-bottom: .25rem;
+  display: inline-block;
+  margin-bottom: .75rem;
+}
 .ga-stat-number-lg {
   font-family: var(--ga-font-heading);
   font-size: 1.8rem;
@@ -430,8 +504,58 @@ a:hover { color: var(--ga-accent); }
 }
 .ga-stat-label-lg { font-size: .8rem; color: var(--ga-text-muted); margin-top: .25rem; }
 
+.ga-surnames-fade {
+  white-space: nowrap;
+  overflow: hidden;
+  width: 100%;
+  -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);
+  mask-image: linear-gradient(to right, black 70%, transparent 100%);
+}
 .ga-immigration-bar { background: var(--ga-border); border-radius: 50px; height: 8px; overflow: hidden; margin-top: .35rem; }
 .ga-immigration-bar-fill { height: 100%; border-radius: 50px; background: var(--ga-accent); transition: width .6s ease; }
+
+/* ─── Recursos page ─────────────────────────────────────────────── */
+.ga-resource-card {
+  background: var(--ga-card-bg);
+  border: 1px solid var(--ga-border);
+  border-radius: var(--ga-radius);
+  padding: 1rem 1.1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--ga-shadow);
+}
+.ga-resource-link {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--ga-primary);
+  text-decoration: none;
+  margin-top: auto;
+}
+.ga-resource-link:hover { color: var(--ga-accent); }
+
+.ga-logo-download-card {
+  background: var(--ga-card-bg);
+  border: 1px solid var(--ga-border);
+  border-radius: var(--ga-radius);
+  padding: .75rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--ga-shadow);
+  gap: .5rem;
+}
+.ga-logo-download-preview {
+  border-radius: calc(var(--ga-radius) - 2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: .75rem;
+  min-height: 90px;
+}
+.ga-logo-preview-light { background: var(--ga-bg); }
+.ga-logo-preview-white { background: #fff; }
+.ga-logo-download-preview img { max-height: 70px; max-width: 100%; object-fit: contain; }
+.ga-logo-download-info { line-height: 1.4; }
 
 /* ─── Map page ───────────────────────────────────────────────────── */
 .ga-leaflet-wrap { border-radius: var(--ga-radius-lg); overflow: hidden; box-shadow: var(--ga-shadow); }

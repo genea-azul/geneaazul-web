@@ -140,7 +140,7 @@ GeneaAzul.connections = (function() {
   function buildConnectionChain(connections) {
     var $wrap = $('<div>').addClass('card mb-3');
 
-    var $header = $('<div>').addClass('card-header text-bg-dark d-flex align-items-center gap-2');
+    var $header = $('<div>').addClass('card-header ga-card-header-primary d-flex align-items-center gap-2');
     $header.html('<i class="bi bi-diagram-3"></i> Camino de conexi&oacute;n');
     $wrap.append($header);
 

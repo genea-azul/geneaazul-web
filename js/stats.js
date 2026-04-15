@@ -40,6 +40,12 @@ GeneaAzul.stats = (function() {
     }).fail(function() { cb([]); });
   }
 
+  /* ── Percentage formatter ───────────────────────────────────────── */
+  function formatPct(count, total) {
+    if (!total) return '';
+    return '(' + ((count / total) * 100).toFixed(1) + '%)';
+  }
+
   /* ═══ SUMMARY PAGE ══════════════════════════════════════════════ */
   function init() {
     ready();
@@ -48,19 +54,67 @@ GeneaAzul.stats = (function() {
     utils.apiGet(
       cfg.apiBaseUrl + '/api/gedcom-analyzer/metadata',
       function(meta) {
-        if (meta.personsCount) $('#st-persons').text(utils.formatNumber(meta.personsCount));
-        if (meta.familiesCount) $('#st-families').text(utils.formatNumber(meta.familiesCount));
+        var persons = meta.personsCount;
+        var azulPersons = meta.azulPersonsCount;
+
+        // General
+        if (persons)               $('#st-persons').text(utils.formatNumber(persons));
+        if (meta.familiesCount)    $('#st-families').text(utils.formatNumber(meta.familiesCount));
+
+        if (meta.maleCount != null) {
+          $('#st-hombres').text(utils.formatNumber(meta.maleCount));
+          $('#st-hombres-pct').text(formatPct(meta.maleCount, persons));
+        }
+        if (meta.femaleCount != null) {
+          $('#st-mujeres').text(utils.formatNumber(meta.femaleCount));
+          $('#st-mujeres-pct').text(formatPct(meta.femaleCount, persons));
+        }
+        if (meta.deceasedCount != null) {
+          $('#st-fallecidas').text(utils.formatNumber(meta.deceasedCount));
+          $('#st-fallecidas-pct').text(formatPct(meta.deceasedCount, persons));
+        }
+        if (meta.aliveCount != null) {
+          $('#st-vivas').text(utils.formatNumber(meta.aliveCount));
+          $('#st-vivas-pct').text(formatPct(meta.aliveCount, persons));
+        }
+        if (meta.distinguishedCount != null)
+          $('#st-personalities').text(utils.formatNumber(meta.distinguishedCount));
+
+        // Azul-specific
+        if (azulPersons != null) {
+          $('#st-azulenos').text(utils.formatNumber(azulPersons));
+          $('#st-azulenos-pct').text(formatPct(azulPersons, persons));
+        }
+        if (meta.azulAliveCount != null) {
+          $('#st-azulenos-vivos').text(utils.formatNumber(meta.azulAliveCount));
+          $('#st-azulenos-vivos-pct').text(formatPct(meta.azulAliveCount, azulPersons));
+        }
+        if (meta.azulMayorsCount != null)
+          $('#st-jefes').text(utils.formatNumber(meta.azulMayorsCount));
+        if (meta.azulDisappearedCount != null)
+          $('#st-desaparecidos').text(utils.formatNumber(meta.azulDisappearedCount));
       }
     );
 
-    // Load immigration preview (top 5)
+    // Load immigration preview (top 5) + immigrants + countries count cards
     loadImmigration(function(data) {
+      var total = data.reduce(function(acc, r) { return acc + r.count; }, 0);
+      var countries = data.reduce(function(acc, r) { return acc + r.country.split('/').length; }, 0);
+      $('#st-immigrants').text(utils.formatNumber(total));
+      $('#st-countries').text(countries);
       renderImmigrationPreview(data.slice(0, 5), '#stats-immigration-preview');
     });
 
-    // Load personalities preview (first 8)
+    // Surnames count card
+    loadSurnames(function(data) {
+      $('#st-surnames').text(utils.formatNumber(data.length));
+    });
+
+    // Personalities preview (7 random) — list still comes from JSON
     loadPersonalities(function(data) {
-      renderPersonalitiesPreview(data.slice(0, 8), '#stats-personalities-preview');
+      var shuffled = data.slice().sort(function() { return Math.random() - 0.5; });
+      renderPersonalitiesPreview(shuffled.slice(0, 7), '#stats-personalities-preview');
+      initTooltips($('#stats-personalities-preview'));
     });
   }
 
@@ -68,16 +122,17 @@ GeneaAzul.stats = (function() {
     var $el = $(selector).empty();
     if (!data || data.length === 0) { $el.html('<p class="text-muted small">Sin datos.</p>'); return; }
     data.forEach(function(row) {
-      var pct = row.percentage.toFixed(1);
+      var pct = row.percentage.toFixed(row.percentage < 0.05 ? 2 : 1);
       $el.append(
         $('<div>').addClass('mb-2')
           .append($('<div>').addClass('d-flex justify-content-between small mb-1')
-            .append($('<span>').html((row.flag || '') + ' ' + row.country))
+            .append($('<span>').html(countryHtml(row, false)))
             .append($('<span>').addClass('text-muted').text(utils.formatNumber(row.count) + ' (' + pct + '%)')))
           .append($('<div>').addClass('ga-immigration-bar')
             .append($('<div>').addClass('ga-immigration-bar-fill').css('width', pct + '%')))
       );
     });
+    initTooltips($el);
   }
 
   function renderPersonalitiesPreview(data, selector) {
@@ -104,13 +159,18 @@ GeneaAzul.stats = (function() {
     var $el = $('#immigration-list').empty();
     if (!data || data.length === 0) { $el.html('<p class="text-muted">Sin datos.</p>'); return; }
 
-    // Update total
+    // Update totals from data
     var total = data.reduce(function(acc, r) { return acc + r.count; }, 0);
     $('#imm-total').text(utils.formatNumber(total));
+    var countryCount = data.reduce(function(acc, r) {
+      return acc + (r.country.split('/').length);
+    }, 0);
+    $('#imm-countries').text(countryCount);
 
+    var $tbody = $('<tbody>').attr('id', 'imm-tbody');
     var $table = $('<div>').addClass('table-responsive')
       .append(
-        $('<table>').addClass('table table-sm table-hover align-middle')
+        $('<table>').addClass('table table-sm table-hover align-middle ga-table')
           .append($('<thead>').append(
             $('<tr>')
               .append($('<th>').html('#'))
@@ -119,47 +179,73 @@ GeneaAzul.stats = (function() {
               .append($('<th>').html('Porcentaje'))
               .append($('<th>').addClass('d-none d-md-table-cell').html('Apellidos frecuentes'))
           ))
-          .append($('<tbody>').attr('id', 'imm-tbody'))
+          .append($tbody)
       );
 
     $el.append($table);
 
     data.forEach(function(row, idx) {
-      var pct = row.percentage.toFixed(1);
-      var $topSurnames = row.topSurnames && row.topSurnames.length > 0
-        ? row.topSurnames.slice(0, 6).join(', ')
+      var pct = row.percentage.toFixed(row.percentage < 10 ? 2 : 1);
+      var surnamesText = row.topSurnames && row.topSurnames.length > 0
+        ? row.topSurnames.slice(0, 16).join(', ')
         : '';
+      var hasExpand = surnamesText.length > 0;
 
-      $('#imm-tbody').append(
-        $('<tr>')
-          .append($('<td>').addClass('text-muted small').html(idx + 1))
-          .append($('<td>').html(
-            (row.flag ? '<span class="me-1">' + row.flag + '</span>' : '')
-            + '<span class="fw-semibold">' + row.country + '</span>'
-            + (row.isoCode ? ' <span class="badge bg-light text-dark fw-normal small">' + row.isoCode + '</span>' : '')
-          ))
-          .append($('<td>').addClass('text-end fw-semibold').html(utils.formatNumber(row.count)))
-          .append($('<td>').attr('style', 'min-width:130px')
-            .append($('<div>').addClass('d-flex align-items-center gap-2')
-              .append($('<div>').addClass('ga-immigration-bar flex-grow-1').css('min-width', '80px')
-                .append($('<div>').addClass('ga-immigration-bar-fill').css('width', pct + '%')))
-              .append($('<span>').addClass('small text-muted').html(pct + '%'))))
-          .append($('<td>').addClass('d-none d-md-table-cell small text-muted').html($topSurnames))
-      );
+      var $row = $('<tr>').addClass(hasExpand ? 'ga-expandable-row' : '')
+        .append($('<td>').addClass('text-muted small').html(idx + 1))
+        .append($('<td>').html(
+          countryHtml(row, true)
+          + (hasExpand ? ' <i class="bi bi-chevron-right ga-expand-icon d-md-none ms-1"></i>' : '')
+        ))
+        .append($('<td>').addClass('text-end fw-semibold').html(utils.formatNumber(row.count)))
+        .append($('<td>').attr('style', 'min-width:130px')
+          .append($('<div>').addClass('d-flex align-items-center gap-2 w-100')
+            .append($('<div>').addClass('ga-immigration-bar flex-grow-1').css('min-width', '80px')
+              .append($('<div>').addClass('ga-immigration-bar-fill').css('width', pct + '%')))
+            .append($('<span>').addClass('small text-muted ms-auto').html(pct + '%'))))
+        .append($('<td>').addClass('d-none d-md-table-cell small text-muted')
+          .append($('<div>').addClass('ga-surnames-fade').text(surnamesText)));
+
+      var $expandRow = $('<tr>').addClass('ga-expand-row d-none d-md-none')
+        .append($('<td>').attr('colspan', '99').addClass('small text-muted py-1 ps-4')
+          .html('<i class="bi bi-people-fill me-1"></i>' + surnamesText));
+
+      $tbody.append($row).append($expandRow);
     });
+
+    // Toggle expand on click (mobile only — md+ shows the column directly)
+    $el.on('click', '.ga-expandable-row', function() {
+      var $next = $(this).next('.ga-expand-row');
+      var opening = $next.hasClass('d-none');
+      $next.toggleClass('d-none', !opening);
+      $(this).find('.ga-expand-icon')
+        .toggleClass('bi-chevron-right', !opening)
+        .toggleClass('bi-chevron-down', opening);
+    });
+
+    initTooltips($el);
+  }
+
+  /* ── Immigration country name helper ───────────────────────────── */
+  function countryHtml(row, bold) {
+    var name = bold ? '<strong>' + row.country + '</strong>' : row.country;
+    if (row.formerly) {
+      name = '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="Nombre anterior: ' + row.formerly + '">' + name + '</span>';
+    }
+    return (row.flag ? (bold ? '<span class="me-1">' + row.flag + '</span>' : row.flag + ' ') : '') + name;
   }
 
   /* ── Personality name helpers ───────────────────────────────────── */
   function buildPersonalityNameHtml(p) {
     var parts = [];
     if (p.title) {
-      var abbr = p.titleFull && p.titleFull !== p.title
-        ? '<abbr title="' + p.titleFull + '" tabindex="0">' + p.title + '</abbr>'
-        : p.title;
-      parts.push('<span class="text-secondary small">' + abbr + '</span>');
+      var titleHtml = p.titleFull && p.titleFull !== p.title
+        ? '<span class="text-secondary small ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + p.titleFull + '">' + p.title + '</span>'
+        : '<span class="text-secondary small">' + p.title + '</span>';
+      parts.push(titleHtml);
     }
     if (p.givenName) parts.push(p.givenName);
-    if (p.nickname) parts.push('<span class="fst-italic">\u201c' + p.nickname + '\u201d</span>');
+    if (p.nickname) parts.push('<span class="fst-italic ga-nickname">\u201c' + p.nickname + '\u201d</span>');
     if (p.surname)  parts.push('<span class="fw-semibold">' + p.surname + '</span>');
     return parts.join(' ');
   }
@@ -167,16 +253,31 @@ GeneaAzul.stats = (function() {
   function buildPersonalityYearsHtml(p) {
     if (!p.birthYear && !p.deathYear) return '';
     var birth = p.birthYear
-      ? (p.birthPlace ? '<span title="' + p.birthPlace + '">' + p.birthYear + '</span>' : p.birthYear)
+      ? (p.birthPlace
+          ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + p.birthPlace + '">' + p.birthYear + '</span>'
+          : p.birthYear)
       : '?';
     var death = (p.deathYear != null)
-      ? (p.deathPlace ? '<span title="' + p.deathPlace + '">' + p.deathYear + '</span>' : p.deathYear)
+      ? (p.deathPlace
+          ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + p.deathPlace + '">' + p.deathYear + '</span>'
+          : p.deathYear)
       : 'vive';
     return ' <span class="small text-secondary ps-1">(' + birth + '&ndash;' + death + ')</span>';
   }
 
+  function initTooltips($container) {
+    $container.find('[data-bs-toggle="tooltip"]').each(function() {
+      new bootstrap.Tooltip(this, { delay: { show: 0, hide: 80 }, trigger: 'hover focus' });
+    });
+  }
+
+  /* ── Normalize: lowercase + strip diacritics ───────────────────── */
+  function normalize(str) {
+    return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
   function buildPersonalityDataName(p) {
-    return [(p.title || ''), (p.givenName || ''), (p.nickname || ''), (p.surname || '')].join(' ').toLowerCase();
+    return normalize([(p.title || ''), (p.givenName || ''), (p.nickname || ''), (p.surname || '')].join(' '));
   }
 
   /* ═══ PERSONALITIES PAGE ════════════════════════════════════════ */
@@ -194,6 +295,9 @@ GeneaAzul.stats = (function() {
   function renderPersonalitiesFull(data) {
     var $el = $('#personalities-list').empty();
     if (!data || data.length === 0) { $el.html('<p class="text-muted">Sin datos disponibles.</p>'); return; }
+    $('#pers-total').text(data.length);
+
+    var $header = $('<div>').addClass('ga-list-header').text('Personalidad');
 
     var $ul = $('<ul>').addClass('list-unstyled small mb-0');
     data.forEach(function(p) {
@@ -203,13 +307,15 @@ GeneaAzul.stats = (function() {
           .html(buildPersonalityNameHtml(p) + buildPersonalityYearsHtml(p))
       );
     });
-    $el.append($ul);
+    $el.append($header).append($ul);
+    initTooltips($el);
   }
 
   function filterPersonalitiesRows(q) {
+    var nq = normalize(q);
     $('#personalities-list li').each(function() {
       var name = $(this).attr('data-name') || '';
-      $(this).toggleClass('d-none', q.length > 0 && name.indexOf(q) === -1);
+      $(this).toggleClass('d-none', nq.length > 0 && name.indexOf(nq) === -1);
     });
   }
 
@@ -221,30 +327,35 @@ GeneaAzul.stats = (function() {
     });
 
     $(document).on('input', '#surnames-filter', function() {
-      var q = $(this).val().toLowerCase();
-      filterSurnameRows(q);
+      filterSurnameRows($(this).val());
     });
   }
 
   function renderSurnamesFull(data) {
     var $el = $('#surnames-list').empty();
     if (!data || data.length === 0) { $el.html('<p class="text-muted">Sin datos disponibles.</p>'); return; }
+    $('#surn-total').text(data.length);
 
     var $tbody = $('<tbody>').attr('id', 'surnames-tbody');
-    var $table = $('<table>').addClass('table table-sm table-hover').attr('id', 'surnames-table')
+    var $table = $('<table>').addClass('table table-sm table-hover ga-table').attr('id', 'surnames-table')
       .append($('<thead>').append(
         $('<tr>')
+          .append($('<th>').html('#'))
           .append($('<th>').html('Apellido'))
           .append($('<th>').html('Variantes'))
       ))
       .append($tbody);
 
-    data.forEach(function(s) {
-      var variants = s.variants && s.variants.length > 0 ? s.variants.join(', ') : '<span class="text-muted">—</span>';
+    data.forEach(function(s, idx) {
+      var variantList = s.variants && s.variants.length > 0 ? s.variants : [];
+      var variantsHtml = variantList.length > 0 ? variantList.join(', ') : '<span class="text-muted">—</span>';
       $tbody.append(
-        $('<tr>').attr('data-surname', s.surname.toLowerCase())
+        $('<tr>')
+          .attr('data-surname', normalize(s.surname))
+          .attr('data-variants', variantList.map(normalize).join(' '))
+          .append($('<td>').addClass('text-muted small').html(idx + 1))
           .append($('<td>').html('<span class="fw-semibold">' + s.surname + '</span>'))
-          .append($('<td>').addClass('small text-muted').html(variants))
+          .append($('<td>').addClass('small text-muted').html(variantsHtml))
       );
     });
 
@@ -252,9 +363,11 @@ GeneaAzul.stats = (function() {
   }
 
   function filterSurnameRows(q) {
+    var nq = normalize(q);
     $('#surnames-tbody tr').each(function() {
       var s = $(this).attr('data-surname') || '';
-      $(this).toggleClass('d-none', q.length > 0 && s.indexOf(q) === -1);
+      var v = $(this).attr('data-variants') || '';
+      $(this).toggleClass('d-none', nq.length > 0 && s.indexOf(nq) === -1 && v.indexOf(nq) === -1);
     });
   }
 
