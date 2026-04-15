@@ -217,8 +217,10 @@ GeneaAzul.search = (function() {
 
     if (!rq.contact) {
       $resultBody.html('<p><b>Error:</b> Ingres&aacute; tu contacto (email, WhatsApp o @instagram) para poder avisarte si encontramos familia.</p>');
-      $('#individualContact').trigger('focus');
-      finalizeSearch($btn, $resultCard);
+      $btn.prop('disabled', false);
+      var $contact = $('#individualContact');
+      $contact.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $contact.trigger('focus');
       return;
     }
 
