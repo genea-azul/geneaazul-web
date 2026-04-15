@@ -56,6 +56,7 @@ GeneaAzul.router = (function() {
     $('#inicio-section').removeClass('d-none').addClass('ga-page-fade-in');
     $('#page-content').addClass('d-none').empty();
     updateNavActive('inicio');
+    GeneaAzul.utils.animateCounters($('#hero-stats'));
   }
 
   /* Hide hero, show and populate page content */
@@ -99,7 +100,8 @@ GeneaAzul.router = (function() {
 
   /* Core route handler */
   function handleRoute(routeKey) {
-    if (routeKey === currentRoute && routeKey !== 'inicio') return; // already showing
+    var reRunRoutes = ['inicio', 'estadisticas'];
+    if (routeKey === currentRoute && reRunRoutes.indexOf(routeKey) === -1) return; // already showing
     currentRoute = routeKey;
 
     updateNavActive(routeKey);
