@@ -25,9 +25,10 @@ GeneaAzul.stories = (function() {
       renderIndex(stories);
     });
 
-    $(document).on('click', '#stories-back-btn', function() {
-      GeneaAzul.router.navigate('#historias');
-    });
+    $(document).off('click.stories', '#stories-back-btn')
+      .on('click.stories', '#stories-back-btn', function() {
+        GeneaAzul.router.navigate('#historias');
+      });
   }
 
   function renderIndex(stories) {
@@ -74,13 +75,36 @@ GeneaAzul.stories = (function() {
 
   /* ── Load individual story ─────────────────────────────────────── */
   function loadStory(slug, $container) {
+    if (!/^[a-z0-9-]+$/.test(slug)) {
+      $container.html('<div class="container py-5 text-center"><p class="text-muted">Historia no encontrada.</p>'
+        + '<a href="#historias" data-route="historias" class="btn btn-outline-secondary mt-2">'
+        + '<i class="bi bi-arrow-left me-1"></i>Volver</a></div>');
+      return;
+    }
+
+    loadIndex(function(stories) {
+      var valid = stories.some(function(s) { return s.slug === slug; });
+      if (!valid) {
+        $container.html('<div class="container py-5 text-center"><p class="text-muted">Historia no encontrada.</p>'
+          + '<a href="#historias" data-route="historias" class="btn btn-outline-secondary mt-2">'
+          + '<i class="bi bi-arrow-left me-1"></i>Volver</a></div>');
+        return;
+      }
+      fetchStory(slug, $container);
+    });
+  }
+
+  function fetchStory(slug, $container) {
     $container.html('<div class="ga-page-loading py-5"><div class="spinner-border spinner-border-sm" role="status"></div><span>Cargando historia...</span></div>');
 
     $.ajax({
       url: 'stories/' + slug + '.md',
       method: 'GET',
       success: function(markdown) {
-        var html = marked.parse(markdown);
+        var sanitized = typeof DOMPurify !== 'undefined'
+          ? DOMPurify.sanitize(marked.parse(markdown))
+          : marked.parse(markdown);
+        var html = sanitized;
         $container.html(
           '<section class="ga-section container-xl">'
           + '<div class="row justify-content-center"><div class="col-lg-9 col-xl-8">'

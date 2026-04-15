@@ -54,12 +54,12 @@ GeneaAzul.app = (function() {
       var countries  = data.reduce(function(acc, r) { return acc + r.country.split('/').length; }, 0);
       updateHeroStat('#stat-immigrants', immigrants);
       updateHeroStat('#stat-countries', countries);
-    });
+    }).fail(function() {});
 
     // Surnames count from surnames.json
     $.getJSON('data/surnames.json', function(data) {
       updateHeroStat('#stat-surnames', data.length);
-    });
+    }).fail(function() {});
   }
 
   function updateHeroStat(selector, value) {

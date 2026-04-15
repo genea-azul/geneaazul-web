@@ -67,7 +67,6 @@ GeneaAzul.router = (function() {
     $pc.html($html);
     // Trigger reflow then fade in
     requestAnimationFrame(function() { $pc.addClass('ga-page-fade-in'); });
-    $pc.get(0).scrollIntoView({ behavior: 'smooth', block: 'start' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 

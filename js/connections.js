@@ -47,16 +47,18 @@ GeneaAzul.connections = (function() {
   }
 
   function wireButton() {
-    $(document).on('click', '#searchConnectionsBtn', function(e) {
-      e.preventDefault();
-      doSearch();
-    });
+    $(document).off('click.connections', '#searchConnectionsBtn')
+      .on('click.connections', '#searchConnectionsBtn', function(e) {
+        e.preventDefault();
+        doSearch();
+      });
   }
 
   function wireEnter() {
-    $(document).on('keydown', '#conexiones-section input', function(e) {
-      if (e.key === 'Enter') { e.preventDefault(); $('#searchConnectionsBtn').trigger('click'); }
-    });
+    $(document).off('keydown.connections', '#conexiones-section input')
+      .on('keydown.connections', '#conexiones-section input', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); $('#searchConnectionsBtn').trigger('click'); }
+      });
   }
 
   function doSearch() {
@@ -160,12 +162,13 @@ GeneaAzul.connections = (function() {
       }
 
       // Person row
-      var nameHtml = '<span class="' + (isEndpoint ? 'fw-semibold' : '') + '">'
-        + step.personName + '</span>';
+      var $personRow = $('<div>').addClass('py-1 ps-1');
+      var $name = $('<span>').addClass(isEndpoint ? 'fw-semibold' : '').text(step.personName);
+      $personRow.append($name);
       if (step.personData) {
-        nameHtml += ' <span class="text-muted fw-normal">(' + step.personData + ')</span>';
+        $personRow.append(' ').append($('<span>').addClass('text-muted fw-normal').text('(' + step.personData + ')'));
       }
-      $body.append($('<div>').addClass('py-1 ps-1').html(nameHtml));
+      $body.append($personRow);
     });
 
     $wrap.append($body);

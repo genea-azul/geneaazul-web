@@ -634,11 +634,10 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   font-family: var(--ga-font-heading);
   color: #fff;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: .8rem;
   margin-bottom: 1rem;
   text-transform: uppercase;
   letter-spacing: .07em;
-  font-size: .8rem;
 }
 .ga-footer-desc { font-size: .88rem; line-height: 1.65; margin-bottom: .75rem; }
 .ga-footer-declaration { opacity: .75; line-height: 1.5; }

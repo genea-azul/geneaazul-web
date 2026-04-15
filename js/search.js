@@ -80,14 +80,16 @@ GeneaAzul.search = (function() {
   }
 
   function toggleYearOfDeath(isAliveSelector, yearOfDeathSelector) {
-    $(document).on('change', isAliveSelector, function() {
-      var alive = $(isAliveSelector).prop('checked');
-      $(yearOfDeathSelector).val('').prop('disabled', alive);
-    });
+    $(document).off('change.search-form', isAliveSelector)
+      .on('change.search-form', isAliveSelector, function() {
+        var alive = $(isAliveSelector).prop('checked');
+        $(yearOfDeathSelector).val('').prop('disabled', alive);
+      });
   }
 
   function toggleCardColorBySex(cardSelector, radioName, relatedCardSelector, relatedRadioName) {
-    $(document).on('change', 'input[type=radio][name=' + radioName + ']', function() {
+    $(document).off('change.search-form', 'input[type=radio][name=' + radioName + ']')
+      .on('change.search-form', 'input[type=radio][name=' + radioName + ']', function() {
       var isMale = $(this).val() === 'M';
       applyCardSexColor(cardSelector, isMale);
 
@@ -164,14 +166,16 @@ GeneaAzul.search = (function() {
 
   /* ── Search button ──────────────────────────────────────────────── */
   function wireSearchButton() {
-    $(document).on('click', '#searchBtn', function(e) {
-      e.preventDefault();
-      doSearch();
-    });
-    $(document).on('click', '#clearFormBtn', function(e) {
-      e.preventDefault();
-      clearForm();
-    });
+    $(document).off('click.search', '#searchBtn')
+      .on('click.search', '#searchBtn', function(e) {
+        e.preventDefault();
+        doSearch();
+      });
+    $(document).off('click.search', '#clearFormBtn')
+      .on('click.search', '#clearFormBtn', function(e) {
+        e.preventDefault();
+        clearForm();
+      });
   }
 
   function clearForm() {
@@ -624,17 +628,17 @@ GeneaAzul.search = (function() {
   function buildSurnameComponent(r, idx) {
     var $card = $('<div>').addClass('card border-default text-bg-light');
     if (idx > 0) $card.addClass('mt-2');
-    $card.append($('<div>').addClass('card-header').html(r.surname));
+    $card.append($('<div>').addClass('card-header').text(r.surname));
     var $body = $('<div>').addClass('card-body small');
     if (r.variants && r.variants.length > 0) {
       var $vul = $('<ul>').addClass('mb-0');
-      r.variants.forEach(function(v) { $vul.append($('<li>').html(v)); });
-      $body.append($('<div>').addClass('mt-1').html('Variantes: ').append($vul));
+      r.variants.forEach(function(v) { $vul.append($('<li>').text(v)); });
+      $body.append($('<div>').addClass('mt-1').text('Variantes: ').append($vul));
     }
-    $body.append($('<div>').addClass('mt-1').html('Cantidad de personas: ' + r.frequency));
+    $body.append($('<div>').addClass('mt-1').text('Cantidad de personas: ' + r.frequency));
     if (r.countries && r.countries.length > 0) {
       var $cul = $('<ul>').addClass('mb-0');
-      r.countries.forEach(function(c) { $cul.append($('<li>').html(c)); });
+      r.countries.forEach(function(c) { $cul.append($('<li>').text(c)); });
       $body.append($('<div>').addClass('mt-1').html('Pa&iacute;ses: ').append($cul));
     }
     if (r.firstSeenYear != null && r.lastSeenYear != null) {

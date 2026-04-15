@@ -236,7 +236,7 @@ GeneaAzul.stats = (function() {
   function countryHtml(row, bold) {
     var name = bold ? '<strong>' + row.country + '</strong>' : row.country;
     if (row.formerly) {
-      name = '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="Nombre anterior: ' + row.formerly + '">' + name + '</span>';
+      name = '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="Nombre anterior: ' + escAttr(row.formerly) + '">' + name + '</span>';
     }
     return (row.flag ? (bold ? '<span class="me-1">' + row.flag + '</span>' : row.flag + ' ') : '') + name;
   }
@@ -246,7 +246,7 @@ GeneaAzul.stats = (function() {
     var parts = [];
     if (p.title) {
       var titleHtml = p.titleFull && p.titleFull !== p.title
-        ? '<span class="text-secondary small ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + p.titleFull + '">' + p.title + '</span>'
+        ? '<span class="text-secondary small ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.titleFull) + '">' + p.title + '</span>'
         : '<span class="text-secondary small">' + p.title + '</span>';
       parts.push(titleHtml);
     }
@@ -260,12 +260,12 @@ GeneaAzul.stats = (function() {
     if (!p.birthYear && !p.deathYear) return '';
     var birth = p.birthYear
       ? (p.birthPlace
-          ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + p.birthPlace + '">' + p.birthYear + '</span>'
+          ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.birthPlace) + '">' + p.birthYear + '</span>'
           : p.birthYear)
       : '?';
     var death = (p.deathYear != null)
       ? (p.deathPlace
-          ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + p.deathPlace + '">' + p.deathYear + '</span>'
+          ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.deathPlace) + '">' + p.deathYear + '</span>'
           : p.deathYear)
       : 'vive';
     return ' <span class="small text-secondary ps-1">(' + birth + '&ndash;' + death + ')</span>';
@@ -275,6 +275,11 @@ GeneaAzul.stats = (function() {
     $container.find('[data-bs-toggle="tooltip"]').each(function() {
       new bootstrap.Tooltip(this, { delay: { show: 0, hide: 80 }, trigger: 'hover focus' });
     });
+  }
+
+  /* ── Escape HTML attribute values ──────────────────────────────── */
+  function escAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   }
 
   /* ── Normalize: lowercase + strip diacritics ───────────────────── */
@@ -293,9 +298,10 @@ GeneaAzul.stats = (function() {
       renderPersonalitiesFull(data);
     });
 
-    $(document).on('input', '#personalities-filter', function() {
-      filterPersonalitiesRows($(this).val().toLowerCase());
-    });
+    $(document).off('input.personalities', '#personalities-filter')
+      .on('input.personalities', '#personalities-filter', function() {
+        filterPersonalitiesRows($(this).val().toLowerCase());
+      });
   }
 
   function renderPersonalitiesFull(data) {
@@ -332,9 +338,10 @@ GeneaAzul.stats = (function() {
       renderSurnamesFull(data);
     });
 
-    $(document).on('input', '#surnames-filter', function() {
-      filterSurnameRows($(this).val());
-    });
+    $(document).off('input.surnames', '#surnames-filter')
+      .on('input.surnames', '#surnames-filter', function() {
+        filterSurnameRows($(this).val());
+      });
   }
 
   function renderSurnamesFull(data) {
