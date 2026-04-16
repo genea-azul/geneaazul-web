@@ -758,35 +758,20 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 }
 
 /* ─── Efemérides ─────────────────────────────────────────────────── */
-.ga-ephem-item {
-  position: relative;
-}
-
 .ga-ephem-day {
-  position: absolute;
-  top: 0.25rem;
-  left: 0.25rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  line-height: 1;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--ga-text-muted);
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.03em;
 }
 
-.ga-ephem-symbol {
-  position: absolute;
-  top: 0.25rem;
-  right: 0.25rem;
-  font-size: 0.85rem;
-  line-height: 1;
-  font-style: normal;
+.ga-ephem-birth-icon {
+  color: #b8860b;
 }
 
-.ga-ephem-birth {
-  color: #c8a000;   /* golden star for birthdays */
-}
-
-.ga-ephem-death {
-  color: var(--ga-text-muted);   /* muted dagger for death anniversaries */
+.ga-ephem-death-icon {
+  color: var(--ga-text-muted);
 }
 
 /* ─── Responsive tweaks ──────────────────────────────────────────── */
