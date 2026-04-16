@@ -228,6 +228,15 @@
           </div>
         </div>
 
+        <!-- Birthdays today -->
+        <div class="ga-highlight-card mb-5" id="birthdays-today-card" style="display:none">
+          <div class="ga-highlight-header">
+            <i class="bi bi-balloon-heart me-2"></i>Azuleños/as que cumplen años hoy
+          </div>
+          <div class="ga-highlight-body" id="birthdays-today-body">
+          </div>
+        </div>
+
         <!-- Final CTA -->
         <div class="text-center pb-5">
           <p class="ga-cta-text">¿Tenés raíces azuleñas? Buscá a tu familia en el árbol</p>
@@ -406,11 +415,13 @@
   <script src="js/stats.js"></script>
   <script src="js/stories.js"></script>
   <script src="js/map.js"></script>
+  <script src="js/birthdays.js"></script>
 
   <script>
     $(document).ready(function() {
       GeneaAzul.router.init();
       GeneaAzul.app.init();
+      GeneaAzul.birthdays.init();
     });
   </script>
 </body>
