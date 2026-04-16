@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════
    Genea Azul — ephemerides.js
-   Fetches and renders "Efemérides del día" on the landing page.
-   Shows living personalities born today (★) and deceased personalities
-   who passed away on this day (†).
+   Fetches and renders "Efemérides de [mes]" on the landing page.
+   Shows living personalities born this month (★) and deceased
+   personalities who passed away this month (†), ordered by day.
    ═══════════════════════════════════════════════════════════════════ */
 var GeneaAzul = window.GeneaAzul || {};
 
@@ -15,7 +15,7 @@ GeneaAzul.ephemerides = (function() {
 
   function fetchEphemerides() {
     GeneaAzul.utils.apiGet(
-      GeneaAzul.config.apiBaseUrl + '/api/birthday/ephemerides-today',
+      GeneaAzul.config.apiBaseUrl + '/api/birthday/ephemerides-this-month',
       function(data) {
         var birthdays = data && data.birthdays ? data.birthdays : [];
         var deaths    = data && data.deaths    ? data.deaths    : [];
@@ -29,7 +29,7 @@ GeneaAzul.ephemerides = (function() {
     var $body = $('#ephemerides-body');
     var $card = $('#ephemerides-card');
 
-    $('#ephemerides-date').text('— ' + todayLabel());
+    $('#ephemerides-month').text(monthLabel());
 
     var $list = $('<div>').addClass('row g-2');
 
@@ -47,7 +47,14 @@ GeneaAzul.ephemerides = (function() {
       ? '<span class="ga-ephem-symbol ga-ephem-birth" title="Cumpleaños">★</span>'
       : '<span class="ga-ephem-symbol ga-ephem-death" title="Fallecimiento">†</span>';
 
-    var year = isBirth ? extractYear(p.dateOfBirth) : extractYear(p.dateOfDeath);
+    var eventDate = isBirth ? p.dateOfBirth : p.dateOfDeath;
+    var day  = extractDay(eventDate);
+    var year = extractYear(eventDate);
+
+    var dayHtml = day
+      ? '<span class="ga-ephem-day">' + GeneaAzul.utils.escHtml(day) + '</span>'
+      : '';
+
     var yearHtml = year
       ? '<span class="ga-birthday-year">(' + GeneaAzul.utils.escHtml(year) + ')</span>'
       : '';
@@ -63,7 +70,8 @@ GeneaAzul.ephemerides = (function() {
     var $item = $('<div>').addClass('ga-birthday-item ga-ephem-item text-center');
 
     $item.html(
-      symbolHtml
+      dayHtml
+      + symbolHtml
       + imgHtml
       + '<div class="ga-birthday-name">' + GeneaAzul.utils.escHtml(displayName) + ' ' + yearHtml + '</div>'
     );
@@ -72,16 +80,23 @@ GeneaAzul.ephemerides = (function() {
     return $col;
   }
 
-  /* Returns "16 de abril" in Argentine time. */
-  function todayLabel() {
+  /* Returns the current month name in Argentine time, e.g. "abril 2026". */
+  function monthLabel() {
     return new Date().toLocaleDateString('es-AR', {
       timeZone: 'America/Argentina/Buenos_Aires',
-      day:      'numeric',
-      month:    'long'
+      month:    'long',
+      year:     'numeric'
     });
   }
 
-  /* Extracts the 4-digit year from a GEDCOM date string like "15 APR 1985". */
+  /* Extracts the day number from a GEDCOM date string like "15 APR 1985" → "15". */
+  function extractDay(dateStr) {
+    if (!dateStr) return null;
+    var match = dateStr.match(/^(\d{1,2})\s+[A-Z]{3}/);
+    return match ? match[1] : null;
+  }
+
+  /* Extracts the 4-digit year from a GEDCOM date string like "15 APR 1985" → "1985". */
   function extractYear(dateStr) {
     if (!dateStr) return null;
     var match = dateStr.match(/\b(\d{4})\b/);

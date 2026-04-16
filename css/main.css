@@ -734,7 +734,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 }
 
 .ga-birthday-footer {
-  padding: 0.6rem 1rem 0.5rem;
+  padding: 0.8rem 1rem 0;
   font-size: 0.8rem;
   color: var(--ga-text-muted);
   border-top: 1px solid var(--ga-border);
@@ -760,6 +760,16 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 /* ─── Efemérides ─────────────────────────────────────────────────── */
 .ga-ephem-item {
   position: relative;
+}
+
+.ga-ephem-day {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ga-text-muted);
 }
 
 .ga-ephem-symbol {
