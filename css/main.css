@@ -828,6 +828,19 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   color: var(--ga-text-muted);
 }
 
+/* Highlight entries whose event falls on today */
+.ga-ephem-today .ga-ephem-photo-wrap {
+  outline: 2px solid var(--ga-accent);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
+.ga-ephem-today .ga-ephem-day-badge {
+  background: var(--ga-accent);
+  border-color: var(--ga-accent);
+  color: #fff;
+}
+
 /* ─── Responsive tweaks ──────────────────────────────────────────── */
 
 /* Give every lazy-loaded section consistent inset on all screens narrower than xl

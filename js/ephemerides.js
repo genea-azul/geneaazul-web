@@ -31,6 +31,11 @@ GeneaAzul.ephemerides = (function() {
     $('#ephemerides-month').text(monthLabel());
 
     // Tag each entry with its event type, merge, then sort by day
+    var todayDay = parseInt(new Date().toLocaleDateString('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      day: 'numeric'
+    }), 10);
+
     var all = [];
     birthdays.forEach(function(p) { all.push({ p: p, type: 'birth' }); });
     deaths.forEach(function(p)    { all.push({ p: p, type: 'death' }); });
@@ -42,7 +47,7 @@ GeneaAzul.ephemerides = (function() {
     });
 
     var $list = $('<div>').addClass('row g-2');
-    all.forEach(function(entry) { $list.append(buildItem(entry.p, entry.type)); });
+    all.forEach(function(entry) { $list.append(buildItem(entry.p, entry.type, todayDay)); });
 
     $body.html($list);
     $card.show();
@@ -51,12 +56,13 @@ GeneaAzul.ephemerides = (function() {
     }
   }
 
-  function buildItem(p, eventType) {
+  function buildItem(p, eventType, todayDay) {
     var isBirth = eventType === 'birth';
 
     var eventDate = isBirth ? p.dateOfBirth : p.dateOfDeath;
     var day  = extractDay(eventDate);
     var year = extractYear(eventDate);
+    var isToday = day !== null && day === todayDay;
 
     // Day badge: small pill centred at the top edge of the photo circle
     var dayHtml = day
@@ -80,7 +86,7 @@ GeneaAzul.ephemerides = (function() {
       : '<div class="ga-birthday-photo-placeholder"><i class="bi bi-person"></i></div>';
 
     var $col  = $('<div>').addClass('col-6 col-sm-4 col-md-3 col-lg-2');
-    var $item = $('<div>').addClass('ga-birthday-item text-center');
+    var $item = $('<div>').addClass('ga-birthday-item text-center' + (isToday ? ' ga-ephem-today' : ''));
 
     $item.html(
       '<div class="ga-ephem-photo-wrap">'

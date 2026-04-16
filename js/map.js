@@ -103,7 +103,7 @@ GeneaAzul.map = (function() {
         '<strong>' + (row.flag || '') + ' ' + row.country + '</strong>'
         + formerlyHtml
         + '<div>' + GeneaAzul.utils.formatNumber(row.count) + ' personas ('
-        + row.percentage.toFixed(row.percentage < 0.05 ? 2 : 1) + '%)</div>'
+        + row.percentage.toFixed(row.percentage < 10 ? 2 : 1) + '%)</div>'
         + surnames,
         { maxWidth: 220 }
       );

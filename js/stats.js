@@ -122,7 +122,7 @@ GeneaAzul.stats = (function() {
     var $el = $(selector).empty();
     if (!data || data.length === 0) { $el.html('<p class="text-muted small">Sin datos.</p>'); return; }
     data.forEach(function(row) {
-      var pct = row.percentage.toFixed(row.percentage < 0.05 ? 2 : 1);
+      var pct = row.percentage.toFixed(row.percentage < 10 ? 2 : 1);
       $el.append(
         $('<div>').addClass('mb-2')
           .append($('<div>').addClass('d-flex justify-content-between small mb-1')
@@ -357,12 +357,16 @@ GeneaAzul.stats = (function() {
           .append($('<th>').html('#'))
           .append($('<th>').html('Apellido'))
           .append($('<th>').html('Variantes'))
+          .append($('<th>').addClass('text-end').html('Total'))
+          .append($('<th>').addClass('text-end').html('Vivos'))
       ))
       .append($tbody);
 
     data.forEach(function(s, idx) {
       var variantList = s.variants && s.variants.length > 0 ? s.variants : [];
       var variantsHtml = variantList.length > 0 ? variantList.join(', ') : '<span class="text-muted">—</span>';
+      var countHtml = s.count != null ? utils.formatNumber(s.count) : '<span class="text-muted">—</span>';
+      var aliveHtml = s.aliveCount != null ? utils.formatNumber(s.aliveCount) : '<span class="text-muted">—</span>';
       $tbody.append(
         $('<tr>')
           .attr('data-surname', normalize(s.surname))
@@ -370,6 +374,8 @@ GeneaAzul.stats = (function() {
           .append($('<td>').addClass('text-muted small').html(idx + 1))
           .append($('<td>').html('<span class="fw-semibold">' + s.surname + '</span>'))
           .append($('<td>').addClass('small text-muted').html(variantsHtml))
+          .append($('<td>').addClass('text-end').html(countHtml))
+          .append($('<td>').addClass('text-end').html(aliveHtml))
       );
     });
 

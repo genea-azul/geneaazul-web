@@ -12,22 +12,34 @@ Public-facing website for [Genea Azul](https://geneaazul.com.ar), a non-profit c
 ## Quick Start
 
 ```bash
-# Clone the repo
 git clone https://github.com/genea-azul/geneaazul-web.git
 cd geneaazul-web
-
-# Serve locally (any static server works)
-python3 -m http.server 8080
-
-# Open in browser
-open http://localhost:8080
 ```
 
-API calls will go to `gedcom-analyzer-app.fly.dev` in production. To use a local backend, edit `js/config.js` and change `apiBaseUrl`.
+### With full mock API (recommended)
+
+`dev-server.js` serves static files **and** mocks all backend API endpoints so everything works without a running backend:
+
+```bash
+node dev-server.js
+# → http://localhost:8080
+```
+
+All API endpoints are mocked with realistic data. Ephemerides and birthday entries are generated for today's Argentine date so landing-page features are visible immediately.
+
+### Static files only
+
+If you only need to browse static pages (no API-dependent features):
+
+```bash
+python3 -m http.server 8080
+```
+
+API calls will hit `gedcom-analyzer-app.fly.dev` directly (requires internet access). To point at a local backend instead, change `apiBaseUrl` in `js/config.js`.
 
 ## Project Structure
 
-```
+```plaintext
 geneaazul-web/
 ├── index.html              # App shell: navbar, hero, footer, router
 ├── css/
@@ -65,6 +77,7 @@ geneaazul-web/
 │   └── surnames.json
 ├── img/                    # Images and SVG assets
 ├── _redirects              # Cloudflare Pages SPA routing
+├── dev-server.js           # Local dev server with full API mocks (node dev-server.js)
 ├── docs/
 │   ├── SPEC.md             # Full design specification
 │   └── API-REFERENCE.md    # Backend API documentation
@@ -90,13 +103,13 @@ Upload all files to any static hosting provider. The `_redirects` file handles S
 
 ## CDN Dependencies
 
-| Library | Version | Purpose |
-|---------|---------|---------|
-| Bootstrap | 5.3.3 | Layout and components |
-| Bootstrap Icons | 1.11.3 | Icons |
-| jQuery | 3.7.1 | DOM manipulation, AJAX |
-| marked.js | 15.x | Markdown rendering |
-| Google Fonts | — | Playfair Display, Source Sans 3, Inter |
+| Library         | Version | Purpose                                |
+| --------------- | ------- | -------------------------------------- |
+| Bootstrap       | 5.3.3   | Layout and components                  |
+| Bootstrap Icons | 1.11.3  | Icons                                  |
+| jQuery          | 3.7.1   | DOM manipulation, AJAX                 |
+| marked.js       | 15.x    | Markdown rendering                     |
+| Google Fonts    | —       | Playfair Display, Source Sans 3, Inter |
 
 ## Contributing
 
@@ -104,4 +117,4 @@ This is a community project. To contribute family data, request tree access, or 
 
 - Instagram: [@genea.azul](https://instagram.com/genea.azul)
 - Facebook: [genea.azul](https://facebook.com/genea.azul)
-- Email: genea.azul@gmail.com
+- Email: <genea.azul@gmail.com>

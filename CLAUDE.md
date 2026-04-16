@@ -1,0 +1,259 @@
+# Genea Azul — Web (AI Agent Context)
+
+Project-level context for AI coding agents. Read this before making any change.
+
+---
+
+## What this project is
+
+Public-facing static website for **Genea Azul** (`geneaazul.com.ar`), a non-profit community genealogy research project focused on the city and district of Azul, Buenos Aires, Argentina. The site lets people search for family members, visualise immigration patterns, explore statistics, and read family stories — all backed by a GEDCOM database exposed via a REST API.
+
+---
+
+## Stack at a glance
+
+| Layer   | Technology                                                                |
+| ------- | ------------------------------------------------------------------------- |
+| HTML    | Single `index.html` shell; page fragments in `pages/*.html` (lazy-loaded) |
+| CSS     | Vanilla CSS with custom properties; no preprocessor, no build step        |
+| JS      | ES5-compatible, jQuery 3.7.1, IIFE module pattern — **no bundler**        |
+| Icons   | Bootstrap Icons 1.11.3 (CDN)                                              |
+| Hosting | Cloudflare Pages (auto-deploy from `main`; no build command)              |
+| Backend | `https://gedcom-analyzer-app.fly.dev` (Spring Boot on Fly.io)             |
+
+**There is no build step.** Files are served as-is. Do not introduce `npm`, TypeScript, JSX, ES modules (`import`/`export`), or any syntax that requires transpilation.
+
+---
+
+## Module pattern — always follow this
+
+Every JS file exposes a single global namespace object using the **IIFE revealing-module pattern**:
+
+```javascript
+var GeneaAzul = window.GeneaAzul || {};
+
+GeneaAzul.myFeature = (function() {
+
+  function init() { /* ... */ }
+  function privateHelper() { /* ... */ }
+
+  return { init };
+
+})();
+```
+
+- `GeneaAzul` is the single global namespace — never pollute `window` with anything else.
+- Public API is declared in `return { ... }` at the bottom.
+- All other functions are private.
+- Each module lives in its own file under `js/`.
+- New modules must be included in `index.html` with a `<script>` tag and initialised in the `$(document).ready` block.
+
+---
+
+## CSS conventions
+
+### Custom properties (do not hardcode colours)
+
+All colours, spacing, and typography use CSS custom properties defined in `css/theme-heritage.css` and `css/theme-modern.css`. **Never use raw hex colours for anything that should adapt to theming.** Use these variables:
+
+| Variable            | Usage                     |
+| ------------------- | ------------------------- |
+| `--ga-primary`      | Primary brand colour      |
+| `--ga-accent`       | Accent / highlight colour |
+| `--ga-bg`           | Page background           |
+| `--ga-bg-card`      | Card surface background   |
+| `--ga-text`         | Main body text            |
+| `--ga-text-muted`   | Secondary / subdued text  |
+| `--ga-border`       | Borders and dividers      |
+| `--ga-font-heading` | Serif heading font        |
+| `--ga-font-body`    | Sans-serif body font      |
+
+Exception: one-off decorative values not tied to theme (e.g. `color: #b8860b` for a gold birthday star) may use raw values with a comment.
+
+### Class naming
+
+All custom classes are prefixed `ga-`. Bootstrap utility classes are used freely alongside them.
+
+### Where to add styles
+
+All styles go in `css/main.css`. Do not add `<style>` blocks inline in HTML. Do not create new CSS files unless introducing a full new theme.
+
+---
+
+## Key utilities (available everywhere)
+
+All helpers are on `GeneaAzul.utils` (defined in `js/utils.js`):
+
+| Method                                                   | Purpose                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------- |
+| `GeneaAzul.utils.apiGet(url, successFn, errorFn)`        | GET request via jQuery AJAX                                         |
+| `GeneaAzul.utils.apiPost(url, data, successFn, errorFn)` | POST request                                                        |
+| `GeneaAzul.utils.escHtml(s)`                             | HTML-escape a value before inserting into DOM — **always use this** |
+| `GeneaAzul.utils.formatNumber(n)`                        | Argentine locale number format (e.g. `70.512`)                      |
+| `GeneaAzul.utils.spinnerHtml(text)`                      | Bootstrap spinner HTML string                                       |
+| `GeneaAzul.utils.getHashParams()`                        | Parse query-string params from the URL hash                         |
+
+**Security rule**: always call `escHtml()` on any server-supplied string before inserting it into HTML via `.html()`. Strings inserted via `.text()` are safe.
+
+---
+
+## Routing
+
+`js/router.js` implements hash-based routing. Routes correspond to `pages/*.html` fragments that are lazy-loaded into `#page-content`.
+
+- Navigation uses `<a href="#route" data-route="route">` anchors.
+- The landing page (route `""` or `"inicio"`) is the `index.html` shell itself — it has no lazy-loaded fragment.
+- **Anchors for in-page sections** on the landing page (e.g. `#cumpleanos`, `#efemerides`) are separate from router routes. After revealing a hidden card via API, scroll to it programmatically when the hash matches:
+
+  ```javascript
+  if (window.location.hash === '#cumpleanos') {
+    $card[0].scrollIntoView({ behavior: 'smooth' });
+  }
+  ```
+
+---
+
+## Time zone
+
+**Always use Argentine time** (`America/Argentina/Buenos_Aires`, UTC−3, no DST) when creating or formatting dates for display. Never use `new Date()` without a time zone when the result is shown to users.
+
+```javascript
+new Date().toLocaleDateString('es-AR', {
+  timeZone: 'America/Argentina/Buenos_Aires',
+  day: 'numeric', month: 'long'
+});
+```
+
+---
+
+## Landing page sections (index.html)
+
+The landing page has these dynamic sections in order:
+
+| Section                 | ID            | Module                      | Notes                                                              |
+| ----------------------- | ------------- | --------------------------- | ------------------------------------------------------------------ |
+| Hero stats              | `#hero-stats` | `config.js` (GeneaAzul.app) | Animated counters; live person count from API                      |
+| Highlights (3-up cards) | —             | Static HTML                 | Immigration, map, personalidades                                   |
+| Azul birthdays          | `#cumpleanos` | `js/birthdays.js`           | Alive azuleños born today; shuffled; hidden until API returns data |
+| Efemérides del mes      | `#efemerides` | `js/ephemerides.js`         | Distinguished persons born/died this month; mixed & sorted by day  |
+| Final CTA               | —             | Static HTML                 | Link to search                                                     |
+
+Both `#cumpleanos` and `#efemerides` start with `display:none` and are revealed only when the API returns non-empty data. They expose direct anchor links (`#cumpleanos`, `#efemerides`) visible on header hover.
+
+---
+
+## API integration
+
+### Base URL
+
+```javascript
+GeneaAzul.config.apiBaseUrl
+// → 'https://gedcom-analyzer-app.fly.dev' in prod
+// → window.location.origin on localhost (assumes local backend on same port)
+```
+
+### GEDCOM date format
+
+The backend returns dates as GEDCOM-formatted strings, e.g. `"15 APR 1985"`, `"ABT 1940"`. To extract parts:
+
+```javascript
+// Year
+dateStr.match(/\b(\d{4})\b/)[1]
+
+// Day (only present for full dates like "15 APR 1985")
+dateStr.match(/^(\d{1,2})\s+[A-Z]{3}/) // → ["15 APR", "15"]
+```
+
+### Birthday endpoints
+
+| Endpoint                                   | Returns                                | Notes                                                    |
+| ------------------------------------------ | -------------------------------------- | -------------------------------------------------------- |
+| `GET /api/birthday/azul-today`             | `SimplePersonDto[]`                    | Alive persons from Azul born today; shuffled server-side |
+| `GET /api/birthday/ephemerides-this-month` | `EphemeridesDto { birthdays, deaths }` | Distinguished persons for the current month              |
+
+### SimplePersonDto fields
+
+```plaintext
+uuid, sex, isAlive, name, aka, profilePicture,
+dateOfBirth (GEDCOM string), placeOfBirth, dateOfDeath (GEDCOM string)
+```
+
+- `dateOfDeath` is populated only when `obfuscateLiving = false` (i.e. public personalities).
+- `name` for living persons in the azul-today endpoint has the surname abbreviated (e.g. `"María G. R."`) — already done server-side.
+- `aka` is the nickname/alias — shown as `«nickname»` when present.
+
+---
+
+## Feature flags
+
+`GeneaAzul.config.onVacations` — when `true`, all API-dependent features are silently skipped. Always check this first in any `init()` function:
+
+```javascript
+function init() {
+  if (GeneaAzul.config.onVacations) return;
+  // ...
+}
+```
+
+---
+
+## Static data files
+
+| File                      | Contents                                                                                               | Used by                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `data/personalities.json` | 250+ notable persons with `givenName`, `surname`, `birthYear`, `deathYear`, `birthPlace`, `deathPlace` | `pages/estadisticas-personalidades.html`          |
+| `data/immigration.json`   | Immigration waves by origin country                                                                    | `js/stats.js`, hero counters                      |
+| `data/surnames.json`      | Surname list with frequency                                                                            | Hero counter, `pages/estadisticas-apellidos.html` |
+
+**Important**: `personalities.json` contains only year-level data (no day/month). For day-of-month efemérides, the backend GEDCOM indexes must be used — not this file.
+
+---
+
+## Hosting and caching
+
+- **Deployment**: push to `main` → Cloudflare Pages auto-deploys (no build command).
+- **SPA routing**: `_redirects` contains `/* /index.html 200` so all routes serve `index.html`.
+- **Cache headers**: defined in `_headers`:
+  - `index.html` / root: `no-cache` (always revalidates — picks up new deploys immediately)
+  - `css/*`, `js/*`, `data/*`: `public, max-age=3600, stale-while-revalidate=60` (1 hour)
+  - `img/*`: 1 week; `fonts/*`: 1 year + `immutable`
+- **No content hashing** in filenames — this is why CSS/JS TTL is kept short (1 hour).
+
+---
+
+## Local development
+
+Run `node dev-server.js` (no `npm install` needed — Node.js built-ins only). It serves static files on `http://localhost:8080` **and** mocks all backend API endpoints, so the full landing page works without a running backend.
+
+Mocked endpoints:
+
+| Method | Path                                     | Notes                                                       |
+| ------ | ---------------------------------------- | ----------------------------------------------------------- |
+| GET    | `/api/gedcom-analyzer`                   | Health check — unlocks search and connections forms         |
+| GET    | `/api/gedcom-analyzer/metadata`          | Full stats (personsCount, familiesCount, etc.)              |
+| GET    | `/api/birthday/azul-today`               | Two living persons born today (AR time)                     |
+| GET    | `/api/birthday/ephemerides-this-month`   | Births and deaths; two entries fall on today's day          |
+| POST   | `/api/search/family`                     | One result person with parents, spouse, children, tree data |
+| POST   | `/api/search/surnames`                   | Generates a response for whatever surnames were submitted   |
+| GET    | `/api/search/family-tree/:uuid/plainPdf` | Minimal valid PDF as base64                                 |
+| POST   | `/api/search/connection`                 | Four-step connection chain                                  |
+
+The server computes today's Argentine date at startup and uses it for ephemerides/birthday mock data — so the `ga-ephem-today` highlight is always visible.
+
+---
+
+## Things NOT to do
+
+- Do not use `import`/`export`, `async`/`await`, arrow functions, template literals, or any ES6+ syntax that requires a transpiler. Keep ES5 compatibility.
+- Do not add `<style>` blocks to HTML files.
+- Do not hardcode theme colours — use CSS variables.
+- Do not forget `escHtml()` when inserting server data into `.html()`.
+- Do not add anchors/hashes to the sitemap (`sitemap.xml`) — fragment identifiers are ignored by crawlers.
+- Do not add new files without including them in `index.html`.
+- Do not touch `_redirects` — the single SPA rewrite rule is intentional.
+
+---
+
+## Related project
+
+The backend is in a sibling repo: `gedcom-analyzer` (Spring Boot). Its own context file lives there. For this frontend, the backend is a black box accessed via HTTP — do not modify backend code from this repo.
