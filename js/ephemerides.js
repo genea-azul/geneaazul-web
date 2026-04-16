@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
    Genea Azul — ephemerides.js
    Fetches and renders "Efemérides de [mes]" on the landing page.
-   Births (🎈) and deaths (🌸) are mixed and sorted by day.
+   Births (bi-balloon-heart) and deaths (†) are mixed and sorted by day.
    ═══════════════════════════════════════════════════════════════════ */
 var GeneaAzul = window.GeneaAzul || {};
 
@@ -30,18 +30,18 @@ GeneaAzul.ephemerides = (function() {
 
     $('#ephemerides-month').text(monthLabel());
 
-    // Tag each entry with its event type, then merge and sort by day
+    // Tag each entry with its event type, merge, then sort by day
     var all = [];
     birthdays.forEach(function(p) { all.push({ p: p, type: 'birth' }); });
     deaths.forEach(function(p)    { all.push({ p: p, type: 'death' }); });
 
     all.sort(function(a, b) {
-      var dayA = extractDay(a.type === 'birth' ? a.p.dateOfBirth : a.p.dateOfDeath) || 0;
-      var dayB = extractDay(b.type === 'birth' ? b.p.dateOfBirth : b.p.dateOfDeath) || 0;
-      return dayA - dayB;
+      var da = extractDay(a.type === 'birth' ? a.p.dateOfBirth : a.p.dateOfDeath) || 0;
+      var db = extractDay(b.type === 'birth' ? b.p.dateOfBirth : b.p.dateOfDeath) || 0;
+      return da - db;
     });
 
-    var $list = $('<div>').addClass('row g-3');
+    var $list = $('<div>').addClass('row g-2');
     all.forEach(function(entry) { $list.append(buildItem(entry.p, entry.type)); });
 
     $body.html($list);
@@ -55,13 +55,15 @@ GeneaAzul.ephemerides = (function() {
     var day  = extractDay(eventDate);
     var year = extractYear(eventDate);
 
+    // Day badge: small pill centred at the top edge of the photo circle
     var dayHtml = day
-      ? '<div class="ga-ephem-day">' + GeneaAzul.utils.escHtml(day) + '</div>'
+      ? '<span class="ga-ephem-day-badge">' + GeneaAzul.utils.escHtml(String(day)) + '</span>'
       : '';
 
-    var iconHtml = isBirth
-      ? '<i class="bi bi-balloon-heart ga-ephem-birth-icon" title="Cumpleaños"></i> '
-      : '<i class="bi bi-flower1 ga-ephem-death-icon" title="Fallecimiento"></i> ';
+    // Event-type badge: small icon at the bottom-right of the photo circle
+    var typeBadgeHtml = isBirth
+      ? '<span class="ga-ephem-type-badge ga-ephem-birth" title="Cumpleaños"><i class="bi bi-balloon-heart"></i></span>'
+      : '<span class="ga-ephem-type-badge ga-ephem-death" title="Fallecimiento">&dagger;</span>';
 
     var yearHtml = year
       ? '<span class="ga-birthday-year">(' + GeneaAzul.utils.escHtml(year) + ')</span>'
@@ -70,7 +72,7 @@ GeneaAzul.ephemerides = (function() {
     var displayName = p.name;
     if (p.aka) displayName += ' «' + p.aka + '»';
 
-    var imgHtml = p.profilePicture
+    var photoInner = p.profilePicture
       ? '<img src="' + GeneaAzul.utils.escHtml(p.profilePicture) + '" alt="' + GeneaAzul.utils.escHtml(p.name) + '" class="ga-birthday-photo">'
       : '<div class="ga-birthday-photo-placeholder"><i class="bi bi-person"></i></div>';
 
@@ -78,19 +80,19 @@ GeneaAzul.ephemerides = (function() {
     var $item = $('<div>').addClass('ga-birthday-item text-center');
 
     $item.html(
-      dayHtml
-      + imgHtml
-      + '<div class="ga-birthday-name">'
-      + iconHtml
-      + GeneaAzul.utils.escHtml(displayName) + ' ' + yearHtml
+      '<div class="ga-ephem-photo-wrap">'
+        + photoInner
+        + dayHtml
+        + typeBadgeHtml
       + '</div>'
+      + '<div class="ga-birthday-name">' + GeneaAzul.utils.escHtml(displayName) + ' ' + yearHtml + '</div>'
     );
 
     $col.append($item);
     return $col;
   }
 
-  /* Returns the current month + year in Argentine time, e.g. "abril de 2026". */
+  /* Returns "abril de 2026" in Argentine time. */
   function monthLabel() {
     return new Date().toLocaleDateString('es-AR', {
       timeZone: 'America/Argentina/Buenos_Aires',

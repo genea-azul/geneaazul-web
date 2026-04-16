@@ -758,19 +758,55 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 }
 
 /* ─── Efemérides ─────────────────────────────────────────────────── */
-.ga-ephem-day {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--ga-text-muted);
-  margin-bottom: 0.25rem;
-  letter-spacing: 0.03em;
+
+/* Constrains overlays to the 64 px photo circle — no spill into adjacent cards */
+.ga-ephem-photo-wrap {
+  position: relative;
+  width: 64px;
+  margin: 0 auto 0.4rem;
 }
 
-.ga-ephem-birth-icon {
+/* Day number: small pill centred at the top edge of the circle */
+.ga-ephem-day-badge {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--ga-bg);
+  border: 1px solid var(--ga-border);
+  color: var(--ga-text-muted);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Event-type badge: small circle at the bottom-right of the photo */
+.ga-ephem-type-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--ga-bg);
+  border: 1px solid var(--ga-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  line-height: 1;
+  font-style: normal;
+}
+
+.ga-ephem-birth {
   color: #b8860b;
 }
 
-.ga-ephem-death-icon {
+.ga-ephem-death {
   color: var(--ga-text-muted);
 }
 
