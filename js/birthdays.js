@@ -22,9 +22,21 @@ GeneaAzul.birthdays = (function() {
     );
   }
 
+  /* Returns a formatted date string in Argentine time (America/Argentina/Buenos_Aires).
+     e.g. "16 de abril" or "2 de septiembre". */
+  function todayLabel() {
+    return new Date().toLocaleDateString('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      day:      'numeric',
+      month:    'long'
+    });
+  }
+
   function renderBirthdays(people) {
     var $body = $('#birthdays-today-body');
     var $card = $('#birthdays-today-card');
+
+    $('#birthdays-today-date').text('— ' + todayLabel());
 
     var $list = $('<div>').addClass('row g-2');
 

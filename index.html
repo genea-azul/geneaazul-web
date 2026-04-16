@@ -232,8 +232,28 @@
         <div class="ga-highlight-card mb-5" id="birthdays-today-card" style="display:none">
           <div class="ga-highlight-header">
             <i class="bi bi-balloon-heart me-2"></i>Azuleños/as que cumplen años hoy
+            <span class="ga-birthday-date" id="birthdays-today-date"></span>
           </div>
           <div class="ga-highlight-body" id="birthdays-today-body">
+          </div>
+          <div class="ga-birthday-footer">
+            ¿Falta algún cumpleaños? Escribinos y lo agregamos.
+            <a href="https://instagram.com/_u/genea.azul" target="_blank" rel="noopener" class="ga-birthday-footer-link" aria-label="Instagram">
+              <i class="bi bi-instagram"></i>
+            </a>
+            <a href="https://facebook.com/genea.azul" target="_blank" rel="noopener" class="ga-birthday-footer-link" aria-label="Facebook">
+              <i class="bi bi-facebook"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Efemérides -->
+        <div class="ga-highlight-card mb-5" id="ephemerides-card" style="display:none">
+          <div class="ga-highlight-header">
+            <i class="bi bi-calendar-event me-2"></i>Efemérides del día
+            <span class="ga-birthday-date" id="ephemerides-date"></span>
+          </div>
+          <div class="ga-highlight-body" id="ephemerides-body">
           </div>
         </div>
 
@@ -416,12 +436,14 @@
   <script src="js/stories.js"></script>
   <script src="js/map.js"></script>
   <script src="js/birthdays.js"></script>
+  <script src="js/ephemerides.js"></script>
 
   <script>
     $(document).ready(function() {
       GeneaAzul.router.init();
       GeneaAzul.app.init();
       GeneaAzul.birthdays.init();
+      GeneaAzul.ephemerides.init();
     });
   </script>
 </body>
