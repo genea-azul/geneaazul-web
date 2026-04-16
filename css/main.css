@@ -219,6 +219,24 @@ a:hover { color: var(--ga-accent); }
   margin-bottom: .6rem;
 }
 a.ga-highlight-header:hover { color: var(--ga-accent); }
+
+.ga-anchor-link {
+  font-size: 0.9rem;
+  color: var(--ga-text-muted);
+  opacity: 0;
+  text-decoration: none;
+  vertical-align: middle;
+  transition: opacity 0.15s;
+}
+
+.ga-highlight-header:hover .ga-anchor-link,
+.ga-anchor-link:focus {
+  opacity: 1;
+}
+
+.ga-anchor-link:hover {
+  color: var(--ga-primary);
+}
 .ga-highlight-body {
   font-size: .9rem;
   color: var(--ga-text-muted);

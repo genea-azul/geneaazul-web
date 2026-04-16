@@ -26,7 +26,7 @@ GeneaAzul.ephemerides = (function() {
 
   function renderEphemerides(birthdays, deaths) {
     var $body = $('#ephemerides-body');
-    var $card = $('#ephemerides-card');
+    var $card = $('#efemerides');
 
     $('#ephemerides-month').text(monthLabel());
 
@@ -46,6 +46,9 @@ GeneaAzul.ephemerides = (function() {
 
     $body.html($list);
     $card.show();
+    if (window.location.hash === '#efemerides') {
+      $card[0].scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   function buildItem(p, eventType) {

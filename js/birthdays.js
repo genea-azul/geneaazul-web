@@ -34,7 +34,7 @@ GeneaAzul.birthdays = (function() {
 
   function renderBirthdays(people) {
     var $body = $('#birthdays-today-body');
-    var $card = $('#birthdays-today-card');
+    var $card = $('#cumpleanos');
 
     $('#birthdays-today-date').text('— ' + todayLabel());
 
@@ -64,6 +64,9 @@ GeneaAzul.birthdays = (function() {
 
     $body.html($list);
     $card.show();
+    if (window.location.hash === '#cumpleanos') {
+      $card[0].scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   /* Extracts the 4-digit year from a GEDCOM date string like "15 APR 1985" or "ABT 1940" */
