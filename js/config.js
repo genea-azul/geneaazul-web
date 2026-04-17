@@ -8,7 +8,6 @@ GeneaAzul.config = {
     apiBaseUrl: (window.location.hostname === 'localhost')
         ? window.location.origin
         : 'https://gedcom-analyzer-app.fly.dev',
-    onVacations: false,
     obfuscateLiving: true,
     familyTreeProcessPersonsBySec: 225,
     familyTreeProcessFixedDelayMillis: 3250,
@@ -36,10 +35,8 @@ GeneaAzul.app = (function() {
   }
 
   function fetchLiveStats() {
-    if (GeneaAzul.config.onVacations) return;
-
     // Persons count from API
-    GeneaAzul.utils.apiGet(
+    GeneaAzul.utils.apiGetCached(
       GeneaAzul.config.apiBaseUrl + '/api/gedcom-analyzer/metadata',
       function(meta) {
         if (meta && meta.personsCount) {

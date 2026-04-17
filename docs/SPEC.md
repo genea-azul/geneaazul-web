@@ -649,14 +649,6 @@ When the page loads:
    - Returns `{ personsCount: 70512, modifiedDateTime: "..." }`
    - Use `personsCount` for the hero counter and search page
 
-### 5.4 Vacation Mode
-
-A boolean flag `onVacations` in `config.js`. When true:
-- Hero section shows a "We're on vacation" message with return date
-- Search features are disabled
-- Contact links are prominently displayed
-- This is a manual toggle (set in config before deploying)
-
 ---
 
 ## 6. CDN Dependencies
@@ -760,7 +752,6 @@ GeneaAzul.config = {
     apiBaseUrl: (window.location.hostname === 'localhost')
         ? window.location.origin
         : 'https://gedcom-analyzer-app.fly.dev',
-    onVacations: false,
     obfuscateLiving: true,
     familyTreeProcessPersonsBySec: 225,
     familyTreeProcessFixedDelayMillis: 3250,
@@ -927,7 +918,6 @@ When building the new site, ensure all current functionality is preserved:
 - [ ] Connection chain display
 - [ ] All Spanish localization (relationship names, dates, errors)
 - [ ] Rate limiting error handling
-- [ ] Vacation mode
 - [ ] Statistics data (all 3 lists: immigration, personalities, surnames)
 - [ ] Social links (Instagram, Facebook, Email)
 - [ ] Persons count display from API metadata

@@ -112,17 +112,10 @@ GeneaAzul.search = (function() {
 
   /* ── Backend initialisation (health check) ──────────────────────── */
   function initBackend() {
-    if (cfg.onVacations) {
-      $('#search-loading-container').addClass('d-none');
-      $('#search-vacations-container').removeClass('d-none');
-      return;
-    }
-
     // Obfuscation from URL
     var searchParams = new URLSearchParams(window.location.search);
     if (searchParams.get('f') === '0') {
       cfg.obfuscateLiving = false;
-      $('#obfuscated-info').addClass('d-none');
     }
 
     // Delayed spinner reveal
@@ -132,36 +125,18 @@ GeneaAzul.search = (function() {
       }
     }, 1500);
 
-    utils.apiGet(
+    utils.apiGetCached(
       cfg.apiBaseUrl + '/api/gedcom-analyzer',
       function(data) {
         $('#search-loading-container').addClass('d-none');
         $('#search-form-container').removeClass('d-none');
         if (data.disableObfuscateLiving) {
           cfg.obfuscateLiving = false;
-          $('#obfuscated-info').addClass('d-none');
         }
-        // Fetch metadata to update person count
-        utils.apiGet(
-          cfg.apiBaseUrl + '/api/gedcom-analyzer/metadata',
-          function(meta) {
-            $('#stat-persons').text(utils.formatNumber(meta.personsCount));
-          }
-        );
       },
       function() {
         $('#search-loading-container').addClass('d-none');
-        var $msg = $('#search-spinner-msg');
-        $msg.html(
-          '<h6>Hubo un problema iniciando el buscador</h6>'
-          + '<p>Por favor intent&aacute; ingresar nuevamente o contact&aacute;nos:</p>'
-          + '<ul class="list-group list-group-flush">'
-          + '<li class="list-group-item"><a class="link-secondary text-decoration-none" href="https://instagram.com/_u/genea.azul"><i class="bi bi-instagram me-1"></i>@genea.azul</a></li>'
-          + '<li class="list-group-item"><a class="link-secondary text-decoration-none" href="https://facebook.com/genea.azul"><i class="bi bi-facebook me-1"></i>genea.azul</a></li>'
-          + '<li class="list-group-item"><a class="link-secondary text-decoration-none" href="mailto:genea.azul@gmail.com"><i class="bi bi-envelope me-1"></i>genea.azul@gmail.com</a></li>'
-          + '</ul>'
-          + '<p class="mt-3">Gracias y disculpas.</p>'
-        ).parent().removeClass('d-none');
+        $('#search-spinner-msg').html(utils.backendErrorHtml()).parent().removeClass('d-none');
       }
     );
   }

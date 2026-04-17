@@ -23,6 +23,7 @@ GeneaAzul.router = (function() {
     'testimonios':               'testimonios',
     'colabora':                  'colabora',
     'recursos':                  'recursos',
+    'cronologia':                'cronologia',
     'sobre-nosotros':            'sobre-nosotros'
   };
 
@@ -35,7 +36,8 @@ GeneaAzul.router = (function() {
     'estadisticas-personalidades':function(){ if (GeneaAzul.stats)       GeneaAzul.stats.initPersonalities(); },
     'estadisticas-apellidos':    function() { if (GeneaAzul.stats)       GeneaAzul.stats.initSurnames(); },
     'mapa':                      function() { if (GeneaAzul.map)         GeneaAzul.map.init(); },
-    'historias':                 function() { if (GeneaAzul.stories)     GeneaAzul.stories.init(); }
+    'historias':                 function() { if (GeneaAzul.stories)     GeneaAzul.stories.init(); },
+    'cronologia':                function() { if (GeneaAzul.cronologia)  GeneaAzul.cronologia.init(); }
   };
 
   /* Parse hash → route key (strip leading # and query string) */

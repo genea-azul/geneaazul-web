@@ -661,4 +661,3 @@ The complete relationship naming logic is complex and must be ported from the ex
 | Person 2 not found (connections) | `errors` contains `"CONNECTIONS-PERSON-2-NOT-FOUND"` | "La persona 2 no fue encontrada..." |
 | Person 2 ambiguous (connections) | `errors` contains `"CONNECTIONS-PERSON-2-AMBIGUOUS"` | "Más de un resultado para la persona 2..." |
 | Same person (connections) | `errors` contains `"CONNECTIONS-SAME-PERSON"` | "Las personas 1 y 2 son las mismas. No se puede calcular la conexión entre mismas personas." |
-| Vacation mode | `config.onVacations === true` | "Nos tomamos vacaciones y apagamos el servidor. La página volverá a estar disponible a mediados de [mes]." |

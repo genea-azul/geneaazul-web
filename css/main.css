@@ -7,6 +7,7 @@
 :root {
   --ga-primary:        #1a365d;
   --ga-primary-hover:  #152b4a;
+  --ga-primary-muted:  #537793;
   --ga-accent:         #c9a227;
   --ga-accent-hover:   #b08d1f;
   --ga-bg:             #faf8f0;
@@ -255,9 +256,9 @@ a.ga-highlight-header:hover { color: var(--ga-accent); }
 /* ─── CTA text ───────────────────────────────────────────────────── */
 .ga-cta-text {
   font-family: var(--ga-font-heading);
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   color: var(--ga-text-muted);
-  margin-bottom: 1rem;
+  margin-bottom: .5rem;
 }
 
 /* ─── Buttons ────────────────────────────────────────────────────── */
@@ -278,15 +279,6 @@ a.ga-highlight-header:hover { color: var(--ga-accent); }
   box-shadow: 0 4px 16px rgba(26,54,93,.3);
 }
 
-.ga-btn-accent {
-  background-color: var(--ga-accent);
-  border-color: var(--ga-accent);
-  color: #fff;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: background-color var(--ga-transition);
-}
-.ga-btn-accent:hover { background-color: var(--ga-accent-hover); border-color: var(--ga-accent-hover); color: #fff; }
 
 /* ─── Page content (lazy-loaded area) ───────────────────────────── */
 .ga-page-content {
@@ -371,7 +363,7 @@ a.ga-highlight-header:hover { color: var(--ga-accent); }
   text-align: right;
   padding-top: .1rem;
 }
-.ga-connection-name { font-weight: 600; color: var(--ga-primary); font-size: .9rem; }
+.ga-connection-name { font-weight: 600; color: var(--ga-primary-muted); font-size: .9rem; }
 .ga-connection-data { font-size: .8rem; color: var(--ga-text-muted); }
 .ga-connection-arrow {
   text-align: center;
@@ -439,6 +431,8 @@ a.ga-highlight-header:hover { color: var(--ga-accent); }
 .ga-story-article h1 { font-size: 2rem; margin-bottom: .3rem; }
 .ga-story-article h2 { font-size: 1.4rem; margin-top: 2rem; }
 .ga-story-article h3 { margin-top: 2rem; }
+.ga-story-article a { color: var(--ga-primary-muted); text-decoration: none; }
+.ga-story-article a:hover { color: var(--ga-accent); }
 .ga-story-article blockquote {
   border-left: 4px solid var(--ga-accent);
   padding: .5rem 1.2rem;
@@ -542,14 +536,6 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   display: inline-block;
   margin-bottom: .75rem;
 }
-.ga-stat-number-lg {
-  font-family: var(--ga-font-heading);
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--ga-primary);
-  line-height: 1;
-}
-.ga-stat-label-lg { font-size: .8rem; color: var(--ga-text-muted); margin-top: .25rem; }
 
 .ga-surnames-td {
   max-width: 0;
@@ -587,7 +573,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-resource-link {
   font-size: .85rem;
   font-weight: 600;
-  color: var(--ga-primary);
+  color: var(--ga-primary-muted);
   text-decoration: none;
   margin-top: auto;
 }
@@ -675,20 +661,8 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-theme-btn { font-size: .75rem; padding: .2rem .6rem; color: rgba(255,255,255,.6); border-color: rgba(255,255,255,.2); background: transparent; border-radius: 50px; }
 .ga-theme-btn:hover, .ga-theme-btn.active { color: #fff; border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.1); }
 
-/* ─── Obfuscation notice ─────────────────────────────────────────── */
-.ga-obfuscated-notice {
-  font-size: .82rem;
-  color: var(--ga-text-muted);
-  display: flex;
-  align-items: center;
-  gap: .4rem;
-  padding: .4rem .75rem;
-  background: var(--ga-bg);
-  border-radius: var(--ga-radius);
-  border: 1px solid var(--ga-border);
-}
 
-/* ─── Vacancy / loading states ───────────────────────────────────── */
+/* ─── Loading states ─────────────────────────────────────────────── */
 .ga-server-status {
   border-radius: var(--ga-radius-lg);
   padding: 1.5rem;
@@ -859,4 +833,159 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   /* Immigration table: hide bars on mobile, keep percentage text */
   .ga-immigration-bar { display: none !important; }
   #immigration-list td[style] { min-width: 0 !important; }
+}
+
+/* ── Cronología timeline ───────────────────────────────────────── */
+.ga-tl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.ga-tl-filter-btn {
+  border: 1px solid var(--ga-border);
+  background: var(--ga-bg-card);
+  color: var(--ga-text);
+  border-radius: 1rem;
+  padding: 0.25rem 0.875rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ga-tl-filter-btn:hover,
+.ga-tl-filter-btn.active {
+  color: #fff;
+}
+
+.ga-tl-filter-btn[data-filter="all"]:hover,
+.ga-tl-filter-btn[data-filter="all"].active         { background: var(--ga-text-muted); border-color: var(--ga-text-muted); }
+.ga-tl-filter-btn[data-filter="historia"]:hover,
+.ga-tl-filter-btn[data-filter="historia"].active    { background: var(--ga-primary);    border-color: var(--ga-primary); }
+.ga-tl-filter-btn[data-filter="genealogia"]:hover,
+.ga-tl-filter-btn[data-filter="genealogia"].active  { background: var(--ga-accent);     border-color: var(--ga-accent); }
+.ga-tl-filter-btn[data-filter="descubrimiento"]:hover,
+.ga-tl-filter-btn[data-filter="descubrimiento"].active { background: #2e7d32; border-color: #2e7d32; }
+
+.ga-tl-list {
+  position: relative;
+  --ga-tl-dot-col: 1.5rem;
+}
+
+.ga-tl-list::before { /* vertical spine */
+  content: '';
+  position: absolute;
+  left: calc(var(--ga-tl-dot-col) / 2 - 1px);
+  top: 0.75rem;
+  bottom: 0;
+  width: 2px;
+  background: var(--ga-border);
+}
+
+.ga-tl-entry {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.ga-tl-entry.d-none {
+  display: none !important;
+}
+
+.ga-tl-dot-wrap {
+  width: var(--ga-tl-dot-col);
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 0.3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.ga-tl-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  border: 2px solid var(--ga-bg);
+  flex-shrink: 0;
+}
+
+.ga-tl-dot-historia      { background: var(--ga-primary); }
+.ga-tl-dot-genealogia    { background: var(--ga-accent); }
+.ga-tl-dot-descubrimiento { background: #2e7d32; /* green, decorative */ }
+
+.ga-tl-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ga-tl-meta {
+  font-size: 0.85rem;
+  color: var(--ga-text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.ga-tl-card {
+  background: var(--ga-bg-card);
+  border: 1px solid var(--ga-border);
+  border-left-width: 3px;
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.875rem;
+}
+
+.ga-tl-card-historia      { border-left-color: var(--ga-primary); }
+.ga-tl-card-genealogia    { border-left-color: var(--ga-accent); }
+.ga-tl-card-descubrimiento { border-left-color: #2e7d32; }
+
+.ga-tl-card-historia .ga-tl-title      { color: var(--ga-primary); }
+.ga-tl-card-genealogia .ga-tl-title    { color: var(--ga-accent); }
+.ga-tl-card-descubrimiento .ga-tl-title { color: #2e7d32; }
+
+.ga-tl-img {
+  float: right;
+  width: 3rem;
+  height: auto;
+  margin: 0 0 0.375rem 0.75rem;
+  border-radius: 2px;
+  border: 1px solid var(--ga-border);
+  display: block;
+}
+
+.ga-tl-title {
+  font-weight: 600;
+  color: var(--ga-text);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.ga-tl-body {
+  font-size: 0.875rem;
+  color: var(--ga-text-muted);
+  margin-top: 0.25rem;
+}
+
+.ga-tl-source-link {
+  font-size: 0.75rem;
+  color: var(--ga-primary-muted);
+  margin-top: 0.375rem;
+  display: inline-block;
+}
+
+.ga-tl-source-link:hover {
+  color: var(--ga-accent);
+}
+
+.ga-tl-story-link {
+  font-size: 0.75rem;
+  color: var(--ga-accent);
+  margin-top: 0.25rem;
+  display: inline-block;
+}
+
+.ga-tl-story-link:hover {
+  text-decoration: underline;
 }

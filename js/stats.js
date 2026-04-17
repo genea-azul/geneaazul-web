@@ -51,7 +51,7 @@ GeneaAzul.stats = (function() {
     ready();
 
     // Load live stats from API
-    utils.apiGet(
+    utils.apiGetCached(
       cfg.apiBaseUrl + '/api/gedcom-analyzer/metadata',
       function(meta) {
         var persons = meta.personsCount;

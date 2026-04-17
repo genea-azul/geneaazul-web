@@ -19,19 +19,13 @@ GeneaAzul.connections = (function() {
   }
 
   function initBackend() {
-    if (cfg.onVacations) {
-      $('#conn-loading-container').addClass('d-none');
-      $('#conn-vacations-container').removeClass('d-none');
-      return;
-    }
-
     setTimeout(function() {
       if ($('#conn-form-container').hasClass('d-none')) {
         $('#conn-spinner').css('visibility', 'visible');
       }
     }, 1500);
 
-    utils.apiGet(
+    utils.apiGetCached(
       cfg.apiBaseUrl + '/api/gedcom-analyzer',
       function() {
         $('#conn-loading-container').addClass('d-none');
@@ -39,9 +33,7 @@ GeneaAzul.connections = (function() {
       },
       function() {
         $('#conn-loading-container').addClass('d-none');
-        $('#conn-spinner-msg').html(
-          '<p class="text-danger mt-2">No se pudo conectar con el servidor. Por favor intent&aacute; de nuevo m&aacute;s tarde.</p>'
-        ).parent().removeClass('d-none');
+        $('#conn-spinner-msg').html(utils.backendErrorHtml()).parent().removeClass('d-none');
       }
     );
   }
@@ -104,7 +96,7 @@ GeneaAzul.connections = (function() {
           $resultBody.html(
             '<p>&#128270; No se encontr&oacute; conexi&oacute;n entre estas personas. &#128269;</p>'
             + '<p>Puede que no est&eacute;n en el &aacute;rbol, o no haya un camino conocido que las une. '
-            + 'Contact&aacute;nos para que carguemos la info 😊</p>'
+            + 'Contactanos para que carguemos la info 😊</p>'
           );
         } else {
           var distance = data.connections.length - 1;
@@ -146,29 +138,27 @@ GeneaAzul.connections = (function() {
     $header.html('<i class="bi bi-diagram-3"></i> Camino de conexi&oacute;n');
     $wrap.append($header);
 
-    var $body = $('<div>').addClass('card-body small p-2');
+    var $body = $('<div>').addClass('card-body p-2');
 
     connections.forEach(function(step, idx) {
-      var isEndpoint = (idx === 0 || idx === connections.length - 1);
-
-      // Arrow + relationship label between steps
       if (idx > 0) {
         var relText = step.relationship ? (step.relationship + ' de') : '';
         $body.append(
-          $('<div>').addClass('d-flex align-items-center gap-1 text-muted py-1 ps-1')
+          $('<div>').addClass('ga-connection-arrow')
             .append($('<i>').addClass('bi bi-arrow-down-short'))
+            .append(' ')
             .append($('<span>').addClass('fst-italic').text(relText))
         );
       }
 
-      // Person row
-      var $personRow = $('<div>').addClass('py-1 ps-1');
-      var $name = $('<span>').addClass(isEndpoint ? 'fw-semibold' : '').text(step.personName);
-      $personRow.append($name);
+      var $step = $('<div>').addClass('ga-connection-step');
+      var $right = $('<div>');
+      $right.append($('<span>').addClass('ga-connection-name').text(step.personName));
       if (step.personData) {
-        $personRow.append(' ').append($('<span>').addClass('text-muted fw-normal').text('(' + step.personData + ')'));
+        $right.append($('<div>').addClass('ga-connection-data').text('(' + step.personData + ')'));
       }
-      $body.append($personRow);
+      $step.append($right);
+      $body.append($step);
     });
 
     $wrap.append($body);

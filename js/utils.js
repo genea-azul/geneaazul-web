@@ -80,6 +80,27 @@ GeneaAzul.utils = (function() {
     });
   }
 
+  /* Like apiGet but deduplicates: concurrent or repeated calls for the same
+     URL share one request. Resolved/rejected callbacks fire immediately for
+     calls that arrive after the request completes. */
+  var _getCache = {};
+  function apiGetCached(url, successFn, errorFn) {
+    if (!_getCache[url]) {
+      var deferred = $.Deferred();
+      $.ajax({
+        type: 'GET',
+        url: url,
+        contentType: 'application/json',
+        success: function(data) { deferred.resolve(data); },
+        error: function(xhr)    { deferred.reject(xhr); }
+      });
+      _getCache[url] = deferred;
+    }
+    _getCache[url]
+      .done(successFn  || function() {})
+      .fail(errorFn    || function() {});
+  }
+
   function apiPost(url, data, successFn, errorFn) {
     $.ajax({
       type: 'POST',
@@ -93,6 +114,24 @@ GeneaAzul.utils = (function() {
   }
 
   /* ── DOM helpers ───────────────────────────────────────────────── */
+  /* Shared backend-unavailable error block used by #buscar and #conexiones.
+     Matches the contact-button style from #sobre-nosotros. */
+  function backendErrorHtml() {
+    return '<p class="mb-1">No se pudo conectar con el servidor.</p>'
+      + '<p class="text-muted mb-3">Por favor intent&aacute; de nuevo o contactanos:</p>'
+      + '<div class="d-flex gap-3 justify-content-center flex-wrap">'
+      +   '<a href="https://instagram.com/_u/genea.azul" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">'
+      +     '<i class="bi bi-instagram me-2"></i>@genea.azul'
+      +   '</a>'
+      +   '<a href="https://facebook.com/genea.azul" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">'
+      +     '<i class="bi bi-facebook me-2"></i>genea.azul'
+      +   '</a>'
+      +   '<a href="mailto:genea.azul@gmail.com" class="btn btn-outline-secondary btn-sm">'
+      +     '<i class="bi bi-envelope me-2"></i>Email'
+      +   '</a>'
+      + '</div>';
+  }
+
   /* Returns a loading spinner element */
   function spinnerHtml(text) {
     text = text || 'Buscando...';
@@ -127,7 +166,9 @@ GeneaAzul.utils = (function() {
     animateCounter,
     animateCounters,
     apiGet,
+    apiGetCached,
     apiPost,
+    backendErrorHtml,
     spinnerHtml,
     getHashParams
   };

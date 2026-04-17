@@ -8,7 +8,6 @@ var GeneaAzul = window.GeneaAzul || {};
 GeneaAzul.ephemerides = (function() {
 
   function init() {
-    if (GeneaAzul.config.onVacations) return;
     fetchEphemerides();
   }
 
