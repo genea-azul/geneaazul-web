@@ -28,12 +28,22 @@ GeneaAzul.cronologia = (function() {
         $container.html('<p class="text-muted text-center">No hay entradas disponibles.</p>');
         return;
       }
+      var navH = $('#main-navbar').outerHeight() || 56;
       var $list = $('<div>').addClass('ga-tl-list');
+      var lastYear = null;
       entries.forEach(function(entry) {
+        if (entry.year !== lastYear) {
+          $list.append(
+            $('<div>').addClass('ga-tl-year-header')
+              .text(entry.year)
+              .css('top', navH + 'px')
+          );
+          lastYear = entry.year;
+        }
         $list.append(buildEntry(entry));
       });
       $container.append($list);
-      initFilterTabs();
+      initFilterTabs($list);
     }).fail(function() {
       $container.html('<p class="text-muted text-center">No se pudo cargar la cronolog\u00eda.</p>');
     });
@@ -55,7 +65,7 @@ GeneaAzul.cronologia = (function() {
     $dotWrap.append($dot);
 
     var $content = $('<div>').addClass('ga-tl-content');
-    $content.append($('<div>').addClass('ga-tl-meta').text(formatDate(entry)));
+    $content.append($('<div>').addClass('ga-tl-meta d-none').text(formatDate(entry)));
 
     var $card = $('<div>').addClass('ga-tl-card ga-tl-card-' + dotType);
 
@@ -70,7 +80,8 @@ GeneaAzul.cronologia = (function() {
     $titleRow.append($('<i>').addClass('bi ' + (TYPE_ICONS[dotType] || 'bi-clock-history')));
     $titleRow.append($('<span>').text(entry.title));
     $card.append($titleRow);
-    $card.append($('<div>').addClass('ga-tl-body').text(entry.body));
+    var bodyHtml = DOMPurify.sanitize(marked.parseInline(entry.body || ''));
+    $card.append($('<div>').addClass('ga-tl-body').html(bodyHtml));
 
     if (entry.sourceUrl && entry.sourceUrl.indexOf('http') === 0) {
       $card.append(
@@ -79,7 +90,7 @@ GeneaAzul.cronologia = (function() {
           .text(entry.source || 'Fuente')
       );
     } else if (entry.source) {
-      $card.append($('<div>').addClass('ga-tl-source-link').text(entry.source));
+      $card.append($('<div>').addClass('ga-tl-source-text').text(entry.source));
     }
 
     if (entry.storySlug) {
@@ -95,7 +106,15 @@ GeneaAzul.cronologia = (function() {
     return $entry;
   }
 
-  function initFilterTabs() {
+  function updateYearHeaders($list) {
+    $list.find('.ga-tl-year-header').each(function() {
+      var $h = $(this);
+      var $entries = $h.nextUntil('.ga-tl-year-header', '.ga-tl-entry');
+      $h.toggleClass('d-none', $entries.not('.d-none').length === 0);
+    });
+  }
+
+  function initFilterTabs($list) {
     var $section = $('#cronologia-section');
     $(document).off('click.cronologia', '.ga-tl-filter-btn')
       .on('click.cronologia', '.ga-tl-filter-btn', function() {
@@ -108,6 +127,7 @@ GeneaAzul.cronologia = (function() {
           $section.find('.ga-tl-entry').addClass('d-none');
           $section.find('.ga-tl-entry[data-type="' + filter + '"]').removeClass('d-none');
         }
+        updateYearHeaders($list);
       });
   }
 

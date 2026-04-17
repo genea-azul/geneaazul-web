@@ -56,7 +56,7 @@ sourceUrl: https://es.wikipedia.org/wiki/Partido_de_Azul
 imageUrl: null
 ---
 
-El 16 de diciembre de 1832, el coronel Pedro Burgos fundó el Fuerte...
+El **16 de diciembre de 1832**, el coronel Pedro Burgos fundó el **Fuerte de San Serapio Mártir del Arroyo Azul**...
 ```
 
 **Field rules:**
@@ -64,7 +64,7 @@ El 16 de diciembre de 1832, el coronel Pedro Burgos fundó el Fuerte...
 - `month`, `day`: integer or `null` — **only set when confirmed from a source**
 - `type`: always `historia` (unless user explicitly requests `descubrimiento`)
 - `title`: Spanish, 5–10 words, specific
-- Body: 1–3 sentences in Spanish, factual, includes the date if known
+- Body: 1–3 sentences in Spanish, factual, includes the date if known. Apply `**bold**` to: (1) the main date of the event, (2) the name of the subject/institution, (3) any other key fact worth highlighting — but do not over-bold; one or two terms per sentence at most
 - `source`: short name (e.g. `Wikipedia`, `Hemeroteca de Azul`, `IFDT N.° 156 — Historia de Azul`)
 - `sourceUrl`: exact URL, or `null` for PDFs/offline sources
 - `imageUrl`: always `null` unless user specifies otherwise
