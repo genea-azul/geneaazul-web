@@ -869,22 +869,26 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   padding: 0.25rem 0.875rem;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background-color var(--ga-transition), color var(--ga-transition), border-color var(--ga-transition);
 }
+
+.ga-tl-filter-btn[data-filter="all"]                 { color: var(--ga-text-muted);border-color: var(--ga-text-muted); }
+.ga-tl-filter-btn[data-filter="all"]:hover,
+.ga-tl-filter-btn[data-filter="all"].active          { background: var(--ga-text-muted); }
+.ga-tl-filter-btn[data-filter="historia"]            { color: var(--ga-primary); border-color: var(--ga-primary); }
+.ga-tl-filter-btn[data-filter="historia"]:hover,
+.ga-tl-filter-btn[data-filter="historia"].active     { background: var(--ga-primary); }
+.ga-tl-filter-btn[data-filter="genealogia"]          { color: var(--ga-accent);border-color: var(--ga-accent); }
+.ga-tl-filter-btn[data-filter="genealogia"]:hover,
+.ga-tl-filter-btn[data-filter="genealogia"].active   { background: var(--ga-accent); }
+.ga-tl-filter-btn[data-filter="curiosidades"]        { color: #2e7d32; border-color: #2e7d32; }
+.ga-tl-filter-btn[data-filter="curiosidades"]:hover,
+.ga-tl-filter-btn[data-filter="curiosidades"].active { background: #2e7d32; }
 
 .ga-tl-filter-btn:hover,
 .ga-tl-filter-btn.active {
   color: #fff;
 }
-
-.ga-tl-filter-btn[data-filter="all"]:hover,
-.ga-tl-filter-btn[data-filter="all"].active         { background: var(--ga-text-muted); border-color: var(--ga-text-muted); }
-.ga-tl-filter-btn[data-filter="historia"]:hover,
-.ga-tl-filter-btn[data-filter="historia"].active    { background: var(--ga-primary);    border-color: var(--ga-primary); }
-.ga-tl-filter-btn[data-filter="genealogia"]:hover,
-.ga-tl-filter-btn[data-filter="genealogia"].active  { background: var(--ga-accent);     border-color: var(--ga-accent); }
-.ga-tl-filter-btn[data-filter="descubrimiento"]:hover,
-.ga-tl-filter-btn[data-filter="descubrimiento"].active { background: #2e7d32; border-color: #2e7d32; }
 
 .ga-tl-list {
   position: relative;
@@ -954,7 +958,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 
 .ga-tl-dot-historia      { background: var(--ga-primary); }
 .ga-tl-dot-genealogia    { background: var(--ga-accent); }
-.ga-tl-dot-descubrimiento { background: #2e7d32; /* green, decorative */ }
+.ga-tl-dot-curiosidades  { background: #2e7d32; /* green, decorative */ }
 
 .ga-tl-content {
   flex: 1;
@@ -977,11 +981,11 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 
 .ga-tl-card-historia      { border-left-color: var(--ga-primary); }
 .ga-tl-card-genealogia    { border-left-color: var(--ga-accent); }
-.ga-tl-card-descubrimiento { border-left-color: #2e7d32; }
+.ga-tl-card-curiosidades  { border-left-color: #2e7d32; }
 
 .ga-tl-card-historia .ga-tl-title      { color: var(--ga-primary); }
 .ga-tl-card-genealogia .ga-tl-title    { color: var(--ga-accent); }
-.ga-tl-card-descubrimiento .ga-tl-title { color: #2e7d32; }
+.ga-tl-card-curiosidades .ga-tl-title  { color: #2e7d32; }
 
 .ga-tl-img {
   float: right;

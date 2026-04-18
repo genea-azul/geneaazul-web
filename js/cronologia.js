@@ -12,9 +12,9 @@ GeneaAzul.cronologia = (function() {
                      'jul','ago','sep','oct','nov','dic'];
 
   var TYPE_ICONS = {
-    historia:      'bi-book',
-    genealogia:    'bi-diagram-3',
-    descubrimiento: 'bi-lightbulb'
+    historia:     'bi-book',
+    genealogia:   'bi-diagram-3',
+    curiosidades: 'bi-patch-question'
   };
 
   function init() {
