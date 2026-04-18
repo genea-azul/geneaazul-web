@@ -35,12 +35,15 @@ GeneaAzul.app = (function() {
   }
 
   function fetchLiveStats() {
-    // Persons count from API
+    // Persons + surnames count from API
     GeneaAzul.utils.apiGetCached(
       GeneaAzul.config.apiBaseUrl + '/api/gedcom-analyzer/metadata',
       function(meta) {
         if (meta && meta.personsCount) {
           updateHeroStat('#stat-persons', meta.personsCount);
+        }
+        if (meta && meta.azulSurnamesCount) {
+          updateHeroStat('#stat-surnames', meta.azulSurnamesCount);
         }
       }
     );
@@ -51,11 +54,6 @@ GeneaAzul.app = (function() {
       var countries  = data.reduce(function(acc, r) { return acc + r.country.split('/').length; }, 0);
       updateHeroStat('#stat-immigrants', immigrants);
       updateHeroStat('#stat-countries', countries);
-    }).fail(function() {});
-
-    // Surnames count from surnames.json
-    $.getJSON('data/surnames.json', function(data) {
-      updateHeroStat('#stat-surnames', data.length);
     }).fail(function() {});
   }
 

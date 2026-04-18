@@ -63,9 +63,15 @@ GeneaAzul.map = (function() {
       }).addTo(_leafletMap);
     }
 
+    var $overlay = $('<div>').addClass('ga-map-loading')
+      .html(GeneaAzul.utils.spinnerHtml('Cargando datos\u2026'));
+    $('.ga-leaflet-wrap').append($overlay);
+
     $.getJSON('data/immigration.json', function(data) {
+      $overlay.remove();
       renderBubbles(data);
     }).fail(function() {
+      $overlay.remove();
       $('#map-container').html('<p class="text-muted text-center py-4">No se pudieron cargar los datos.</p>');
     });
   }

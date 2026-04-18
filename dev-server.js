@@ -44,6 +44,7 @@ var MOCK_METADATA = {
   distinguishedCount:    258,
   azulPersonsCount:      12450,
   azulAliveCount:        4800,
+  azulSurnamesCount:     4080,
   azulMayorsCount:       47,
   azulDisappearedCount:  12
 };

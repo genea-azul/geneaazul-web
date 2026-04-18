@@ -63,7 +63,11 @@ a:hover { color: var(--ga-accent); }
 .ga-navbar .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,0.87)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
+.ga-navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,0.87)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M6 6l18 18M24 6L6 24'/%3e%3c/svg%3e");
+}
 .ga-navbar .navbar-toggler { color: var(--ga-navbar-text); }
+.ga-navbar-menu-label { color: var(--ga-navbar-text); font-size: 0.8rem; letter-spacing: .04em; margin-left: 0.25rem; vertical-align: middle; }
 
 .ga-brand { display: flex; align-items: center; gap: .5rem; }
 /* White filter for dark navbar/footer backgrounds */
@@ -78,12 +82,13 @@ a:hover { color: var(--ga-accent); }
   font-weight: 400;
   font-size: .95rem;
   padding: .4rem .75rem;
+  margin: 0 .075rem;
   border-radius: var(--ga-radius);
   transition: background-color var(--ga-transition), color var(--ga-transition);
 }
 .ga-navbar .nav-link:hover,
 .ga-navbar .nav-link.active {
-  background-color: rgba(255,255,255,.12);
+  background-color: rgba(255,255,255,.24);
   color: #fff !important;
 }
 .ga-navbar .dropdown-menu {
@@ -98,7 +103,7 @@ a:hover { color: var(--ga-accent); }
   color: var(--ga-text);
   padding: .45rem .9rem;
 }
-.ga-navbar .dropdown-item:hover                { background-color: var(--ga-bg); color: var(--ga-primary); }
+.ga-navbar .dropdown-item:hover                { background-color: var(--ga-border); color: var(--ga-primary); }
 .ga-navbar .dropdown-item.active               { background-color: var(--ga-primary); color: #fff; }
 .ga-navbar .dropdown-item.active:hover         { background-color: var(--ga-primary-hover); color: #fff; }
 
@@ -603,7 +608,19 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-logo-download-info { line-height: 1.4; }
 
 /* ─── Map page ───────────────────────────────────────────────────── */
-.ga-leaflet-wrap { border-radius: var(--ga-radius-lg); overflow: hidden; box-shadow: var(--ga-shadow); }
+.ga-leaflet-wrap { position: relative; border-radius: var(--ga-radius-lg); overflow: hidden; box-shadow: var(--ga-shadow); }
+
+.ga-map-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
 #map-container { height: 440px; }
 @media (max-width: 575.98px) { #map-container { height: 300px; } }
 /* Leaflet popup style overrides to match theme */

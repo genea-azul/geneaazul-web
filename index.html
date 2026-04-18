@@ -55,43 +55,44 @@
       </a>
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Abrir menú">
         <span class="navbar-toggler-icon"></span>
+        <span class="ga-navbar-menu-label">Menú</span>
       </button>
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="#inicio" data-route="inicio"><i class="bi bi-house me-1"></i>Inicio</a>
+            <a class="nav-link" href="#inicio" data-route="inicio"><i class="bi bi-house me-2"></i>Inicio</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#buscar" data-route="buscar"><i class="bi bi-search me-1"></i>Buscar</a>
+            <a class="nav-link" href="#buscar" data-route="buscar"><i class="bi bi-search me-2"></i><span class="d-none d-lg-inline">Buscar</span><span class="d-lg-none">Buscar personas</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#conexiones" data-route="conexiones"><i class="bi bi-diagram-3 me-1"></i>Conexiones</a>
+            <a class="nav-link" href="#conexiones" data-route="conexiones"><i class="bi bi-diagram-3 me-2"></i>Conexiones</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#estadisticas" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-route="estadisticas">
-              <i class="bi bi-bar-chart me-1"></i>Estadísticas
+              <i class="bi bi-bar-chart me-2"></i>Estadísticas
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#estadisticas" data-route="estadisticas"><i class="bi bi-grid me-1"></i>Resumen</a></li>
-              <li><a class="dropdown-item" href="#estadisticas/inmigracion" data-route="estadisticas/inmigracion"><i class="bi bi-globe-americas me-1"></i>Inmigración</a></li>
-              <li><a class="dropdown-item" href="#estadisticas/personalidades" data-route="estadisticas/personalidades"><i class="bi bi-star me-1"></i>Personalidades</a></li>
-              <li><a class="dropdown-item" href="#estadisticas/apellidos" data-route="estadisticas/apellidos"><i class="bi bi-fonts me-1"></i>Apellidos</a></li>
+              <li><a class="dropdown-item" href="#estadisticas" data-route="estadisticas"><i class="bi bi-grid me-2"></i>Resumen</a></li>
+              <li><a class="dropdown-item" href="#estadisticas/inmigracion" data-route="estadisticas/inmigracion"><i class="bi bi-globe-americas me-2"></i>Inmigración</a></li>
+              <li><a class="dropdown-item" href="#estadisticas/personalidades" data-route="estadisticas/personalidades"><i class="bi bi-star me-2"></i>Personalidades</a></li>
+              <li><a class="dropdown-item" href="#estadisticas/apellidos" data-route="estadisticas/apellidos"><i class="bi bi-fonts me-2"></i>Apellidos</a></li>
             </ul>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#mapa" data-route="mapa"><i class="bi bi-map me-1"></i>Mapa</a>
+            <a class="nav-link" href="#mapa" data-route="mapa"><i class="bi bi-map me-2"></i><span class="d-none d-lg-inline">Mapa</span><span class="d-lg-none">Mapa migratorio</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#historias" data-route="historias"><i class="bi bi-book me-1"></i>Historias</a>
+            <a class="nav-link" href="#historias" data-route="historias"><i class="bi bi-book me-2"></i><span class="d-none d-lg-inline">Historias</span><span class="d-lg-none">Historias familiares</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#cronologia" data-route="cronologia"><i class="bi bi-clock-history me-1"></i>Cronolog&iacute;a</a>
+            <a class="nav-link" href="#cronologia" data-route="cronologia"><i class="bi bi-clock-history me-2"></i>Cronolog&iacute;a</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#recursos" data-route="recursos"><i class="bi bi-link-45deg me-1"></i>Recursos</a>
+            <a class="nav-link" href="#recursos" data-route="recursos"><i class="bi bi-link-45deg me-2"></i><span class="d-none d-lg-inline">Recursos</span><span class="d-lg-none">Recursos genealógicos</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#sobre-nosotros" data-route="sobre-nosotros"><i class="bi bi-info-circle me-1"></i>Sobre nosotros</a>
+            <a class="nav-link" href="#sobre-nosotros" data-route="sobre-nosotros"><i class="bi bi-info-circle me-2"></i>Sobre nosotros</a>
           </li>
         </ul>
         <!-- Social icons -->
@@ -209,7 +210,7 @@
                 <i class="bi bi-map me-2"></i>Mapa migratorio
               </a>
               <div class="ga-highlight-body">
-                Visualizá en un mapa interactivo los países de origen de los más de 7.000 inmigrantes registrados en el árbol.
+                Visualizá en un mapa interactivo los países de origen de los más de 7.300 inmigrantes registrados en el árbol.
               </div>
               <a href="#mapa" data-route="mapa" class="ga-highlight-link">
                 Explorar mapa <i class="bi bi-arrow-right ms-1"></i>
@@ -226,6 +227,45 @@
               </div>
               <a href="#estadisticas/personalidades" data-route="estadisticas/personalidades" class="ga-highlight-link">
                 Ver todas las personalidades <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="ga-highlight-card">
+              <a href="#estadisticas/apellidos" data-route="estadisticas/apellidos" class="ga-highlight-header text-decoration-none">
+                <i class="bi bi-fonts me-2"></i>Apellidos
+              </a>
+              <div class="ga-highlight-body">
+                Más de 4.600 apellidos registrados: desde los más frecuentes como Rodríguez, García o Valicenti hasta linajes únicos traídos por inmigrantes de todo el mundo.
+              </div>
+              <a href="#estadisticas/apellidos" data-route="estadisticas/apellidos" class="ga-highlight-link">
+                Ver ranking de apellidos <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="ga-highlight-card">
+              <a href="#historias" data-route="historias" class="ga-highlight-header text-decoration-none">
+                <i class="bi bi-book me-2"></i>Historias familiares
+              </a>
+              <div class="ga-highlight-body">
+                Relatos sobre familias, apellidos y personajes que forman parte del árbol genealógico de Azul: sus orígenes, sus viajes y las huellas que dejaron en el partido.
+              </div>
+              <a href="#historias" data-route="historias" class="ga-highlight-link">
+                Leer historias <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="ga-highlight-card">
+              <a href="#cronologia" data-route="cronologia" class="ga-highlight-header text-decoration-none">
+                <i class="bi bi-clock-history me-2"></i>Cronología
+              </a>
+              <div class="ga-highlight-body">
+                La historia de Azul contada a través del tiempo: desde la fundación del fuerte en 1832 hasta la actualidad, con más de 100 eventos documentados.
+              </div>
+              <a href="#cronologia" data-route="cronologia" class="ga-highlight-link">
+                Ver cronología <i class="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
           </div>

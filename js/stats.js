@@ -93,6 +93,8 @@ GeneaAzul.stats = (function() {
           utils.animateCounter($('#st-jefes'),        meta.azulMayorsCount);
         if (meta.azulDisappearedCount != null)
           utils.animateCounter($('#st-desaparecidos'), meta.azulDisappearedCount);
+        if (meta.azulSurnamesCount != null)
+          utils.animateCounter($('#st-surnames'), meta.azulSurnamesCount);
       }
     );
 
@@ -103,11 +105,6 @@ GeneaAzul.stats = (function() {
       utils.animateCounter($('#st-immigrants'), total);
       utils.animateCounter($('#st-countries'),  countries);
       renderImmigrationPreview(data.slice(0, 5), '#stats-immigration-preview');
-    });
-
-    // Surnames count card
-    loadSurnames(function(data) {
-      utils.animateCounter($('#st-surnames'), data.length);
     });
 
     // Personalities preview (7 random) — list still comes from JSON
@@ -295,6 +292,7 @@ GeneaAzul.stats = (function() {
   /* ═══ PERSONALITIES PAGE ════════════════════════════════════════ */
   function initPersonalities() {
     ready();
+    $('#personalities-list').html(utils.spinnerHtml('Cargando personalidades\u2026'));
     loadPersonalities(function(data) {
       renderPersonalitiesFull(data);
     });
@@ -335,6 +333,7 @@ GeneaAzul.stats = (function() {
   /* ═══ SURNAMES PAGE ═════════════════════════════════════════════ */
   function initSurnames() {
     ready();
+    $('#surnames-list').html(utils.spinnerHtml('Cargando apellidos\u2026'));
     loadSurnames(function(data) {
       renderSurnamesFull(data);
     });
