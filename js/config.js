@@ -66,9 +66,16 @@ GeneaAzul.app = (function() {
 
   function initNavbarScroll() {
     var $navbar = $('#main-navbar');
+    setNavbarHeightVar($navbar);
+    $(window).on('resize.navheight', function() { setNavbarHeightVar($navbar); });
     $(window).on('scroll.navbar', function() {
       $navbar.toggleClass('scrolled', window.scrollY > 20);
     });
+  }
+
+  function setNavbarHeightVar($navbar) {
+    var h = $navbar.outerHeight() || 56;
+    document.documentElement.style.setProperty('--ga-navbar-h', h + 'px');
   }
 
   return { init };

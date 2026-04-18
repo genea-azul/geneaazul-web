@@ -26,6 +26,11 @@
   --ga-navbar-text:    rgba(255,255,255,.87);
   --ga-footer-bg:      #1a365d;
   --ga-footer-text:    rgba(255,255,255,.82);
+
+  /* ── Cross-theme semantic colours (same across all themes) ── */
+  --ga-curiosidades: #2e7d32; /* timeline "curiosidades" category */
+  --ga-sex-male:     #2c6fa0; /* teal-blue for male persons */
+  --ga-sex-female:   #9b4c6e; /* wine-rose for female persons */
 }
 
 /* ─── Base ───────────────────────────────────────────────────────── */
@@ -385,14 +390,17 @@ a.ga-highlight-header:hover { color: var(--ga-accent); }
   border-bottom-color: rgba(255,255,255,.15);
 }
 /* Sex selected: male = teal-blue, female = wine-rose */
-.ga-person-form-card.ga-sex-male  > .card-header { background-color: #2c6fa0; }
-.ga-person-form-card.ga-sex-female > .card-header { background-color: #9b4c6e; }
+.ga-person-form-card.ga-sex-male  > .card-header { background-color: var(--ga-sex-male); }
+.ga-person-form-card.ga-sex-female > .card-header { background-color: var(--ga-sex-female); }
 /* Border accent */
-.ga-person-form-card.ga-sex-male  { border-color: #2c6fa0 !important; }
-.ga-person-form-card.ga-sex-female { border-color: #9b4c6e !important; }
-/* Static male/female headers (padre, madre, abuelos) */
-.ga-card-header-male   { background-color: #2c6fa0; color: #fff; }
-.ga-card-header-female { background-color: #9b4c6e; color: #fff; }
+.ga-person-form-card.ga-sex-male  { border-color: var(--ga-sex-male) !important; }
+.ga-person-form-card.ga-sex-female { border-color: var(--ga-sex-female) !important; }
+/* Static male/female headers (padre, madre, abuelos, result cards) */
+.ga-card-header-male   { background-color: var(--ga-sex-male); color: #fff; border-bottom-color: rgba(255,255,255,.15); }
+.ga-card-header-female { background-color: var(--ga-sex-female); color: #fff; border-bottom-color: rgba(255,255,255,.15); }
+/* Result card border accent by sex */
+.ga-result-card-male   { border-color: var(--ga-sex-male) !important; }
+.ga-result-card-female { border-color: var(--ga-sex-female) !important; }
 
 /* Sex toggle buttons inside card header */
 .ga-switch-lg {
@@ -741,6 +749,14 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   opacity: 0.75;
   margin-left: 0.4rem;
 }
+@media (max-width: 575px) {
+  .ga-birthday-date {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.15rem;
+  }
+  .ga-anchor-link { display: none; }
+}
 
 .ga-birthday-footer {
   padding: 0.8rem 1rem 0;
@@ -812,7 +828,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 }
 
 .ga-ephem-birth {
-  color: #b8860b;
+  color: #b8860b; /* decorative birthday star gold — intentionally fixed, not theme-dependent */
 }
 
 .ga-ephem-death {
@@ -881,9 +897,9 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-tl-filter-btn[data-filter="genealogia"]          { color: var(--ga-accent);border-color: var(--ga-accent); }
 .ga-tl-filter-btn[data-filter="genealogia"]:hover,
 .ga-tl-filter-btn[data-filter="genealogia"].active   { background: var(--ga-accent); }
-.ga-tl-filter-btn[data-filter="curiosidades"]        { color: #2e7d32; border-color: #2e7d32; }
+.ga-tl-filter-btn[data-filter="curiosidades"]        { color: var(--ga-curiosidades); border-color: var(--ga-curiosidades); }
 .ga-tl-filter-btn[data-filter="curiosidades"]:hover,
-.ga-tl-filter-btn[data-filter="curiosidades"].active { background: #2e7d32; }
+.ga-tl-filter-btn[data-filter="curiosidades"].active { background: var(--ga-curiosidades); }
 
 .ga-tl-filter-btn:hover,
 .ga-tl-filter-btn.active {
@@ -897,7 +913,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 
 .ga-tl-year-header {
   position: sticky;
-  /* top is set inline by JS to match navbar height */
+  top: var(--ga-navbar-h, 56px);
   z-index: 2;
   background: var(--ga-bg);
   padding: 0.4rem 0 0.4rem calc(var(--ga-tl-dot-col) + 0.75rem);
@@ -958,7 +974,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 
 .ga-tl-dot-historia      { background: var(--ga-primary); }
 .ga-tl-dot-genealogia    { background: var(--ga-accent); }
-.ga-tl-dot-curiosidades  { background: #2e7d32; /* green, decorative */ }
+.ga-tl-dot-curiosidades  { background: var(--ga-curiosidades); /* green, decorative */ }
 
 .ga-tl-content {
   flex: 1;
@@ -981,11 +997,11 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 
 .ga-tl-card-historia      { border-left-color: var(--ga-primary); }
 .ga-tl-card-genealogia    { border-left-color: var(--ga-accent); }
-.ga-tl-card-curiosidades  { border-left-color: #2e7d32; }
+.ga-tl-card-curiosidades  { border-left-color: var(--ga-curiosidades); }
 
 .ga-tl-card-historia .ga-tl-title      { color: var(--ga-primary); }
 .ga-tl-card-genealogia .ga-tl-title    { color: var(--ga-accent); }
-.ga-tl-card-curiosidades .ga-tl-title  { color: #2e7d32; }
+.ga-tl-card-curiosidades .ga-tl-title  { color: var(--ga-curiosidades); }
 
 .ga-tl-img {
   float: right;

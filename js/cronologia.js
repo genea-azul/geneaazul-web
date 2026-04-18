@@ -28,15 +28,12 @@ GeneaAzul.cronologia = (function() {
         $container.html('<p class="text-muted text-center">No hay entradas disponibles.</p>');
         return;
       }
-      var navH = $('#main-navbar').outerHeight() || 56;
       var $list = $('<div>').addClass('ga-tl-list');
       var lastYear = null;
       entries.forEach(function(entry) {
         if (entry.year !== lastYear) {
           $list.append(
-            $('<div>').addClass('ga-tl-year-header')
-              .text(entry.year)
-              .css('top', navH + 'px')
+            $('<div>').addClass('ga-tl-year-header').text(entry.year)
           );
           lastYear = entry.year;
         }

@@ -385,14 +385,12 @@ GeneaAzul.search = (function() {
     var $card = $('<div>').addClass('card ga-result-card');
     if (idx > 0) $card.addClass('mt-2');
 
-    if (person.sex === 'M')      $card.addClass('border-secondary');
-    else if (person.sex === 'F') $card.addClass('border-danger');
-    else                         $card.addClass('border-light');
+    if (person.sex === 'M')      $card.addClass('ga-result-card-male');
+    else if (person.sex === 'F') $card.addClass('ga-result-card-female');
 
     var $header = $('<div>').addClass('card-header d-flex align-items-center gap-2');
-    if (person.sex === 'M')      $header.addClass('text-bg-secondary');
-    else if (person.sex === 'F') $header.addClass('text-bg-danger');
-    else                         $header.addClass('text-bg-light');
+    if (person.sex === 'M')      $header.addClass('ga-card-header-male');
+    else if (person.sex === 'F') $header.addClass('ga-card-header-female');
 
     var genderIcon = person.sex === 'M' ? 'bi-gender-male' : (person.sex === 'F' ? 'bi-gender-female' : 'bi-person');
     $header.append($('<i>').addClass('bi ' + genderIcon)).append(i18n.displayNameInSpanish(person.name));
@@ -569,10 +567,18 @@ GeneaAzul.search = (function() {
     utils.apiGet(
       cfg.apiBaseUrl + '/api/search/family-tree/' + data.personUuid + '/plainPdf',
       function(pdfData) {
+        var binary = atob(pdfData.pdf);
+        var bytes = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
+        var blob = new Blob([bytes], { type: 'application/pdf' });
+        var url = URL.createObjectURL(blob);
         var link = document.createElement('a');
-        link.href = 'data:application/pdf;base64,' + pdfData.pdf;
+        link.href = url;
         link.download = 'familiares-' + data.personUuid + '.pdf';
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
         $btn.prop('disabled', false).removeClass('disabled');
       },
       function(xhr) {

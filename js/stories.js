@@ -47,12 +47,12 @@ GeneaAzul.stories = (function() {
               .addClass('ga-highlight-header d-block text-decoration-none')
               .attr('href', '#historias/' + story.slug)
               .attr('data-route-story', story.slug)
-              .html('<i class="bi bi-book me-2"></i>' + story.title)
+              .html('<i class="bi bi-book me-2"></i>' + GeneaAzul.utils.escHtml(story.title))
             )
-            .append($('<div>').addClass('ga-highlight-body').html(story.excerpt || ''))
+            .append($('<div>').addClass('ga-highlight-body').text(story.excerpt || ''))
             .append($('<div>').addClass('d-flex justify-content-between align-items-center mt-2')
               .append($('<small>').addClass('text-muted').html(
-                (story.author ? '<i class="bi bi-person me-1"></i>' + story.author : '')
+                (story.author ? '<i class="bi bi-person me-1"></i>' + GeneaAzul.utils.escHtml(story.author) : '')
                 + (date ? ' &middot; ' + date : '')
               ))
               .append($('<a>')
@@ -101,9 +101,7 @@ GeneaAzul.stories = (function() {
       url: 'stories/' + slug + '.md',
       method: 'GET',
       success: function(markdown) {
-        var sanitized = typeof DOMPurify !== 'undefined'
-          ? DOMPurify.sanitize(marked.parse(markdown))
-          : marked.parse(markdown);
+        var sanitized = DOMPurify.sanitize(marked.parse(markdown));
         var html = sanitized;
         $container.html(
           '<section class="ga-section container-xl">'

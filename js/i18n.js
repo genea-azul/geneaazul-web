@@ -253,16 +253,16 @@ GeneaAzul.i18n = (function() {
   }
 
   return {
-    displayNameInSpanish,
-    displayDateInSpanish,
-    displayReferenceTypeInSpanish,
-    displayRelationshipInSpanish,
-    getTreeSideInSpanish,
-    getSexSuffixInSpanish,
-    getGradeSuffixInSpanish,
-    getAdoptionSuffixInSpanish,
-    getCardinal,
-    displayErrorCodeInSpanish
+    displayNameInSpanish:          displayNameInSpanish,
+    displayDateInSpanish:          displayDateInSpanish,
+    displayReferenceTypeInSpanish: displayReferenceTypeInSpanish,
+    displayRelationshipInSpanish:  displayRelationshipInSpanish,
+    getTreeSideInSpanish:          getTreeSideInSpanish,
+    getSexSuffixInSpanish:         getSexSuffixInSpanish,
+    getGradeSuffixInSpanish:       getGradeSuffixInSpanish,
+    getAdoptionSuffixInSpanish:    getAdoptionSuffixInSpanish,
+    getCardinal:                   getCardinal,
+    displayErrorCodeInSpanish:     displayErrorCodeInSpanish
   };
 
 })();
