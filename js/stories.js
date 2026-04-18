@@ -39,7 +39,7 @@ GeneaAzul.stories = (function() {
     }
 
     stories.forEach(function(story) {
-      var date = story.date ? new Date(story.date + 'T00:00:00').toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+      var date = story.date ? new Date(story.date + 'T00:00:00').toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric', month: 'long', day: 'numeric' }) : '';
       var $card = $('<div>').addClass('col-md-6 col-lg-4')
         .append(
           $('<article>').addClass('ga-highlight-card h-100')
@@ -129,6 +129,6 @@ GeneaAzul.stories = (function() {
     });
   }
 
-  return { init, loadStory };
+  return { init: init, loadStory: loadStory };
 
 })();

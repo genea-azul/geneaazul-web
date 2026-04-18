@@ -879,7 +879,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 
 .ga-tl-filter-btn {
   border: 1px solid var(--ga-border);
-  background: var(--ga-bg-card);
+  background: var(--ga-card-bg);
   color: var(--ga-text);
   border-radius: 1rem;
   padding: 0.25rem 0.875rem;
@@ -988,7 +988,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 }
 
 .ga-tl-card {
-  background: var(--ga-bg-card);
+  background: var(--ga-card-bg);
   border: 1px solid var(--ga-border);
   border-left-width: 3px;
   border-radius: 0.375rem;

@@ -188,6 +188,6 @@ GeneaAzul.router = (function() {
     handleRoute(parseHash(window.location.hash));
   }
 
-  return { init, navigate, parseHash };
+  return { init: init, navigate: navigate, parseHash: parseHash };
 
 })();

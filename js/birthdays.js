@@ -75,6 +75,6 @@ GeneaAzul.birthdays = (function() {
     return match ? match[1] : null;
   }
 
-  return { init };
+  return { init: init };
 
 })();

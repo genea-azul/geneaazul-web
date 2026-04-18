@@ -245,7 +245,7 @@ GeneaAzul.search = (function() {
             $resultBody
               .html('<p>&#9888;&#65039; La b&uacute;squeda es ambigua. &#9888;&#65039;</p>')
               .append('<p>Refin&aacute; la b&uacute;squeda agregando <span class="fw-semibold">fechas</span> o completando nombres de <span class="fw-semibold">padres</span> y <span class="fw-semibold">parejas</span>.</p>')
-              .append('<p><b>Potenciales resultados:</b> ' + data.potentialResults + '</p>');
+              .append('<p><b>Potenciales resultados:</b> ' + utils.escHtml(data.potentialResults) + '</p>');
           }
         }
 
@@ -391,6 +391,7 @@ GeneaAzul.search = (function() {
     var $header = $('<div>').addClass('card-header d-flex align-items-center gap-2');
     if (person.sex === 'M')      $header.addClass('ga-card-header-male');
     else if (person.sex === 'F') $header.addClass('ga-card-header-female');
+    else                         $header.addClass('ga-card-header-primary');
 
     var genderIcon = person.sex === 'M' ? 'bi-gender-male' : (person.sex === 'F' ? 'bi-gender-female' : 'bi-person');
     $header.append($('<i>').addClass('bi ' + genderIcon)).append(i18n.displayNameInSpanish(person.name));

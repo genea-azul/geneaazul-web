@@ -66,10 +66,21 @@ GeneaAzul.app = (function() {
 
   function initNavbarScroll() {
     var $navbar = $('#main-navbar');
+    var $toggler = $navbar.find('.navbar-toggler');
     setNavbarHeightVar($navbar);
-    $(window).on('resize.navheight', function() { setNavbarHeightVar($navbar); });
+
+    var _navHResize;
+    $(window).on('resize.navheight', function() {
+      clearTimeout(_navHResize);
+      _navHResize = setTimeout(function() { setNavbarHeightVar($navbar); }, 100);
+    });
+
     $(window).on('scroll.navbar', function() {
       $navbar.toggleClass('scrolled', window.scrollY > 20);
+    });
+
+    $('#navbarContent').on('show.bs.collapse hide.bs.collapse', function(e) {
+      $toggler.attr('aria-label', e.type === 'show' ? 'Cerrar menú' : 'Abrir menú');
     });
   }
 
@@ -78,6 +89,6 @@ GeneaAzul.app = (function() {
     document.documentElement.style.setProperty('--ga-navbar-h', h + 'px');
   }
 
-  return { init };
+  return { init: init };
 
 })();

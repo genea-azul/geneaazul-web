@@ -157,20 +157,20 @@ GeneaAzul.utils = (function() {
   }
 
   return {
-    isEmpty,
-    trimToNull,
-    toNumber,
-    maxLengthCheck,
-    escHtml,
-    formatNumber,
-    animateCounter,
-    animateCounters,
-    apiGet,
-    apiGetCached,
-    apiPost,
-    backendErrorHtml,
-    spinnerHtml,
-    getHashParams
+    isEmpty:         isEmpty,
+    trimToNull:      trimToNull,
+    toNumber:        toNumber,
+    maxLengthCheck:  maxLengthCheck,
+    escHtml:         escHtml,
+    formatNumber:    formatNumber,
+    animateCounter:  animateCounter,
+    animateCounters: animateCounters,
+    apiGet:          apiGet,
+    apiGetCached:    apiGetCached,
+    apiPost:         apiPost,
+    backendErrorHtml: backendErrorHtml,
+    spinnerHtml:     spinnerHtml,
+    getHashParams:   getHashParams
   };
 
 })();

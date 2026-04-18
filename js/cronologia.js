@@ -128,6 +128,6 @@ GeneaAzul.cronologia = (function() {
       });
   }
 
-  return { init };
+  return { init: init };
 
 })();

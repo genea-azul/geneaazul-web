@@ -120,6 +120,6 @@ GeneaAzul.map = (function() {
     });
   }
 
-  return { init };
+  return { init: init };
 
 })();
