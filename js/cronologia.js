@@ -33,7 +33,7 @@ GeneaAzul.cronologia = (function() {
       entries.forEach(function(entry) {
         if (entry.year !== lastYear) {
           $list.append(
-            $('<div>').addClass('ga-tl-year-header').text(entry.year)
+            $('<div>').addClass('ga-tl-year-header').text(entry.year !== null ? entry.year : 'Y aún más…')
           );
           lastYear = entry.year;
         }
@@ -47,7 +47,7 @@ GeneaAzul.cronologia = (function() {
   }
 
   function formatDate(entry) {
-    if (!entry.month) return String(entry.year);
+    if (!entry.month) return entry.year !== null ? String(entry.year) : '';
     var month = MONTH_NAMES[entry.month - 1] || String(entry.month);
     if (!entry.day) return month + ' ' + entry.year;
     return entry.day + ' ' + month + ' ' + entry.year;
