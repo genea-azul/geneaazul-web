@@ -159,9 +159,10 @@ GeneaAzul.router = (function() {
 
     /* Story detail: #historias/slug — must be checked before the routeMap fallback */
     if (routeKey.indexOf('historias/') === 0) {
-      var slug = routeKey.replace('historias/', '');
+      var slug = routeKey.substring('historias/'.length);
       $('#inicio-section').addClass('d-none');
-      var $pc = $('#page-content').removeClass('d-none');
+      var $pc = $('#page-content').removeClass('d-none').empty();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       if (GeneaAzul.stories) {
         GeneaAzul.stories.loadStory(slug, $pc);
       }
