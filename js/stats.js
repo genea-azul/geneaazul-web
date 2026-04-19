@@ -280,13 +280,8 @@ GeneaAzul.stats = (function() {
     return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   }
 
-  /* ── Normalize: lowercase + strip diacritics ───────────────────── */
-  function normalize(str) {
-    return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  }
-
   function buildPersonalityDataName(p) {
-    return normalize([(p.title || ''), (p.givenName || ''), (p.nickname || ''), (p.surname || '')].join(' '));
+    return utils.normalize([(p.title || ''), (p.givenName || ''), (p.nickname || ''), (p.surname || '')].join(' '));
   }
 
   /* ═══ PERSONALITIES PAGE ════════════════════════════════════════ */
@@ -323,7 +318,7 @@ GeneaAzul.stats = (function() {
   }
 
   function filterPersonalitiesRows(q) {
-    var nq = normalize(q);
+    var nq = utils.normalize(q);
     $('#personalities-list li').each(function() {
       var name = $(this).attr('data-name') || '';
       $(this).toggleClass('d-none', nq.length > 0 && name.indexOf(nq) === -1);
@@ -368,8 +363,8 @@ GeneaAzul.stats = (function() {
       var aliveHtml = s.aliveCount != null ? utils.formatNumber(s.aliveCount) : '<span class="text-muted">—</span>';
       $tbody.append(
         $('<tr>')
-          .attr('data-surname', normalize(s.surname))
-          .attr('data-variants', variantList.map(normalize).join(' '))
+          .attr('data-surname', utils.normalize(s.surname))
+          .attr('data-variants', variantList.map(utils.normalize).join(' '))
           .append($('<td>').addClass('text-muted small').html(idx + 1))
           .append($('<td>').html('<span class="fw-semibold">' + escAttr(s.surname) + '</span>'))
           .append($('<td>').addClass('small text-muted').html(variantsHtml))
@@ -382,7 +377,7 @@ GeneaAzul.stats = (function() {
   }
 
   function filterSurnameRows(q) {
-    var nq = normalize(q);
+    var nq = utils.normalize(q);
     $('#surnames-tbody tr').each(function() {
       var s = $(this).attr('data-surname') || '';
       var v = $(this).attr('data-variants') || '';

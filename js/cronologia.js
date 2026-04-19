@@ -8,6 +8,7 @@ GeneaAzul.cronologia = (function() {
 
   var utils;
   var _data = null;
+  var _activeFilter = 'all';
 
   var MONTH_NAMES = ['ene','feb','mar','abr','may','jun',
                      'jul','ago','sep','oct','nov','dic'];
@@ -34,6 +35,8 @@ GeneaAzul.cronologia = (function() {
   }
 
   function renderTimeline(entries) {
+    _activeFilter = 'all';
+    $('#cronologia-search').val('');
     var $container = $('#cronologia-timeline');
     $container.empty();
     if (!entries || entries.length === 0) {
@@ -63,7 +66,9 @@ GeneaAzul.cronologia = (function() {
   }
 
   function buildEntry(entry) {
-    var $entry = $('<div>').addClass('ga-tl-entry').attr('data-type', entry.type);
+    var $entry = $('<div>').addClass('ga-tl-entry')
+      .attr('data-type', entry.type)
+      .attr('data-title', entry.title || '');
 
     var $dotWrap = $('<div>').addClass('ga-tl-dot-wrap');
     var dotType = entry.type || 'historia';
@@ -112,6 +117,17 @@ GeneaAzul.cronologia = (function() {
     return $entry;
   }
 
+  function applyFilters($list) {
+    var query = utils.normalize($('#cronologia-search').val());
+    $list.find('.ga-tl-entry').each(function() {
+      var $e = $(this);
+      var typeOk  = _activeFilter === 'all' || $e.attr('data-type') === _activeFilter;
+      var titleOk = query.length === 0 || utils.normalize($e.attr('data-title')).indexOf(query) !== -1;
+      $e.toggleClass('d-none', !(typeOk && titleOk));
+    });
+    updateYearHeaders($list);
+  }
+
   function updateYearHeaders($list) {
     $list.find('.ga-tl-year-header').each(function() {
       var $h = $(this);
@@ -124,16 +140,14 @@ GeneaAzul.cronologia = (function() {
     var $section = $('#cronologia-section');
     $(document).off('click.cronologia', '.ga-tl-filter-btn')
       .on('click.cronologia', '.ga-tl-filter-btn', function() {
-        var filter = $(this).data('filter');
+        _activeFilter = $(this).data('filter');
         $section.find('.ga-tl-filter-btn').removeClass('active');
         $(this).addClass('active');
-        if (filter === 'all') {
-          $section.find('.ga-tl-entry').removeClass('d-none');
-        } else {
-          $section.find('.ga-tl-entry').addClass('d-none');
-          $section.find('.ga-tl-entry[data-type="' + filter + '"]').removeClass('d-none');
-        }
-        updateYearHeaders($list);
+        applyFilters($list);
+      });
+    $(document).off('input.cronologia', '#cronologia-search')
+      .on('input.cronologia', '#cronologia-search', function() {
+        applyFilters($list);
       });
   }
 

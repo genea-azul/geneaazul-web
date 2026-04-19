@@ -28,6 +28,7 @@ GeneaAzul.app = (function() {
     animateHeroStats();
     fetchLiveStats();
     initNavbarScroll();
+    initSearchClear();
   }
 
   function animateHeroStats() {
@@ -87,6 +88,17 @@ GeneaAzul.app = (function() {
   function setNavbarHeightVar($navbar) {
     var h = $navbar.outerHeight() || 56;
     document.documentElement.style.setProperty('--ga-navbar-h', h + 'px');
+  }
+
+  function initSearchClear() {
+    $(document).on('input', '.ga-search-wrap input', function() {
+      $(this).closest('.ga-search-wrap').find('.ga-search-clear')
+        .toggle($(this).val() !== '');
+    });
+    $(document).on('click', '.ga-search-clear', function() {
+      $(this).closest('.ga-search-wrap').find('input')
+        .val('').trigger('input').trigger('focus');
+    });
   }
 
   return { init: init };

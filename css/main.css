@@ -42,6 +42,24 @@ html { scroll-behavior: smooth; }
 .form-control::placeholder,
 .form-select::placeholder { color: var(--ga-text-muted); opacity: .45; }
 
+.ga-search-wrap { position: relative; }
+.ga-search-wrap .form-control { padding-right: 2rem; }
+.ga-search-clear {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--ga-text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0 0.15rem;
+  display: none;
+}
+.ga-search-clear:hover { color: var(--ga-text); }
+
 body {
   font-family: var(--ga-font-body);
   color: var(--ga-text);
@@ -109,7 +127,7 @@ a:hover { color: var(--ga-accent); }
   padding: .45rem .9rem;
 }
 .ga-navbar .dropdown-item:hover                { background-color: var(--ga-border); color: var(--ga-primary); }
-.ga-navbar .dropdown-item.active               { background-color: var(--ga-primary); color: #fff; }
+.ga-navbar .dropdown-item.active               { background-color: var(--ga-primary-muted); color: #fff; }
 .ga-navbar .dropdown-item.active:hover         { background-color: var(--ga-primary-hover); color: #fff; }
 
 /* Navbar becomes slightly more opaque on scroll */
@@ -874,7 +892,12 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+}
+
+.ga-tl-search-wrap {
+  max-width: 24rem;
+  margin: 0 auto 1.5rem;
 }
 
 .ga-tl-filter-btn {

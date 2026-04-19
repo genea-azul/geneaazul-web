@@ -143,6 +143,11 @@ GeneaAzul.utils = (function() {
 
   /* Prefill connections form from URL hash query-string style
      e.g. #conexiones?name=Juan&surname=Perez&year=1980 */
+  /* Lowercase + strip diacritics for accent-insensitive comparison */
+  function normalize(str) {
+    return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
   function safeDecode(s) {
     try { return decodeURIComponent(s); } catch(e) { return s; }
   }
@@ -172,6 +177,7 @@ GeneaAzul.utils = (function() {
     apiGet:          apiGet,
     apiGetCached:    apiGetCached,
     apiPost:         apiPost,
+    normalize:        normalize,
     backendErrorHtml: backendErrorHtml,
     spinnerHtml:     spinnerHtml,
     getHashParams:   getHashParams

@@ -4,8 +4,8 @@
   <!-- Main entry point (SPA — all routes share this URL) -->
   <url>
     <loc>https://geneaazul.com.ar/</loc>
-    <lastmod>2026-04-18</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-04-19</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
