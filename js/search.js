@@ -32,7 +32,7 @@ GeneaAzul.search = (function() {
 
   /* ── Advanced toggle ────────────────────────────────────────────── */
   function wireAdvancedToggle() {
-    $('#advancedSearchToggle').on('click', function() {
+    $('#advancedSearchToggle').off('click').on('click', function() {
       var $adv = $('#search-advanced');
       var open = $adv.hasClass('d-none');
       $adv.toggleClass('d-none', !open);
@@ -57,26 +57,26 @@ GeneaAzul.search = (function() {
     toggleCardColorBySex('#spouseCard', 'spouseSex');
 
     // Grandparents toggle
-    $('#grandparentsContainerShowBtn').on('change', function() {
+    $('#grandparentsContainerShowBtn').off('change').on('change', function() {
       var show = $(this).prop('checked');
       $('#grandparentsContainer').toggleClass('d-none', !show);
     });
     $('#grandparentsContainer').addClass('d-none'); // hidden by default
 
     // Spouse toggle
-    $('#spouseContainerShowBtn').on('change', function() {
+    $('#spouseContainerShowBtn').off('change').on('change', function() {
       var show = $(this).prop('checked');
       $('#spouseContainer').toggleClass('d-none', !show);
     });
     $('#spouseContainer').addClass('d-none');
 
     // Number maxlength guard
-    $('input[type=number]').on('input', function() {
+    $('input[type=number]').off('input').on('input', function() {
       utils.maxLengthCheck(this);
     });
 
     // Allow Enter key to submit
-    $('#buscar-section').on('keydown', 'input', function(e) {
+    $('#buscar-section').off('keydown').on('keydown', 'input', function(e) {
       if (e.key === 'Enter') { e.preventDefault(); $('#searchBtn').trigger('click'); }
     });
   }
@@ -113,8 +113,7 @@ GeneaAzul.search = (function() {
   /* ── Backend initialisation (health check) ──────────────────────── */
   function initBackend() {
     // Obfuscation from URL
-    var searchParams = new URLSearchParams(window.location.search);
-    if (searchParams.get('f') === '0') {
+    if (/[?&]f=0/.test(window.location.search)) {
       cfg.obfuscateLiving = false;
     }
 
@@ -653,6 +652,6 @@ GeneaAzul.search = (function() {
     if (callback) callback();
   }
 
-  return { init };
+  return { init: init };
 
 })();

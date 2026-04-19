@@ -165,6 +165,6 @@ GeneaAzul.connections = (function() {
     return $wrap;
   }
 
-  return { init };
+  return { init: init };
 
 })();

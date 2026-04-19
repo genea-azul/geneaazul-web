@@ -7,6 +7,7 @@ var GeneaAzul = window.GeneaAzul || {};
 GeneaAzul.cronologia = (function() {
 
   var utils;
+  var _data = null;
 
   var MONTH_NAMES = ['ene','feb','mar','abr','may','jun',
                      'jul','ago','sep','oct','nov','dic'];
@@ -19,31 +20,39 @@ GeneaAzul.cronologia = (function() {
 
   function init() {
     utils = GeneaAzul.utils;
+    if (_data) { renderTimeline(_data); return; }
+
     var $container = $('#cronologia-timeline');
     $container.html(utils.spinnerHtml('Cargando cronolog\u00eda\u2026'));
 
     $.getJSON('data/timeline.json', function(entries) {
-      $container.empty();
-      if (!entries || entries.length === 0) {
-        $container.html('<p class="text-muted text-center">No hay entradas disponibles.</p>');
-        return;
-      }
-      var $list = $('<div>').addClass('ga-tl-list');
-      var lastYear = null;
-      entries.forEach(function(entry) {
-        if (entry.year !== lastYear) {
-          $list.append(
-            $('<div>').addClass('ga-tl-year-header').text(entry.year !== null ? entry.year : 'Y aún más…')
-          );
-          lastYear = entry.year;
-        }
-        $list.append(buildEntry(entry));
-      });
-      $container.append($list);
-      initFilterTabs($list);
+      _data = entries;
+      renderTimeline(entries);
     }).fail(function() {
       $container.html('<p class="text-muted text-center">No se pudo cargar la cronolog\u00eda.</p>');
     });
+  }
+
+  function renderTimeline(entries) {
+    var $container = $('#cronologia-timeline');
+    $container.empty();
+    if (!entries || entries.length === 0) {
+      $container.html('<p class="text-muted text-center">No hay entradas disponibles.</p>');
+      return;
+    }
+    var $list = $('<div>').addClass('ga-tl-list');
+    var lastYear = null;
+    entries.forEach(function(entry) {
+      if (entry.year !== lastYear) {
+        $list.append(
+          $('<div>').addClass('ga-tl-year-header').text(entry.year !== null ? entry.year : 'Y a\u00fan m\u00e1s\u2026')
+        );
+        lastYear = entry.year;
+      }
+      $list.append(buildEntry(entry));
+    });
+    $container.append($list);
+    initFilterTabs($list);
   }
 
   function formatDate(entry) {

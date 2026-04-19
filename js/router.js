@@ -58,9 +58,20 @@ GeneaAzul.router = (function() {
     'cronologia':                  function() { if (GeneaAzul.cronologia)  GeneaAzul.cronologia.init(); }
   };
 
+  /* Fire a GA4 page_view event for the current route */
+  function trackPageView(routeKey) {
+    if (typeof gtag !== 'function') return;
+    var base = routeKey.indexOf('historias/') === 0 ? 'historias' : routeKey;
+    var meta = routeMeta[base] || routeMeta['inicio'];
+    gtag('event', 'page_view', {
+      page_title: meta.title,
+      page_path: '/#' + routeKey
+    });
+  }
+
   /* Update document title and meta tags for the current route */
   function updatePageMeta(routeKey) {
-    var base = routeKey.startsWith('historias/') ? 'historias' : routeKey;
+    var base = routeKey.indexOf('historias/') === 0 ? 'historias' : routeKey;
     var meta = routeMeta[base] || routeMeta['inicio'];
     document.title = meta.title;
     $('meta[name="description"]').attr('content', meta.desc);
@@ -120,7 +131,7 @@ GeneaAzul.router = (function() {
 
   /* Navigate to a given hash */
   function navigate(hash) {
-    if (!hash.startsWith('#')) hash = '#' + hash;
+    if (hash.indexOf('#') !== 0) hash = '#' + hash;
     if (window.location.hash !== hash) {
       window.location.hash = hash;
     } else {
@@ -136,6 +147,7 @@ GeneaAzul.router = (function() {
     currentRoute = routeKey;
 
     updatePageMeta(routeKey);
+    trackPageView(routeKey);
     updateNavActive(routeKey);
 
     // Close mobile navbar if open
@@ -146,7 +158,7 @@ GeneaAzul.router = (function() {
     }
 
     /* Story detail: #historias/slug — must be checked before the routeMap fallback */
-    if (routeKey.startsWith('historias/')) {
+    if (routeKey.indexOf('historias/') === 0) {
       var slug = routeKey.replace('historias/', '');
       $('#inicio-section').addClass('d-none');
       var $pc = $('#page-content').removeClass('d-none');
@@ -204,7 +216,7 @@ GeneaAzul.router = (function() {
       // Allow default anchor href to update the hash naturally, only intercept
       // if the click would navigate to a same-page hash
       var href = $(this).attr('href') || '';
-      if (href.startsWith('#')) {
+      if (href.indexOf('#') === 0) {
         e.preventDefault();
         navigate(href);
       }

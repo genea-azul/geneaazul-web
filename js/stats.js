@@ -371,7 +371,7 @@ GeneaAzul.stats = (function() {
           .attr('data-surname', normalize(s.surname))
           .attr('data-variants', variantList.map(normalize).join(' '))
           .append($('<td>').addClass('text-muted small').html(idx + 1))
-          .append($('<td>').html('<span class="fw-semibold">' + s.surname + '</span>'))
+          .append($('<td>').html('<span class="fw-semibold">' + escAttr(s.surname) + '</span>'))
           .append($('<td>').addClass('small text-muted').html(variantsHtml))
           .append($('<td>').addClass('text-end').html(countHtml))
           .append($('<td>').addClass('text-end').html(aliveHtml))
@@ -390,6 +390,6 @@ GeneaAzul.stats = (function() {
     });
   }
 
-  return { init, initImmigration, initPersonalities, initSurnames };
+  return { init: init, initImmigration: initImmigration, initPersonalities: initPersonalities, initSurnames: initSurnames };
 
 })();

@@ -117,28 +117,29 @@ GeneaAzul.i18n = (function() {
 
   /* Full relationship name (for maxDistantRelationship) */
   function displayRelationshipInSpanish(rel) {
+    var separated, spousePrefix, sx, name, gradeSuffix, rName, or, half, rName1, rName2, n1, n2, gradeSuffixOr;
+
     if (rel.referenceType === 'SELF') return '<b>esta persona</b>';
 
-    var separated = (rel.isSeparated ? 'ex-' : '');
+    separated = (rel.isSeparated ? 'ex-' : '');
 
     if (rel.referenceType === 'SPOUSE') return '<b>' + separated + 'pareja</b>';
 
-    var spousePrefix = (rel.isInLaw ? separated + 'pareja de ' : '');
+    spousePrefix = (rel.isInLaw ? separated + 'pareja de ' : '');
 
     if (rel.referenceType === 'PARENT') {
       if (rel.generation === 1) {
-        var sx = getSexSuffixInSpanish(rel);
-        var name = sx === 'o' ? 'padre' : 'madre';
+        sx = getSexSuffixInSpanish(rel);
+        name = sx === 'o' ? 'padre' : 'madre';
         return '<b>' + spousePrefix + name + getAdoptionSuffixInSpanish(rel.adoptionType, sx) + '</b>';
       }
-      var sx = getSexSuffixInSpanish(rel);
-      var gradeSuffix = getGradeSuffixInSpanish(rel.generation - 4, sx);
-      var rName;
+      sx = getSexSuffixInSpanish(rel);
+      gradeSuffix = getGradeSuffixInSpanish(rel.generation - 4, sx);
       if (rel.generation === 2) rName = 'abuel' + sx;
       else if (rel.generation === 3) rName = 'bisabuel' + sx;
       else if (rel.generation === 4) rName = 'tatarabuel' + sx;
       else rName = 'trastatarabuel' + sx;
-      var or = '';
+      or = '';
       if (rel.generation >= 6) or = '<br>&nbsp; (' + spousePrefix + 'ancestro directo de ' + rel.generation + ' generaciones)';
       return '<b>' + spousePrefix + rName + gradeSuffix + '</b>' + or;
     }
@@ -148,17 +149,16 @@ GeneaAzul.i18n = (function() {
         if (rel.isInLaw && rel.adoptionType == null) {
           return '<b>' + (rel.personSex === 'M' ? separated + 'yerno' : separated + 'nuera') + '</b>';
         }
-        var sx = getSexSuffixInSpanish(rel);
+        sx = getSexSuffixInSpanish(rel);
         return '<b>' + spousePrefix + 'hij' + sx + getAdoptionSuffixInSpanish(rel.adoptionType, sx) + '</b>';
       }
-      var sx = getSexSuffixInSpanish(rel);
-      var gradeSuffix = getGradeSuffixInSpanish(rel.generation - 4, sx);
-      var rName;
+      sx = getSexSuffixInSpanish(rel);
+      gradeSuffix = getGradeSuffixInSpanish(rel.generation - 4, sx);
       if (rel.generation === 2) rName = 'niet' + sx;
       else if (rel.generation === 3) rName = 'bisniet' + sx;
       else if (rel.generation === 4) rName = 'tataraniet' + sx;
       else rName = 'trastataraniet' + sx;
-      var or = '';
+      or = '';
       if (rel.generation >= 6) or = '<br>&nbsp; (' + spousePrefix + 'descendiente directo de ' + rel.generation + ' generaciones)';
       return '<b>' + spousePrefix + rName + gradeSuffix + '</b>' + or;
     }
@@ -167,54 +167,52 @@ GeneaAzul.i18n = (function() {
       if (rel.isInLaw && !rel.isHalf) {
         return rel.personSex === 'M' ? separated + 'cu&ntilde;ado' : separated + 'cu&ntilde;ada';
       }
-      var half = rel.isHalf ? 'medio-' : '';
-      var sx = getSexSuffixInSpanish(rel);
+      half = rel.isHalf ? 'medio-' : '';
+      sx = getSexSuffixInSpanish(rel);
       return '<b>' + spousePrefix + half + 'herman' + sx + '</b>';
     }
 
     if (rel.referenceType === 'COUSIN') {
-      var half = rel.isHalf ? 'medio-' : '';
-      var sx = getSexSuffixInSpanish(rel);
+      half = rel.isHalf ? 'medio-' : '';
+      sx = getSexSuffixInSpanish(rel);
       return '<b>' + spousePrefix + half + 'prim' + sx + getGradeSuffixInSpanish(rel.grade, sx) + '</b>';
     }
 
     if (rel.referenceType === 'PIBLING') {
-      var half = rel.isHalf ? 'medio-' : '';
-      var sx = getSexSuffixInSpanish(rel);
-      var gradeSuffix = getGradeSuffixInSpanish(rel.grade, sx);
-      var rName1 = 't&iacute;' + sx + (rel.generation > 1 ? '-' : '');
-      var rName2;
+      half = rel.isHalf ? 'medio-' : '';
+      sx = getSexSuffixInSpanish(rel);
+      gradeSuffix = getGradeSuffixInSpanish(rel.grade, sx);
+      rName1 = 't&iacute;' + sx + (rel.generation > 1 ? '-' : '');
       if (rel.generation === 1) rName2 = '';
       else if (rel.generation === 2) rName2 = 'abuel' + sx;
       else if (rel.generation === 3) rName2 = 'bisabuel' + sx;
       else if (rel.generation === 4) rName2 = 'tatarabuel' + sx;
       else rName2 = 'trastatarabuel' + sx;
-      var or = '';
+      or = '';
       if ((rel.generation === 1 && rel.grade >= 2) || rel.generation >= 2) {
-        var n1 = (rName2 === '') ? getTreeSideInSpanish(rel.treeSides, 'padre/madre') : rName2.substring(0, rName2.length - 1) + 'o/a';
-        var n2 = rel.grade === 1 ? 'herman' + sx : 'prim' + sx;
-        var gradeSuffixOr = getGradeSuffixInSpanish(rel.grade - 1, sx);
+        n1 = (rName2 === '') ? getTreeSideInSpanish(rel.treeSides, 'padre/madre') : rName2.substring(0, rName2.length - 1) + 'o/a';
+        n2 = rel.grade === 1 ? 'herman' + sx : 'prim' + sx;
+        gradeSuffixOr = getGradeSuffixInSpanish(rel.grade - 1, sx);
         or = '<br>&nbsp; (' + spousePrefix + half + n2 + gradeSuffixOr + ' de ' + n1 + ')';
       }
       return '<b>' + spousePrefix + half + rName1 + rName2 + gradeSuffix + '</b>' + or;
     }
 
     if (rel.referenceType === 'NIBLING') {
-      var half = rel.isHalf ? 'medio-' : '';
-      var sx = getSexSuffixInSpanish(rel);
-      var gradeSuffix = getGradeSuffixInSpanish(rel.grade, sx);
-      var rName1 = 'sobrin' + sx + (rel.generation > 1 ? '-' : '');
-      var rName2;
+      half = rel.isHalf ? 'medio-' : '';
+      sx = getSexSuffixInSpanish(rel);
+      gradeSuffix = getGradeSuffixInSpanish(rel.grade, sx);
+      rName1 = 'sobrin' + sx + (rel.generation > 1 ? '-' : '');
       if (rel.generation === 1) rName2 = '';
       else if (rel.generation === 2) rName2 = 'niet' + sx;
       else if (rel.generation === 3) rName2 = 'bisniet' + sx;
       else if (rel.generation === 4) rName2 = 'tataraniet' + sx;
       else rName2 = 'trastataraniet' + sx;
-      var or = '';
+      or = '';
       if ((rel.generation === 1 && rel.grade >= 2) || rel.generation >= 2) {
-        var n1 = (rName2 === '') ? 'hij' + sx : rName2;
-        var n2 = rel.grade === 1 ? 'hermano/a' : 'primo/a';
-        var gradeSuffixOr = getGradeSuffixInSpanish(rel.grade - 1, 'o/a');
+        n1 = (rName2 === '') ? 'hij' + sx : rName2;
+        n2 = rel.grade === 1 ? 'hermano/a' : 'primo/a';
+        gradeSuffixOr = getGradeSuffixInSpanish(rel.grade - 1, 'o/a');
         or = '<br>&nbsp; (' + spousePrefix + n1 + ' de ' + half + n2 + gradeSuffixOr + ')';
       }
       return '<b>' + spousePrefix + half + rName1 + rName2 + gradeSuffix + '</b>' + or;

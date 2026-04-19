@@ -8,7 +8,7 @@ GeneaAzul.utils = (function() {
 
   /* ── String helpers ────────────────────────────────────────────── */
   function isEmpty(str) {
-    return str == null || typeof str === 'undefined' || str.length === 0;
+    return str == null || str.length === 0;
   }
 
   function trimToNull(str) {
@@ -143,6 +143,10 @@ GeneaAzul.utils = (function() {
 
   /* Prefill connections form from URL hash query-string style
      e.g. #conexiones?name=Juan&surname=Perez&year=1980 */
+  function safeDecode(s) {
+    try { return decodeURIComponent(s); } catch(e) { return s; }
+  }
+
   function getHashParams() {
     var hash = window.location.hash || '';
     var qIdx = hash.indexOf('?');
@@ -151,7 +155,7 @@ GeneaAzul.utils = (function() {
     var params = {};
     qs.split('&').forEach(function(pair) {
       var kv = pair.split('=');
-      if (kv[0]) params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || '');
+      if (kv[0]) params[safeDecode(kv[0])] = safeDecode(kv[1] || '');
     });
     return params;
   }

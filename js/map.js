@@ -82,6 +82,8 @@ GeneaAzul.map = (function() {
     var accentColor = getComputedStyle(document.documentElement)
       .getPropertyValue('--ga-accent').trim() || '#c9a227';
 
+    var esc = GeneaAzul.utils.escHtml;
+
     data.forEach(function(row) {
       var coords = CENTROIDS[row.isoCode];
       if (!coords) return;
@@ -98,15 +100,15 @@ GeneaAzul.map = (function() {
       }).addTo(_leafletMap);
 
       var surnames = row.topSurnames && row.topSurnames.length > 0
-        ? '<div class="mt-1 text-muted" style="font-size:.8rem">' + row.topSurnames.slice(0, 16).join(', ') + '</div>'
+        ? '<div class="mt-1 text-muted" style="font-size:.8rem">' + row.topSurnames.slice(0, 16).map(function(s) { return esc(s); }).join(', ') + '</div>'
         : '';
 
       var formerlyHtml = row.formerly
-        ? '<div style="font-size:.75rem;opacity:.7;margin-top:.1rem">Nombre anterior: ' + row.formerly + '</div>'
+        ? '<div style="font-size:.75rem;opacity:.7;margin-top:.1rem">Nombre anterior: ' + esc(row.formerly) + '</div>'
         : '';
 
       marker.bindPopup(
-        '<strong>' + (row.flag || '') + ' ' + row.country + '</strong>'
+        '<strong>' + (row.flag || '') + ' ' + esc(row.country) + '</strong>'
         + formerlyHtml
         + '<div>' + GeneaAzul.utils.formatNumber(row.count) + ' personas ('
         + row.percentage.toFixed(row.percentage < 10 ? 2 : 1) + '%)</div>'
@@ -114,7 +116,7 @@ GeneaAzul.map = (function() {
         { maxWidth: 220 }
       );
 
-      marker.bindTooltip((row.flag || '') + ' ' + row.country, {
+      marker.bindTooltip((row.flag || '') + ' ' + esc(row.country), {
         direction: 'top', sticky: true
       });
     });
