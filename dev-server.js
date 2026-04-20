@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Local dev server for Genea Azul.
- * - Serves static files from the project root on http://localhost:8080
+ * - Serves static files from the project root on http://localhost:8090
  * - Mocks all API endpoints consumed by the frontend
  *
  * Usage: node dev-server.js
@@ -11,7 +11,7 @@ var http = require('http');
 var fs   = require('fs');
 var path = require('path');
 
-var PORT = 8080;
+var PORT = 8090;
 var ROOT = __dirname;
 
 // ─── Argentine "today" ────────────────────────────────────────────────────────
