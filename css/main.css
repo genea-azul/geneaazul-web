@@ -1078,3 +1078,81 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-tl-story-link:hover {
   text-decoration: underline;
 }
+
+/* ─── Biblioteca Digital de Azul — directory tree ────────────── */
+.ga-bda-tree {
+  background: #fff; /* white panel per design */
+  border: 1px solid var(--ga-border);
+  border-radius: var(--ga-radius);
+  padding: 1rem 1.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.ga-bda-category {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  padding: 0.55rem 0 0.2rem;
+  color: var(--ga-text);
+}
+
+.ga-bda-category:first-child { padding-top: 0; }
+
+.ga-bda-folder-icon {
+  color: #c9a227; /* folder gold — matches --ga-accent */
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.ga-bda-category-empty .ga-bda-folder-icon,
+.ga-bda-category-empty > span:not(.badge) {
+  color: var(--ga-text-muted);
+}
+
+.ga-bda-files {
+  list-style: none;
+  margin: 0 0 0 0.5rem;
+  padding: 0 0 0.65rem 1.5rem;
+  border-left: 1px solid var(--ga-border);
+}
+
+.ga-bda-files:last-child { padding-bottom: 0.25rem; }
+
+.ga-bda-files li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0;
+  line-height: 1.45;
+  position: relative;
+}
+
+.ga-bda-files li::before {
+  content: '';
+  position: absolute;
+  left: -1.5rem;
+  top: 50%;
+  width: 0.75rem;
+  height: 1px;
+  background: var(--ga-border);
+}
+
+.ga-bda-files li i {
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.ga-bda-files a {
+  color: var(--ga-primary);
+  text-decoration: none;
+}
+
+.ga-bda-files a:hover {
+  color: var(--ga-accent);
+  text-decoration: underline;
+}
+
+.ga-bda-icon-yt  { color: #FF0000; } /* YouTube red */
+.ga-bda-icon-pdf { color: #c0392b; } /* PDF red     */
+.ga-bda-icon-img { color: #2471a3; } /* image blue  */

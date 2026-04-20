@@ -5,12 +5,13 @@ Thumbs.db
 # IDE
 .idea/
 .vscode/
+.cursor/
 *.swp
 *.swo
 *~
 
-# Cursor
-.cursor/
+# Playwright MCP
+.playwright-mcp/
 
 # Node (in case someone adds it)
 node_modules/
