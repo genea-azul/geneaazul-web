@@ -67,7 +67,7 @@ GeneaAzul.map = (function() {
       .html(GeneaAzul.utils.spinnerHtml('Cargando datos\u2026'));
     $('.ga-leaflet-wrap').append($overlay);
 
-    $.getJSON('data/immigration.json', function(data) {
+    $.getJSON('/data/immigration.json', function(data) {
       $overlay.remove();
       renderBubbles(data);
     }).fail(function() {

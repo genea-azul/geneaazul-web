@@ -50,7 +50,7 @@ GeneaAzul.app = (function() {
     );
 
     // Immigrants + countries count from immigration.json
-    $.getJSON('data/immigration.json', function(data) {
+    $.getJSON('/data/immigration.json', function(data) {
       var immigrants = data.reduce(function(acc, r) { return acc + r.count; }, 0);
       var countries  = data.reduce(function(acc, r) { return acc + r.country.split('/').length; }, 0);
       updateHeroStat('#stat-immigrants', immigrants);

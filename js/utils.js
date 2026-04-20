@@ -152,11 +152,9 @@ GeneaAzul.utils = (function() {
     try { return decodeURIComponent(s); } catch(e) { return s; }
   }
 
-  function getHashParams() {
-    var hash = window.location.hash || '';
-    var qIdx = hash.indexOf('?');
-    if (qIdx === -1) return {};
-    var qs = hash.substring(qIdx + 1);
+  function getQueryParams() {
+    var qs = (window.location.search || '').replace(/^\?/, '');
+    if (!qs) return {};
     var params = {};
     qs.split('&').forEach(function(pair) {
       var kv = pair.split('=');
@@ -180,7 +178,7 @@ GeneaAzul.utils = (function() {
     normalize:        normalize,
     backendErrorHtml: backendErrorHtml,
     spinnerHtml:     spinnerHtml,
-    getHashParams:   getHashParams
+    getQueryParams:  getQueryParams
   };
 
 })();

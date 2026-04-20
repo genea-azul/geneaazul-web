@@ -56,17 +56,17 @@ GeneaAzul.myFeature = (function() {
 
 All colours, spacing, and typography use CSS custom properties defined in `css/theme-heritage.css` and `css/theme-modern.css`. **Never use raw hex colours for anything that should adapt to theming.** Use these variables:
 
-| Variable            | Usage                     |
-| ------------------- | ------------------------- |
-| `--ga-primary`      | Primary brand colour      |
-| `--ga-accent`       | Accent / highlight colour |
-| `--ga-bg`           | Page background           |
-| `--ga-bg-card`      | Card surface background   |
-| `--ga-text`         | Main body text            |
-| `--ga-text-muted`   | Secondary / subdued text  |
-| `--ga-border`       | Borders and dividers      |
-| `--ga-font-heading` | Serif heading font        |
-| `--ga-font-body`    | Sans-serif body font      |
+| Variable             | Usage                     |
+| -------------------- | ------------------------- |
+| `--ga-primary`       | Primary brand colour      |
+| `--ga-accent`        | Accent / highlight colour |
+| `--ga-bg`            | Page background           |
+| `--ga-bg-card`       | Card surface background   |
+| `--ga-text`          | Main body text            |
+| `--ga-text-muted`    | Secondary / subdued text  |
+| `--ga-border`        | Borders and dividers      |
+| `--ga-font-heading`  | Serif heading font        |
+| `--ga-font-body`     | Sans-serif body font      |
 
 Exception: one-off decorative values not tied to theme (e.g. `color: #b8860b` for a gold birthday star) may use raw values with a comment.
 
@@ -92,7 +92,7 @@ All helpers are on `GeneaAzul.utils` (defined in `js/utils.js`):
 | `GeneaAzul.utils.escHtml(s)`                             | HTML-escape a value before inserting into DOM — **always use this** |
 | `GeneaAzul.utils.formatNumber(n)`                        | Argentine locale number format (e.g. `70.512`)                      |
 | `GeneaAzul.utils.spinnerHtml(text)`                      | Bootstrap spinner HTML string                                       |
-| `GeneaAzul.utils.getHashParams()`                        | Parse query-string params from the URL hash                         |
+| `GeneaAzul.utils.getQueryParams()`                       | Parse query-string params from `window.location.search`             |
 
 **Security rule**: always call `escHtml()` on any server-supplied string before inserting it into HTML via `.html()`. Strings inserted via `.text()` are safe.
 
@@ -100,17 +100,21 @@ All helpers are on `GeneaAzul.utils` (defined in `js/utils.js`):
 
 ## Routing
 
-`js/router.js` implements hash-based routing. Routes correspond to `pages/*.html` fragments that are lazy-loaded into `#page-content`.
+`js/router.js` implements History API routing (`pushState`/`popstate`). Routes correspond to `pages/*.html` fragments that are lazy-loaded into `#page-content`.
 
-- Navigation uses `<a href="#route" data-route="route">` anchors.
-- The landing page (route `""` or `"inicio"`) is the `index.html` shell itself — it has no lazy-loaded fragment.
-- **Anchors for in-page sections** on the landing page (e.g. `#cumpleanos`, `#efemerides`) are separate from router routes. After revealing a hidden card via API, scroll to it programmatically when the hash matches:
+- Navigation uses `<a href="/route" data-route="route">` anchors. The router intercepts all `[data-route]` clicks, calls `history.pushState`, and loads the fragment.
+- The landing page (route key `"inicio"`) maps to path `/` — it is the `index.html` shell itself with no lazy-loaded fragment.
+- All static file fetches (fragments, data, stories) use **absolute paths** (leading `/`) so they resolve correctly from any route depth, including two-segment paths like `/estadisticas/inmigracion`.
+- **Backward compat**: on `init()`, if `window.location.hash` matches a known route (e.g. old bookmarked `/#cronologia`), the router silently replaces it with the clean path via `history.replaceState`.
+- **In-page scroll anchors** on the landing page (`#cumpleanos`, `#efemerides`) are genuine fragment links — they do NOT use `data-route` and are not intercepted by the router. After revealing a hidden card via API, scroll to it programmatically when the hash matches:
 
   ```javascript
   if (window.location.hash === '#cumpleanos') {
     $card[0].scrollIntoView({ behavior: 'smooth' });
   }
   ```
+
+- `GeneaAzul.router.navigate(routeKey)` navigates programmatically. Pass the route key without leading `#` or `/` (e.g. `'historias'`, `'historias/mi-historia'`).
 
 ---
 
@@ -204,7 +208,7 @@ dateOfBirth (GEDCOM string), placeOfBirth, dateOfDeath (GEDCOM string)
 | `data/personalities.json` | 250+ notable persons with `givenName`, `surname`, `birthYear`, `deathYear`, `birthPlace`, `deathPlace` | `pages/estadisticas-personalidades.html`          |
 | `data/immigration.json`   | Immigration waves by origin country                                                                    | `js/stats.js`, hero counters                      |
 | `data/surnames.json`      | Surname list with frequency                                                                            | Hero counter, `pages/estadisticas-apellidos.html` |
-| `data/timeline.json`      | Timeline entries for `#cronologia` (see schema below)                                                  | `js/cronologia.js`                                |
+| `data/timeline.json`      | Timeline entries for `/cronologia` (see schema below)                                                  | `js/cronologia.js`                                |
 
 **Important**: `personalities.json` contains only year-level data (no day/month). For day-of-month efemérides, the backend GEDCOM indexes must be used — not this file.
 
@@ -277,7 +281,7 @@ The server computes today's Argentine date at startup and uses it for ephemeride
 - Do not add `<style>` blocks to HTML files.
 - Do not hardcode theme colours — use CSS variables.
 - Do not forget `escHtml()` when inserting server data into `.html()`.
-- Do not add anchors/hashes to the sitemap (`sitemap.xml`) — fragment identifiers are ignored by crawlers.
+- Do not use hash fragments as route URLs — the router uses History API (`pushState`). All `[data-route]` links must use `/path` hrefs, not `#hash` hrefs.
 - Do not add new files without including them in `index.html`.
 - Do not touch `_redirects` — the single SPA rewrite rule is intentional.
 

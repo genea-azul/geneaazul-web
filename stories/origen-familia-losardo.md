@@ -28,6 +28,35 @@ La familia creció rápidamente en tierras bonaerenses. **Juan Bautista**, que y
 
 A lo largo de las generaciones, el apellido Losardo se fue entrelazando con el de muchas otras familias de la región, tanto de origen italiano como español y criollo.
 
+### Descendencia de Juan Bautista
+
+Con su esposa **María Anunciada Bellusci**, oriunda de Mongrassano, Juan Bautista tuvo doce hijos en total. Los tres primeros nacieron en Italia; los nueve restantes, ya en Azul:
+
+- **Pasqualina** (1881, Mongrassano) — falleció durante la travesía del Atlántico
+- **Francisco Saverio** (1883, Mongrassano)
+- **Ángel** (1885, Mongrassano)
+- **Juan Constantino** (1890, Azul)
+- **Mariana** (1891, Azul)
+- **María Carmela** (1893, Azul)
+- **Antonio** (1894, Azul)
+- **Vicente** (1896, Azul)
+- **María Sabina** (1897, Azul)
+- **Fermín Rafael** (1899, Azul)
+- **Eduardo** (1901, Azul)
+- **María Pascuala** (1903, Azul)
+
+### Descendencia de Luis
+
+Con su esposa **María Carmela Cesario**, también oriunda de Mongrassano, Luis tuvo siete hijos, todos nacidos en Azul:
+
+- **José** (1892, Azul)
+- **Francisco Silverio** (1894, Azul)
+- **Domingo** (1896, Azul)
+- **María Rosaria** (1898, Azul)
+- **Pedro** (1901, Azul)
+- **Rosa** (1905, Azul)
+- **Ana** (1906, Azul)
+
 ---
 
 ## Apellidos en su árbol familiar

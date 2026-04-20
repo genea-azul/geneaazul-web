@@ -26,7 +26,7 @@ GeneaAzul.cronologia = (function() {
     var $container = $('#cronologia-timeline');
     $container.html(utils.spinnerHtml('Cargando cronolog\u00eda\u2026'));
 
-    $.getJSON('data/timeline.json', function(entries) {
+    $.getJSON('/data/timeline.json', function(entries) {
       _data = entries;
       renderTimeline(entries);
     }).fail(function() {
@@ -107,7 +107,8 @@ GeneaAzul.cronologia = (function() {
     if (entry.storySlug) {
       $card.append(
         $('<a>').addClass('ga-tl-story-link')
-          .attr('href', '#historias/' + entry.storySlug)
+          .attr('href', '/historias/' + entry.storySlug)
+          .attr('data-route', 'historias/' + entry.storySlug)
           .text('\u2192 Leer historia')
       );
     }

@@ -16,7 +16,7 @@ GeneaAzul.stats = (function() {
   /* ── Immigration data ──────────────────────────────────────────── */
   function loadImmigration(cb) {
     if (_immigration) { cb(_immigration); return; }
-    $.getJSON('data/immigration.json', function(data) {
+    $.getJSON('/data/immigration.json', function(data) {
       _immigration = data;
       cb(data);
     }).fail(function() { cb([]); });
@@ -25,7 +25,7 @@ GeneaAzul.stats = (function() {
   /* ── Personalities data ─────────────────────────────────────────── */
   function loadPersonalities(cb) {
     if (_personalities) { cb(_personalities); return; }
-    $.getJSON('data/personalities.json', function(data) {
+    $.getJSON('/data/personalities.json', function(data) {
       _personalities = data;
       cb(data);
     }).fail(function() { cb([]); });
@@ -34,7 +34,7 @@ GeneaAzul.stats = (function() {
   /* ── Surnames data ──────────────────────────────────────────────── */
   function loadSurnames(cb) {
     if (_surnames) { cb(_surnames); return; }
-    $.getJSON('data/surnames.json', function(data) {
+    $.getJSON('/data/surnames.json', function(data) {
       _surnames = data;
       cb(data);
     }).fail(function() { cb([]); });

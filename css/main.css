@@ -259,6 +259,8 @@ a.ga-highlight-header:hover { color: var(--ga-accent); }
 }
 
 .ga-highlight-header:hover .ga-anchor-link,
+h2:hover .ga-anchor-link,
+h3:hover .ga-anchor-link,
 .ga-anchor-link:focus {
   opacity: 1;
 }
@@ -266,6 +268,12 @@ a.ga-highlight-header:hover { color: var(--ga-accent); }
 .ga-anchor-link:hover {
   color: var(--ga-primary);
 }
+
+/* Offset scroll-to-anchor so sticky navbar doesn't cover the card header */
+.ga-anchor-section {
+  scroll-margin-top: calc(var(--ga-navbar-h, 56px) + 1rem);
+}
+
 .ga-highlight-body {
   font-size: .9rem;
   color: var(--ga-text-muted);
@@ -461,7 +469,7 @@ a.ga-highlight-header:hover { color: var(--ga-accent); }
 .ga-story-article p { text-align: justify; }
 .ga-story-article h1 { font-size: 2rem; margin-bottom: .3rem; }
 .ga-story-article h2 { font-size: 1.4rem; margin-top: 2rem; }
-.ga-story-article h3 { margin-top: 2rem; }
+.ga-story-article h3 { font-size: 1.15rem; margin-top: 1.5rem; }
 .ga-story-article a { color: var(--ga-primary-muted); text-decoration: none; }
 .ga-story-article a:hover { color: var(--ga-accent); }
 .ga-story-article blockquote {
@@ -761,19 +769,21 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   white-space: nowrap;
 }
 
+.ga-birthday-date-row {
+  margin-left: 0.4rem;
+}
 .ga-birthday-date {
   font-size: 0.85rem;
   font-weight: 400;
   opacity: 0.75;
-  margin-left: 0.4rem;
 }
 @media (max-width: 575px) {
-  .ga-birthday-date {
+  .ga-birthday-date-row {
     display: block;
     margin-left: 0;
     margin-top: 0.15rem;
   }
-  .ga-anchor-link { display: none; }
+  .ga-anchor-link { opacity: 1; }
 }
 
 .ga-birthday-footer {

@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════
    Genea Azul — router.js
-   Hash-based SPA routing + lazy loading of page fragments
+   History API SPA routing + lazy loading of page fragments
    ═══════════════════════════════════════════════════════════════════ */
 var GeneaAzul = window.GeneaAzul || {};
 
@@ -9,7 +9,7 @@ GeneaAzul.router = (function() {
   var cache = {};
   var currentRoute = null;
 
-  /* Maps hash routes to page file names */
+  /* Maps route keys to page file names */
   var routeMap = {
     'inicio':                      null,               // inline in index.html
     'buscar':                      'buscar',
@@ -65,11 +65,11 @@ GeneaAzul.router = (function() {
     var meta = routeMeta[base] || routeMeta['inicio'];
     gtag('event', 'page_view', {
       page_title: meta.title,
-      page_path: '/#' + routeKey
+      page_path: routeKey === 'inicio' ? '/' : '/' + routeKey
     });
   }
 
-  /* Update document title and meta tags for the current route */
+  /* Update document title, meta tags, canonical URL, and og:url */
   function updatePageMeta(routeKey) {
     var base = routeKey.indexOf('historias/') === 0 ? 'historias' : routeKey;
     var meta = routeMeta[base] || routeMeta['inicio'];
@@ -79,14 +79,15 @@ GeneaAzul.router = (function() {
     $('meta[property="og:description"]').attr('content', meta.desc);
     $('meta[name="twitter:title"]').attr('content', meta.title);
     $('meta[name="twitter:description"]').attr('content', meta.desc);
+    var canonicalUrl = 'https://geneaazul.com.ar' + (routeKey === 'inicio' ? '/' : '/' + routeKey);
+    $('link[rel="canonical"]').attr('href', canonicalUrl);
+    $('meta[property="og:url"]').attr('content', canonicalUrl);
   }
 
-  /* Parse hash → route key (strip leading # and query string) */
-  function parseHash(hash) {
-    hash = (hash || window.location.hash || '#inicio');
-    hash = hash.replace(/^#/, '');
-    hash = hash.split('?')[0];
-    return hash || 'inicio';
+  /* Parse pathname → route key */
+  function parsePath(path) {
+    path = (path || window.location.pathname).replace(/^\//, '').replace(/\/$/, '');
+    return path || 'inicio';
   }
 
   /* Resolve route key to page file name */
@@ -129,15 +130,14 @@ GeneaAzul.router = (function() {
     });
   }
 
-  /* Navigate to a given hash */
-  function navigate(hash) {
-    if (hash.indexOf('#') !== 0) hash = '#' + hash;
-    if (window.location.hash !== hash) {
-      window.location.hash = hash;
-    } else {
-      // Same hash — still trigger load (e.g. direct call)
-      handleRoute(parseHash(hash));
+  /* Navigate to a route key */
+  function navigate(routeKey) {
+    routeKey = (routeKey || '').replace(/^[#/]+/, '');
+    var path = routeKey === 'inicio' || routeKey === '' ? '/' : '/' + routeKey;
+    if (window.location.pathname !== path) {
+      history.pushState(null, '', path);
     }
+    handleRoute(routeKey || 'inicio');
   }
 
   /* Core route handler */
@@ -157,7 +157,7 @@ GeneaAzul.router = (function() {
       if (bsCollapse) bsCollapse.hide();
     }
 
-    /* Story detail: #historias/slug — must be checked before the routeMap fallback */
+    /* Story detail: historias/slug — must be checked before the routeMap fallback */
     if (routeKey.indexOf('historias/') === 0) {
       var slug = routeKey.substring('historias/'.length);
       $('#inicio-section').addClass('d-none');
@@ -190,9 +190,9 @@ GeneaAzul.router = (function() {
     var $pc = $('#page-content').removeClass('d-none');
     $pc.html('<div class="ga-page-loading"><div class="spinner-border spinner-border-sm" role="status"></div><span>Cargando...</span></div>');
 
-    /* Fetch fragment */
+    /* Fetch fragment — absolute path so it works from any route depth */
     $.ajax({
-      url: 'pages/' + pageFile + '.html',
+      url: '/pages/' + pageFile + '.html',
       method: 'GET',
       success: function(html) {
         var $fragment = $(html);
@@ -208,30 +208,34 @@ GeneaAzul.router = (function() {
 
   /* Bootstrap the router */
   function init() {
-    // Handle nav link clicks that have data-route
+    // Redirect old hash-based URLs to clean paths (backward compat for shared links)
+    var hash = window.location.hash;
+    if (hash && hash.length > 1) {
+      var oldRoute = hash.replace(/^#/, '').split('?')[0];
+      if (routeMap.hasOwnProperty(oldRoute) || oldRoute.indexOf('historias/') === 0) {
+        history.replaceState(null, '', oldRoute === 'inicio' ? '/' : '/' + oldRoute);
+      }
+    }
+
+    // Handle nav and content link clicks
     $(document).on('click', '[data-route]', function(e) {
       // Let Bootstrap handle dropdown toggles — don't navigate on toggle click
       if ($(this).attr('data-bs-toggle') === 'dropdown') return;
       var route = $(this).attr('data-route');
       if (!route) return;
-      // Allow default anchor href to update the hash naturally, only intercept
-      // if the click would navigate to a same-page hash
-      var href = $(this).attr('href') || '';
-      if (href.indexOf('#') === 0) {
-        e.preventDefault();
-        navigate(href);
-      }
+      e.preventDefault();
+      navigate(route);
     });
 
-    // hashchange event
-    $(window).on('hashchange', function() {
-      handleRoute(parseHash(window.location.hash));
+    // Browser back/forward navigation
+    $(window).on('popstate', function() {
+      handleRoute(parsePath(window.location.pathname));
     });
 
     // Initial route on page load
-    handleRoute(parseHash(window.location.hash));
+    handleRoute(parsePath(window.location.pathname));
   }
 
-  return { init: init, navigate: navigate, parseHash: parseHash };
+  return { init: init, navigate: navigate, parsePath: parsePath };
 
 })();
