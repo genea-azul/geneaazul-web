@@ -261,6 +261,7 @@ a.ga-highlight-header:hover { color: var(--ga-accent); }
 .ga-highlight-header:hover .ga-anchor-link,
 h2:hover .ga-anchor-link,
 h3:hover .ga-anchor-link,
+.ga-tl-year-header:hover .ga-anchor-link,
 .ga-anchor-link:focus {
   opacity: 1;
 }

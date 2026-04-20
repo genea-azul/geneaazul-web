@@ -47,15 +47,43 @@ GeneaAzul.cronologia = (function() {
     var lastYear = null;
     entries.forEach(function(entry) {
       if (entry.year !== lastYear) {
-        $list.append(
-          $('<div>').addClass('ga-tl-year-header').text(entry.year !== null ? entry.year : 'Y a\u00fan m\u00e1s\u2026')
-        );
+        $list.append(buildYearHeader(entry.year));
         lastYear = entry.year;
       }
       $list.append(buildEntry(entry));
     });
     $container.append($list);
     initFilterTabs($list);
+    scrollToHashIfAny();
+  }
+
+  function buildYearHeader(year) {
+    var $header = $('<div>').addClass('ga-tl-year-header');
+    if (year === null) {
+      $header.text('Y a\u00fan m\u00e1s\u2026');
+      return $header;
+    }
+    var anchorId = 'ano-' + year;
+    $header.addClass('ga-anchor-section').attr('id', anchorId);
+    $header.append(document.createTextNode(year));
+    $header.append(
+      $('<a>').addClass('ga-anchor-link ms-2')
+        .attr({ href: '#' + anchorId, 'aria-label': 'Enlace directo' })
+        .append($('<i>').addClass('bi bi-link-45deg'))
+    );
+    return $header;
+  }
+
+  function scrollToHashIfAny() {
+    var hash = window.location.hash;
+    if (!hash) return;
+    var m = hash.match(/^#ano-(\d+)$/);
+    if (!m) return;
+    var el = document.getElementById('ano-' + m[1]);
+    if (!el) return;
+    setTimeout(function() {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
 
   function formatDate(entry) {
