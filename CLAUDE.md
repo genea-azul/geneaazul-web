@@ -17,7 +17,7 @@ Public-facing static website for **Genea Azul** (`geneaazul.com.ar`), a non-prof
 | HTML    | Single `index.html` shell; page fragments in `pages/*.html` (lazy-loaded) |
 | CSS     | Vanilla CSS with custom properties; no preprocessor, no build step        |
 | JS      | ES5-compatible, jQuery 3.7.1, IIFE module pattern — **no bundler**        |
-| Icons   | Bootstrap Icons 1.11.3 (CDN)                                              |
+| Icons   | Bootstrap Icons 1.13.1 (CDN)                                              |
 | Hosting | Cloudflare Pages (auto-deploy from `main`; no build command)              |
 | Backend | `https://gedcom-analyzer-app.fly.dev` (Spring Boot on Fly.io)             |
 

@@ -13,16 +13,19 @@ GeneaAzul.stats = (function() {
   var _activeLabelFilter = 'all';
 
   var LABEL_TEXT = {
-    'intendente-azul':      'Intendente',
-    'presidente-argentina': 'Presidente',
+    'intendente-azul':      'Intendente de Azul',
+    'presidente-argentina': 'Presidente de Arg.',
     'gobernador':           'Gobernador',
     'militar':              'Militar',
     'politico':             'Político',
     'artista':              'Artista',
+    'docente':              'Docente',
     'deportista':           'Deportista',
     'medico':               'Médico',
     'cientifico':           'Científico',
+    'ingeniero':            'Ingeniero',
     'religioso':            'Religioso',
+    'historiador':          'Historiador',
     'pueblo-originario':    'Pueblo Originario',
     'empresario':           'Empresario',
     'esclavo-liberto':      'Esclavo / Liberto',
@@ -156,7 +159,7 @@ GeneaAzul.stats = (function() {
     var $list = $('<ul>').addClass('list-unstyled small mb-0');
     data.forEach(function(p) {
       $list.append($('<li>').addClass('py-1 border-bottom').html(
-        buildPersonalityNameHtml(p) + buildPersonalityYearsHtml(p)
+        buildPersonalityNameHtml(p) + buildPersonalityYearsHtml(p) + buildPersonalityLabelsHtml(p)
       ));
     });
     $el.append($list);
@@ -269,7 +272,11 @@ GeneaAzul.stats = (function() {
     if (p.givenName) parts.push(escAttr(p.givenName));
     if (p.nickname) parts.push('<span class="fst-italic ga-nickname">\u201c' + escAttr(p.nickname) + '\u201d</span>');
     if (p.surname)  parts.push('<span class="fw-semibold">' + escAttr(p.surname) + '</span>');
-    var html = parts.join(' ');
+    return parts.join(' ');
+  }
+
+  function buildPersonalityLabelsHtml(p) {
+    var html = '';
     if (p.labels && p.labels.length) {
       html += p.labels.map(function(l) {
         return '<span class="badge text-bg-secondary fw-normal ms-1 ga-pers-label">' + escAttr(LABEL_TEXT[l] || l) + '</span>';
@@ -290,7 +297,7 @@ GeneaAzul.stats = (function() {
           ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.deathPlace) + '">' + p.deathYear + '</span>'
           : p.deathYear)
       : 'vive';
-    return ' <span class="small text-secondary ps-1">(' + birth + '&ndash;' + death + ')</span>';
+    return ' <span class="small text-secondary px-1">(' + birth + '&ndash;' + death + ')</span>';
   }
 
   function initTooltips($container) {
@@ -345,7 +352,7 @@ GeneaAzul.stats = (function() {
         $('<li>').addClass('py-1 ps-1 border-bottom')
           .attr('data-name', buildPersonalityDataName(p))
           .attr('data-labels', labelsStr)
-          .html(buildPersonalityNameHtml(p) + buildPersonalityYearsHtml(p))
+          .html(buildPersonalityNameHtml(p) + buildPersonalityYearsHtml(p) + buildPersonalityLabelsHtml(p))
       );
     });
     $el.append($header).append($ul)
