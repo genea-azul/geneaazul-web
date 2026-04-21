@@ -10,6 +10,7 @@ GeneaAzul.stats = (function() {
   var _immigration = null;
   var _personalities = null;
   var _surnames = null;
+  var _activeLabelFilter = 'all';
 
   function ready() { utils = GeneaAzul.utils; cfg = GeneaAzul.config; }
 
@@ -287,6 +288,7 @@ GeneaAzul.stats = (function() {
   /* ═══ PERSONALITIES PAGE ════════════════════════════════════════ */
   function initPersonalities() {
     ready();
+    _activeLabelFilter = 'all';
     $('#personalities-list').html(utils.spinnerHtml('Cargando personalidades\u2026'));
     loadPersonalities(function(data) {
       renderPersonalitiesFull(data);
@@ -295,6 +297,14 @@ GeneaAzul.stats = (function() {
     $(document).off('input.personalities', '#personalities-filter')
       .on('input.personalities', '#personalities-filter', function() {
         filterPersonalitiesRows($(this).val().toLowerCase());
+      });
+
+    $(document).off('click.personalities', '#personalities-filters .ga-tl-filter-btn')
+      .on('click.personalities', '#personalities-filters .ga-tl-filter-btn', function() {
+        _activeLabelFilter = $(this).data('label');
+        $('#personalities-filters .ga-tl-filter-btn').removeClass('active');
+        $(this).addClass('active');
+        filterPersonalitiesRows($('#personalities-filter').val().toLowerCase());
       });
   }
 
@@ -307,22 +317,33 @@ GeneaAzul.stats = (function() {
 
     var $ul = $('<ul>').addClass('list-unstyled mb-0');
     data.forEach(function(p) {
+      var labelsStr = (p.labels && p.labels.length) ? p.labels.join(' ') : '';
       $ul.append(
         $('<li>').addClass('py-1 ps-1 border-bottom')
           .attr('data-name', buildPersonalityDataName(p))
+          .attr('data-labels', labelsStr)
           .html(buildPersonalityNameHtml(p) + buildPersonalityYearsHtml(p))
       );
     });
-    $el.append($header).append($ul);
+    $el.append($header).append($ul)
+      .append($('<p>').addClass('text-muted mt-3 d-none').attr('id', 'personalities-no-results').text('No hay personalidades con este filtro.'));
     initTooltips($el);
   }
 
   function filterPersonalitiesRows(q) {
     var nq = utils.normalize(q);
+    var visible = 0;
     $('#personalities-list li').each(function() {
       var name = $(this).attr('data-name') || '';
-      $(this).toggleClass('d-none', nq.length > 0 && name.indexOf(nq) === -1);
+      var labels = $(this).attr('data-labels') || '';
+      var matchesText = nq.length === 0 || name.indexOf(nq) !== -1;
+      var matchesLabel = _activeLabelFilter === 'all' || (' ' + labels + ' ').indexOf(' ' + _activeLabelFilter + ' ') !== -1;
+      var show = matchesText && matchesLabel;
+      $(this).toggleClass('d-none', !show);
+      if (show) visible++;
     });
+    $('#personalities-no-results').toggleClass('d-none', visible > 0);
+    $('#pers-total').text(visible);
   }
 
   /* ═══ SURNAMES PAGE ═════════════════════════════════════════════ */
