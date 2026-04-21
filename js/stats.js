@@ -12,6 +12,23 @@ GeneaAzul.stats = (function() {
   var _surnames = null;
   var _activeLabelFilter = 'all';
 
+  var LABEL_TEXT = {
+    'intendente-azul':      'Intendente',
+    'presidente-argentina': 'Presidente',
+    'gobernador':           'Gobernador',
+    'militar':              'Militar',
+    'politico':             'Político',
+    'artista':              'Artista',
+    'deportista':           'Deportista',
+    'medico':               'Médico',
+    'cientifico':           'Científico',
+    'religioso':            'Religioso',
+    'pueblo-originario':    'Pueblo Originario',
+    'empresario':           'Empresario',
+    'esclavo-liberto':      'Esclavo / Liberto',
+    'fundador-azul':        'Fundador de Azul'
+  };
+
   function ready() { utils = GeneaAzul.utils; cfg = GeneaAzul.config; }
 
   /* ── Immigration data ──────────────────────────────────────────── */
@@ -252,7 +269,13 @@ GeneaAzul.stats = (function() {
     if (p.givenName) parts.push(escAttr(p.givenName));
     if (p.nickname) parts.push('<span class="fst-italic ga-nickname">\u201c' + escAttr(p.nickname) + '\u201d</span>');
     if (p.surname)  parts.push('<span class="fw-semibold">' + escAttr(p.surname) + '</span>');
-    return parts.join(' ');
+    var html = parts.join(' ');
+    if (p.labels && p.labels.length) {
+      html += p.labels.map(function(l) {
+        return '<span class="badge text-bg-secondary fw-normal ms-1 ga-pers-label">' + escAttr(LABEL_TEXT[l] || l) + '</span>';
+      }).join('');
+    }
+    return html;
   }
 
   function buildPersonalityYearsHtml(p) {

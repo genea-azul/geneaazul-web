@@ -526,6 +526,7 @@ h3:hover .ga-anchor-link,
 abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-tooltip { cursor: default; border-bottom: 1px dotted var(--ga-text-muted); }
 .ga-nickname { margin-right: 0.15em; }
+.ga-pers-label { font-size: 0.7em; vertical-align: middle; }
 
 /* ─── Shared list header (matches ga-table thead) ───────────────── */
 .ga-list-header {
