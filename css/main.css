@@ -943,10 +943,10 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 
 .ga-tl-filter-btn[data-label="all"]                    { color: var(--ga-text-muted); border-color: var(--ga-text-muted); }
 .ga-tl-filter-btn[data-label="all"]:hover,
-.ga-tl-filter-btn[data-label="all"].active             { background: var(--ga-text-muted); }
+.ga-tl-filter-btn[data-label="all"].active             { background: var(--ga-text-muted); color: #fff; }
 .ga-tl-filter-btn[data-label]:not([data-label="all"])  { color: var(--ga-primary); border-color: var(--ga-primary); }
 .ga-tl-filter-btn[data-label]:not([data-label="all"]):hover,
-.ga-tl-filter-btn[data-label]:not([data-label="all"]).active { background: var(--ga-primary); }
+.ga-tl-filter-btn[data-label]:not([data-label="all"]).active { background: var(--ga-primary); color: #fff; }
 
 .ga-tl-list {
   position: relative;
