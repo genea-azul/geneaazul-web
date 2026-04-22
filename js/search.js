@@ -84,8 +84,8 @@ GeneaAzul.search = (function() {
   function toggleYearOfDeath(isAliveSelector, yearOfDeathSelector) {
     $(document).off('change.search-form', isAliveSelector)
       .on('change.search-form', isAliveSelector, function() {
-        var alive = $(isAliveSelector).prop('checked');
-        $(yearOfDeathSelector).val('').prop('disabled', alive);
+        var isAlive = $(isAliveSelector).prop('checked');
+        $(yearOfDeathSelector).val('').prop('disabled', isAlive);
       });
   }
 

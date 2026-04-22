@@ -527,6 +527,10 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-tooltip { cursor: default; border-bottom: 1px dotted var(--ga-text-muted); }
 .ga-nickname { margin-right: 0.15em; }
 .ga-pers-label { font-size: 0.7em; vertical-align: middle; background-color: var(--ga-border); color: var(--ga-text-muted); }
+.ga-pers-labels { margin-left: 0.25rem; }
+@media (max-width: 575.98px) {
+  .ga-pers-labels { display: block; margin-left: 0; margin-top: 0.2rem; }
+}
 
 /* ─── Shared list header (matches ga-table thead) ───────────────── */
 .ga-list-header {

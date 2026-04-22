@@ -18,6 +18,7 @@ GeneaAzul.stats = (function() {
     'gobernador':           'Gobernador',
     'militar':              'Militar',
     'politico':             'Político',
+    'abogado':              'Abogado',
     'artista':              'Artista',
     'docente':              'Docente',
     'deportista':           'Deportista',
@@ -27,7 +28,7 @@ GeneaAzul.stats = (function() {
     'religioso':            'Religioso',
     'historiador':          'Historiador',
     'pueblo-originario':    'Pueblo Originario',
-    'empresario':           'Empresario',
+    'comerciante':          'Comerciante',
     'esclavo-liberto':      'Esclavo / Liberto',
     'fundador-azul':        'Fundador de Azul'
   };
@@ -271,32 +272,36 @@ GeneaAzul.stats = (function() {
     }
     if (p.givenName) parts.push(escAttr(p.givenName));
     if (p.nickname) parts.push('<span class="fst-italic ga-nickname">\u201c' + escAttr(p.nickname) + '\u201d</span>');
-    if (p.surname)  parts.push('<span class="fw-semibold">' + escAttr(p.surname) + '</span>');
+    if (p.surname) {
+      var surnameHtml = '<span class="fw-semibold">' + escAttr(p.surname) + '</span>';
+      if (p.nameSuffix) surnameHtml += '<span class="text-secondary">, ' + escAttr(p.nameSuffix) + '</span>';
+      parts.push(surnameHtml);
+    }
     return parts.join(' ');
   }
 
   function buildPersonalityLabelsHtml(p) {
-    var html = '';
-    if (p.labels && p.labels.length) {
-      html += p.labels.map(function(l) {
-        return '<span class="badge fw-normal ms-1 ga-pers-label">' + escAttr(LABEL_TEXT[l] || l) + '</span>';
-      }).join('');
-    }
-    return html;
+    if (!p.labels || !p.labels.length) return '';
+    var badges = p.labels.map(function(l) {
+      return '<span class="badge fw-normal me-1 ga-pers-label">' + escAttr(LABEL_TEXT[l] || l) + '</span>';
+    }).join('');
+    return '<span class="ga-pers-labels">' + badges + '</span>';
   }
 
   function buildPersonalityYearsHtml(p) {
-    if (!p.birthYear && !p.deathYear) return '';
+    if (!p.birthYear && !p.deathYear && p.isAlive == null) return '';
     var birth = p.birthYear
       ? (p.birthPlace
           ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.birthPlace) + '">' + p.birthYear + '</span>'
           : p.birthYear)
       : '?';
-    var death = (p.deathYear != null)
-      ? (p.deathPlace
-          ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.deathPlace) + '">' + p.deathYear + '</span>'
-          : p.deathYear)
-      : 'vive';
+    var death = p.isAlive
+      ? 'vive'
+      : (p.deathYear != null
+          ? (p.deathPlace
+              ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.deathPlace) + '">' + p.deathYear + '</span>'
+              : p.deathYear)
+          : '?');
     return ' <span class="small text-secondary px-1">(' + birth + '&ndash;' + death + ')</span>';
   }
 
@@ -312,7 +317,7 @@ GeneaAzul.stats = (function() {
   }
 
   function buildPersonalityDataName(p) {
-    return utils.normalize([(p.title || ''), (p.givenName || ''), (p.nickname || ''), (p.surname || '')].join(' '));
+    return utils.normalize([(p.title || ''), (p.givenName || ''), (p.nickname || ''), (p.surname || ''), (p.nameSuffix || '')].join(' '));
   }
 
   /* ═══ PERSONALITIES PAGE ════════════════════════════════════════ */

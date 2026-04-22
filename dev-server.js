@@ -35,18 +35,18 @@ var nextGedcom  = gedcomDate(Math.min(arDay + 3, 28), arMonth, arYear - 65);
 var MOCK_GEDCOM_ANALYZER = { disableObfuscateLiving: false };
 
 var MOCK_METADATA = {
-  personsCount:          70512,
-  familiesCount:         28340,
-  maleCount:             34100,
-  femaleCount:           36412,
-  deceasedCount:         51000,
-  aliveCount:            19512,
-  distinguishedCount:    258,
-  azulPersonsCount:      12450,
+  personsCount:          70000,
+  familiesCount:         25000,
+  maleCount:             35200,
+  femaleCount:           34800,
+  deceasedCount:         40000,
+  aliveCount:            30000,
+  distinguishedCount:    200,
+  azulPersonsCount:      12000,
   azulAliveCount:        4800,
-  azulSurnamesCount:     4080,
-  azulMayorsCount:       47,
-  azulDisappearedCount:  12
+  azulSurnamesCount:     4000,
+  azulMayorsCount:       40,
+  azulDisappearedCount:  20
 };
 
 var MOCK_AZUL_TODAY = [
