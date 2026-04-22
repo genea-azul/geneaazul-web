@@ -279,7 +279,7 @@ GeneaAzul.stats = (function() {
     var html = '';
     if (p.labels && p.labels.length) {
       html += p.labels.map(function(l) {
-        return '<span class="badge text-bg-secondary fw-normal ms-1 ga-pers-label">' + escAttr(LABEL_TEXT[l] || l) + '</span>';
+        return '<span class="badge fw-normal ms-1 ga-pers-label">' + escAttr(LABEL_TEXT[l] || l) + '</span>';
       }).join('');
     }
     return html;
