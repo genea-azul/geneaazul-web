@@ -106,7 +106,19 @@ GeneaAzul.router = (function() {
     $pc.removeClass('ga-page-fade-in').empty();
     $pc.html($html);
     requestAnimationFrame(function() { $pc.addClass('ga-page-fade-in'); });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!window.location.hash) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /* Scroll to the #hash anchor after fragment injection */
+  function scrollToHash() {
+    var hash = window.location.hash;
+    if (!hash) return;
+    requestAnimationFrame(function() {
+      var el = document.getElementById(hash.slice(1));
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    });
   }
 
   /* Update navbar active link */
@@ -177,6 +189,7 @@ GeneaAzul.router = (function() {
     if (cache[pageFile]) {
       showPage(cache[pageFile].clone(true));
       if (initializers[pageFile]) initializers[pageFile]();
+      scrollToHash();
       return;
     }
 
@@ -193,6 +206,7 @@ GeneaAzul.router = (function() {
         cache[pageFile] = $fragment.clone(true);
         showPage($fragment);
         if (initializers[pageFile]) initializers[pageFile]();
+        scrollToHash();
       },
       error: function() {
         $pc.html('<div class="container py-5 text-center"><p class="text-muted">No se pudo cargar la página. Intentá de nuevo.</p></div>');
