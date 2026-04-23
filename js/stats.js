@@ -337,8 +337,8 @@ GeneaAzul.stats = (function() {
     $(document).off('click.personalities', '#personalities-filters .ga-tl-filter-btn')
       .on('click.personalities', '#personalities-filters .ga-tl-filter-btn', function() {
         _activeLabelFilter = $(this).data('label');
-        $('#personalities-filters .ga-tl-filter-btn').removeClass('active');
-        $(this).addClass('active');
+        $('#personalities-filters .ga-tl-filter-btn').removeClass('active').attr('aria-pressed', 'false');
+        $(this).addClass('active').attr('aria-pressed', 'true');
         filterPersonalitiesRows($('#personalities-filter').val().toLowerCase());
       });
   }

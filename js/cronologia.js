@@ -132,7 +132,7 @@ GeneaAzul.cronologia = (function() {
       $card.append($('<div>').addClass('ga-tl-source-text').text(entry.source));
     }
 
-    if (entry.storySlug) {
+    if (entry.storySlug && /^[a-z0-9-]+$/.test(entry.storySlug)) {
       $card.append(
         $('<a>').addClass('ga-tl-story-link')
           .attr('href', '/historias/' + entry.storySlug)
@@ -167,11 +167,11 @@ GeneaAzul.cronologia = (function() {
 
   function initFilterTabs($list) {
     var $section = $('#cronologia-section');
-    $(document).off('click.cronologia', '.ga-tl-filter-btn')
-      .on('click.cronologia', '.ga-tl-filter-btn', function() {
+    $(document).off('click.cronologia', '#cronologia-section .ga-tl-filter-btn')
+      .on('click.cronologia', '#cronologia-section .ga-tl-filter-btn', function() {
         _activeFilter = $(this).data('filter');
-        $section.find('.ga-tl-filter-btn').removeClass('active');
-        $(this).addClass('active');
+        $section.find('.ga-tl-filter-btn').removeClass('active').attr('aria-pressed', 'false');
+        $(this).addClass('active').attr('aria-pressed', 'true');
         applyFilters($list);
       });
     $(document).off('input.cronologia', '#cronologia-search')

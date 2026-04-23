@@ -53,7 +53,7 @@ GeneaAzul.stories = (function() {
             .append($('<div>').addClass('d-flex justify-content-between align-items-center mt-2')
               .append($('<small>').addClass('text-muted').html(
                 (story.author ? '<i class="bi bi-person me-1"></i>' + GeneaAzul.utils.escHtml(story.author) : '')
-                + (date ? ' &middot; ' + date : '')
+                + (date ? ' &middot; ' + GeneaAzul.utils.escHtml(date) : '')
               ))
               .append($('<a>')
                 .addClass('ga-highlight-link small')

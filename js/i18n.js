@@ -112,7 +112,7 @@ GeneaAzul.i18n = (function() {
   }
 
   function getCardinal(num, singular, plural) {
-    return '<b>' + num + '</b> ' + (num === 1 ? singular : plural);
+    return '<b>' + escHtml(String(num)) + '</b> ' + (num === 1 ? singular : plural);
   }
 
   /* Full relationship name (for maxDistantRelationship) */

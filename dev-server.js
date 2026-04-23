@@ -192,6 +192,7 @@ var server = http.createServer(function(req, res) {
 
 function serveStatic(res, url) {
   var filePath = path.join(ROOT, url === '/' ? 'index.html' : url);
+  if (filePath.indexOf(ROOT) !== 0) { res.writeHead(403); return res.end('Forbidden'); }
   var ext = path.extname(filePath).toLowerCase();
 
   fs.stat(filePath, function(err, stat) {
@@ -200,6 +201,7 @@ function serveStatic(res, url) {
     }
     // Try clean-URL route entry point: /buscar → buscar.html, /estadisticas/inmigracion → estadisticas/inmigracion.html
     var htmlPath = path.join(ROOT, url.replace(/^\//, '') + '.html');
+    if (htmlPath.indexOf(ROOT) !== 0) { return send404(res, url); }
     fs.stat(htmlPath, function(err2, stat2) {
       if (!err2 && stat2.isFile()) {
         return sendFile(res, htmlPath, '.html');
@@ -401,8 +403,23 @@ function integrityCheck() {
     });
   }
 
+  // 9. pages/ fragment <section aria-label> matches title (title === aria-label + ' — Genea Azul')
+  if (genRouteValues) {
+    pageFilePairs.forEach(function(pair) {
+      var gr = genRouteValues[pair.route];
+      if (!gr) return;
+      var expectedLabel = gr.title.replace(' — Genea Azul', '');
+      var fragPath = path.join(ROOT, 'pages', pair.file + '.html');
+      var fragSrc;
+      try { fragSrc = fs.readFileSync(fragPath, 'utf8'); } catch(e) { return; }
+      if (fragSrc.indexOf('aria-label="' + expectedLabel + '"') === -1) {
+        warn('pages/' + pair.file + '.html: <section> aria-label should be "' + expectedLabel + '"');
+      }
+    });
+  }
+
   if (issues.length === 0) {
-    console.log('\x1b[32m[check] OK — router.js, generate-route-pages.js, _redirects, _headers all consistent.\x1b[0m');
+    console.log('\x1b[32m[check] OK — router.js, generate-route-pages.js, _redirects, _headers, fragments all consistent.\x1b[0m');
   } else {
     console.warn('\x1b[33m[check] ' + issues.length + ' issue(s) found — see warnings above.\x1b[0m');
   }

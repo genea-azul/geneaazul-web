@@ -479,8 +479,8 @@ GeneaAzul.search = (function() {
         $tul.append($('<li>').html('Ascendencia: ' + i18n.getCardinal(person.ancestryGenerations.ascending, 'generaci&oacute;n', 'generaciones')));
         $tul.append($('<li>').html('Descendencia: ' + i18n.getCardinal(person.ancestryGenerations.directDescending, 'generaci&oacute;n', 'generaciones')));
       }
-      if (hasPC) $tul.append($('<li>').html('Cantidad de familiares: <b>' + person.personsCountInTree + '</b>'));
-      if (hasSC) $tul.append($('<li>').html('Cantidad de apellidos: <b>' + person.surnamesCountInTree + '</b>'));
+      if (hasPC) $tul.append($('<li>').html('Cantidad de familiares: <b>' + utils.escHtml(String(person.personsCountInTree)) + '</b>'));
+      if (hasSC) $tul.append($('<li>').html('Cantidad de apellidos: <b>' + utils.escHtml(String(person.surnamesCountInTree)) + '</b>'));
       if (hasMD) {
         $tul.append($('<li>').html('Relaci&oacute;n m&aacute;s distante:'));
         $tul.append($('<ul>').addClass('mb-0')
@@ -522,7 +522,7 @@ GeneaAzul.search = (function() {
       .append($('<div>').addClass('mt-2 text-center')
         .append($('<a>').addClass('btn btn-sm btn-dark search-family-tree-btn disabled')
           .attr('id', 'search-family-tree-btn-' + uid)
-          .attr('role', 'button').attr('href', 'javascript:void(0)').attr('tabindex', '-1')
+          .attr('role', 'button').attr('href', '#').attr('tabindex', '-1')
           .on('click', { personUuid: uid, btnLocator: '#search-family-tree-btn-' + uid, errorLocator: '#search-family-tree-error-' + uid }, downloadFamilyTreePdf)
           .html('Descargar listado de familiares (PDF)')))
       .append($('<div>').addClass('mt-1 text-center')
@@ -574,6 +574,7 @@ GeneaAzul.search = (function() {
   }
 
   function downloadFamilyTreePdf(e) {
+    e.preventDefault();
     var data = e.data;
     var $btn = $(data.btnLocator);
     var $err = $(data.errorLocator);
@@ -668,6 +669,12 @@ GeneaAzul.search = (function() {
     if (callback) callback();
   }
 
-  return { init: init };
+  function cleanup() {
+    _activeTimers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
+    _activeTimers = [];
+    $(document).off('.search-form').off('.search');
+  }
+
+  return { init: init, cleanup: cleanup };
 
 })();

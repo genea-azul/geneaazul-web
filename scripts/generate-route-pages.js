@@ -102,8 +102,8 @@ function buildBreadcrumb(crumbs) {
   crumbs.forEach(function(c, i) {
     items.push(
       '{ "@type": "ListItem", "position": ' + (i + 2) +
-      ', "name": "' + c.name +
-      '", "item": "' + BASE + c.path + '" }'
+      ', "name": ' + JSON.stringify(c.name) +
+      ', "item": ' + JSON.stringify(BASE + c.path) + ' }'
     );
   });
   return (

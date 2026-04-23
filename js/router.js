@@ -111,7 +111,9 @@ GeneaAzul.router = (function() {
     }
   }
 
-  /* Scroll to the #hash anchor after fragment injection */
+  /* Scroll to the #hash anchor after fragment injection.
+     NOTE: #cumpleanos and #efemerides are display:none until their API responds —
+     birthdays.js / ephemerides.js handle their own hash scroll after reveal. */
   function scrollToHash() {
     var hash = window.location.hash;
     if (!hash) return;
@@ -153,6 +155,7 @@ GeneaAzul.router = (function() {
     // re-run so popstate/refresh on a story detail doesn't leave #page-content empty.
     var reRunRoutes = ['estadisticas'];
     if (routeKey === currentRoute && reRunRoutes.indexOf(routeKey) === -1 && routeKey.indexOf('historias/') !== 0) return;
+    if (currentRoute === 'buscar' && GeneaAzul.search && GeneaAzul.search.cleanup) GeneaAzul.search.cleanup();
     currentRoute = routeKey;
 
     updatePageMeta(routeKey);
