@@ -178,12 +178,11 @@ Object.keys(ROUTES).forEach(function(route) {
   // Breadcrumb (exact block match)
   html = html.replace(HOME_BREADCRUMB, buildBreadcrumb(m.crumbs));
 
-  // e.g. 'buscar' → 'routes/buscar.html', 'estadisticas/inmigracion' → 'routes/estadisticas-inmigracion.html'
-  var fileName = route.replace(/\//g, '-') + '.html';
-  var outFile = path.join(ROOT, 'routes', fileName);
-  fs.mkdirSync(path.join(ROOT, 'routes'), { recursive: true });
+  // e.g. 'buscar' → 'buscar.html', 'estadisticas/inmigracion' → 'estadisticas/inmigracion.html'
+  var outFile = path.join(ROOT, route + '.html');
+  fs.mkdirSync(path.dirname(outFile), { recursive: true });
   fs.writeFileSync(outFile, html, 'utf8');
-  console.log('Generated: routes/' + fileName);
+  console.log('Generated: ' + route + '.html');
 });
 
 console.log('Done. ' + Object.keys(ROUTES).length + ' files generated.');

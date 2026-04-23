@@ -198,9 +198,8 @@ function serveStatic(res, url) {
     if (!err && stat.isFile()) {
       return sendFile(res, filePath, ext || '.html');
     }
-    // Try route entry point: /buscar → routes/buscar.html, /estadisticas/inmigracion → routes/estadisticas-inmigracion.html
-    var routeFile = url.replace(/^\//, '').replace(/\//g, '-') + '.html';
-    var htmlPath = path.join(ROOT, 'routes', routeFile);
+    // Try clean-URL route entry point: /buscar → buscar.html, /estadisticas/inmigracion → estadisticas/inmigracion.html
+    var htmlPath = path.join(ROOT, url.replace(/^\//, '') + '.html');
     fs.stat(htmlPath, function(err2, stat2) {
       if (!err2 && stat2.isFile()) {
         return sendFile(res, htmlPath, '.html');
@@ -335,12 +334,7 @@ function integrityCheck() {
 
   var routes = routeMapKeys.filter(function(r) { return r !== 'inicio'; });
 
-  // _redirects: '/route /routes/file.html 200' — capture both route key and actual filename
-  var redirectRoutes = [], redirectFiles = [];
-  redirectsSrc.split('\n').forEach(function(line) {
-    var m = line.match(/^(\/[^\s#]+)\s+\/routes\/([^\s]+)/);
-    if (m) { redirectRoutes.push(m[1].slice(1)); redirectFiles.push(m[2]); }
-  });
+  // (no per-route redirects — route HTML files live at root, served via Cloudflare clean URLs)
 
   // _headers: path lines (no wildcards) followed immediately by no-cache
   var headerRoutes = [];
@@ -374,12 +368,10 @@ function integrityCheck() {
       warn('generate-route-pages.js: "' + r + '" in ROUTES but not in routeMap');
   });
 
-  // 4. routeMap ↔ _redirects
+  // 4. route HTML entry points exist at root (e.g. buscar.html, estadisticas/inmigracion.html)
   routes.forEach(function(r) {
-    if (redirectRoutes.indexOf(r) === -1) warn('_redirects: missing rewrite rule for "/' + r + '"');
-  });
-  redirectRoutes.forEach(function(r) {
-    if (routes.indexOf(r) === -1) warn('_redirects: "/' + r + '" has no matching entry in routeMap');
+    if (!fs.existsSync(path.join(ROOT, r + '.html')))
+      warn(r + '.html is missing — run: node scripts/generate-route-pages.js');
   });
 
   // 5. routeMap ↔ _headers no-cache
@@ -387,11 +379,6 @@ function integrityCheck() {
     if (headerRoutes.indexOf(r) === -1) warn('_headers: missing no-cache entry for "/' + r + '"');
   });
 
-  // 6. _redirects → routes/ files actually exist on disk
-  redirectFiles.forEach(function(f) {
-    if (!fs.existsSync(path.join(ROOT, 'routes', f)))
-      warn('routes/' + f + ' is missing — run: node scripts/generate-route-pages.js');
-  });
 
   // 7. routeMap page-file values → pages/ fragments exist on disk
   pageFilePairs.forEach(function(p) {
