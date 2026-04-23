@@ -11,6 +11,12 @@
 /*.html
   Cache-Control: no-cache
 
+# Page fragments and story sources — short TTL matches data files
+/pages/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=60
+/stories/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=60
+
 # Root (SPA — served as index.html)
 /
   Cache-Control: no-cache

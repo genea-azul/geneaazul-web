@@ -87,7 +87,7 @@ GeneaAzul.search = (function() {
     $('#spouseContainer').addClass('d-none');
 
     // Number maxlength guard
-    $('input[type=number]').off('input').on('input', function() {
+    $('#buscar-section input[type=number]').off('input').on('input', function() {
       utils.maxLengthCheck(this);
     });
 
@@ -490,7 +490,7 @@ GeneaAzul.search = (function() {
       if (hasDPT) {
         var $dpDiv = $('<div>').addClass('mb-0');
         person.distinguishedPersonsInTree.forEach(function(np) {
-          var $img = np.file
+          var $img = (np.file && np.file.indexOf('http') === 0)
             ? $('<img>').attr('src', np.file).attr('alt', np.name + ' (foto)').addClass('profile-picture-small')
             : $('<i>').attr('style', 'font-size:32px').addClass('bi bi-person');
           $dpDiv.append(
@@ -645,7 +645,7 @@ GeneaAzul.search = (function() {
       $body.append($('<div>').addClass('mt-1').html('Pa&iacute;ses: ').append($cul));
     }
     if (r.firstSeenYear != null && r.lastSeenYear != null) {
-      $body.append($('<div>').addClass('mt-1').html('Rango de a&ntilde;os: ' + r.firstSeenYear + '&ndash;' + r.lastSeenYear));
+      $body.append($('<div>').addClass('mt-1').html('Rango de a&ntilde;os: ' + utils.escHtml(String(r.firstSeenYear)) + '&ndash;' + utils.escHtml(String(r.lastSeenYear))));
     }
     return $card.append($body);
   }

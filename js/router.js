@@ -137,8 +137,10 @@ GeneaAzul.router = (function() {
 
   /* Core route handler */
   function handleRoute(routeKey) {
+    // estadisticas re-runs on every visit (tab switches re-initialise charts); story slugs
+    // re-run so popstate/refresh on a story detail doesn't leave #page-content empty.
     var reRunRoutes = ['estadisticas'];
-    if (routeKey === currentRoute && reRunRoutes.indexOf(routeKey) === -1) return; // already showing
+    if (routeKey === currentRoute && reRunRoutes.indexOf(routeKey) === -1 && routeKey.indexOf('historias/') !== 0) return;
     currentRoute = routeKey;
 
     updatePageMeta(routeKey);
@@ -200,15 +202,6 @@ GeneaAzul.router = (function() {
 
   /* Bootstrap the router */
   function init() {
-    // Redirect old hash-based URLs to clean paths (backward compat for shared links)
-    var hash = window.location.hash;
-    if (hash && hash.length > 1) {
-      var oldRoute = hash.replace(/^#/, '').split('?')[0];
-      if (routeMap.hasOwnProperty(oldRoute) || oldRoute.indexOf('historias/') === 0) {
-        history.replaceState(null, '', oldRoute === 'inicio' ? '/' : '/' + oldRoute);
-      }
-    }
-
     // Handle nav and content link clicks
     $(document).on('click', '[data-route]', function(e) {
       // Let Bootstrap handle dropdown toggles — don't navigate on toggle click

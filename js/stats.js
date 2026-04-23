@@ -233,7 +233,7 @@ GeneaAzul.stats = (function() {
 
       var $expandRow = $('<tr>').addClass('ga-expand-row d-none d-md-none')
         .append($('<td>').attr('colspan', '99').addClass('small text-muted py-1 ps-4')
-          .html('<i class="bi bi-people-fill me-1"></i>' + surnamesText));
+          .html('<i class="bi bi-people-fill me-1"></i>' + utils.escHtml(surnamesText)));
 
       $tbody.append($row).append($expandRow);
     });
@@ -292,15 +292,15 @@ GeneaAzul.stats = (function() {
     if (!p.birthYear && !p.deathYear && p.isAlive == null) return '';
     var birth = p.birthYear
       ? (p.birthPlace
-          ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.birthPlace) + '">' + p.birthYear + '</span>'
-          : p.birthYear)
+          ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.birthPlace) + '">' + escAttr(p.birthYear) + '</span>'
+          : escAttr(p.birthYear))
       : '?';
     var death = p.isAlive
       ? 'vive'
       : (p.deathYear != null
           ? (p.deathPlace
-              ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.deathPlace) + '">' + p.deathYear + '</span>'
-              : p.deathYear)
+              ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.deathPlace) + '">' + escAttr(p.deathYear) + '</span>'
+              : escAttr(p.deathYear))
           : '?');
     return ' <span class="small text-secondary px-1">(' + birth + '&ndash;' + death + ')</span>';
   }
@@ -313,7 +313,7 @@ GeneaAzul.stats = (function() {
 
   /* ── Escape HTML attribute values ──────────────────────────────── */
   function escAttr(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   function buildPersonalityDataName(p) {
@@ -414,7 +414,7 @@ GeneaAzul.stats = (function() {
 
     data.forEach(function(s, idx) {
       var variantList = s.variants && s.variants.length > 0 ? s.variants : [];
-      var variantsHtml = variantList.length > 0 ? variantList.join(', ') : '<span class="text-muted">—</span>';
+      var variantsHtml = variantList.length > 0 ? variantList.map(function(v) { return utils.escHtml(v); }).join(', ') : '<span class="text-muted">—</span>';
       var countHtml = s.count != null ? utils.formatNumber(s.count) : '<span class="text-muted">—</span>';
       var aliveHtml = s.aliveCount != null ? utils.formatNumber(s.aliveCount) : '<span class="text-muted">—</span>';
       $tbody.append(
