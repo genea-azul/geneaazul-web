@@ -130,6 +130,12 @@ a:hover { color: var(--ga-accent); }
 .ga-navbar .dropdown-item.active               { background-color: var(--ga-primary-muted); color: #fff; }
 .ga-navbar .dropdown-item.active:hover         { background-color: var(--ga-primary-hover); color: #fff; }
 
+@media (max-width: 1199.98px) {
+  .ga-navbar .dropdown-menu.show {
+    animation: gaFadeIn .2s ease forwards;
+  }
+}
+
 /* Navbar becomes slightly more opaque on scroll */
 .ga-navbar.scrolled { box-shadow: 0 4px 16px rgba(0,0,0,.28); }
 

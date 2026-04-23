@@ -25,10 +25,15 @@ GeneaAzul.config = {
 GeneaAzul.app = (function() {
 
   function init() {
-    animateHeroStats();
-    fetchLiveStats();
+    // Early wake-up ping so the backend is ready before the user navigates to a feature page
+    GeneaAzul.utils.apiGetCached(GeneaAzul.config.apiBaseUrl + '/api/gedcom-analyzer/metadata', function() {});
     initNavbarScroll();
     initSearchClear();
+  }
+
+  function initHome() {
+    animateHeroStats();
+    fetchLiveStats();
   }
 
   function animateHeroStats() {
@@ -101,6 +106,6 @@ GeneaAzul.app = (function() {
     });
   }
 
-  return { init: init };
+  return { init: init, initHome: initHome };
 
 })();

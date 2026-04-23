@@ -1,1 +1,20 @@
+# Per-route rewrites — must come before the SPA catch-all.
+# Serve route-specific HTML entry points (with correct <head> meta tags for SEO)
+# from routes/ without exposing that path in the browser URL.
+# Keep in sync with: scripts/generate-route-pages.js ROUTES, _headers SPA route entries.
+/buscar                      /routes/buscar.html 200
+/conexiones                  /routes/conexiones.html 200
+/estadisticas                /routes/estadisticas.html 200
+/estadisticas/inmigracion    /routes/estadisticas-inmigracion.html 200
+/estadisticas/personalidades /routes/estadisticas-personalidades.html 200
+/estadisticas/apellidos      /routes/estadisticas-apellidos.html 200
+/mapa                        /routes/mapa.html 200
+/historias                   /routes/historias.html 200
+/testimonios                 /routes/testimonios.html 200
+/colabora                    /routes/colabora.html 200
+/recursos                    /routes/recursos.html 200
+/cronologia                  /routes/cronologia.html 200
+/sobre-nosotros              /routes/sobre-nosotros.html 200
+
+# SPA catch-all — all other paths (unknown routes, story slugs, etc.)
 /* /index.html 200

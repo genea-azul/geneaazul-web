@@ -27,7 +27,23 @@ GeneaAzul.search = (function() {
     wireAdvancedToggle();
     wireFormInteractions();
     wireSearchButton();
+    prefillFromQuery();
     initBackend();
+  }
+
+  /* ── Pre-fill form from ?q= URL parameter ───────────────────────── */
+  function prefillFromQuery() {
+    var params = utils.getQueryParams();
+    // getQueryParams uses decodeURIComponent which leaves '+' as-is; fix it
+    var q = (params.q || '').replace(/\+/g, ' ').trim();
+    if (!q) return;
+
+    var tokens   = q.split(/\s+/);
+    var surname   = tokens[tokens.length - 1];
+    var givenName = tokens.length > 1 ? tokens.slice(0, tokens.length - 1).join(' ') : '';
+
+    $('#individualSurname').val(surname);
+    if (givenName) $('#individualGivenName').val(givenName);
   }
 
   /* ── Advanced toggle ────────────────────────────────────────────── */

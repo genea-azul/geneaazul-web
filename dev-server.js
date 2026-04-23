@@ -195,15 +195,27 @@ function serveStatic(res, url) {
   var ext = path.extname(filePath).toLowerCase();
 
   fs.stat(filePath, function(err, stat) {
-    if (err || !stat.isFile()) {
-      filePath = path.join(ROOT, 'index.html');
-      ext = '.html';
+    if (!err && stat.isFile()) {
+      return sendFile(res, filePath, ext || '.html');
     }
-    fs.readFile(filePath, function(err2, data) {
-      if (err2) { res.writeHead(500); return res.end('Internal server error'); }
-      res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
-      res.end(data);
+    // Try route entry point: /buscar → routes/buscar.html, /estadisticas/inmigracion → routes/estadisticas-inmigracion.html
+    var routeFile = url.replace(/^\//, '').replace(/\//g, '-') + '.html';
+    var htmlPath = path.join(ROOT, 'routes', routeFile);
+    fs.stat(htmlPath, function(err2, stat2) {
+      if (!err2 && stat2.isFile()) {
+        return sendFile(res, htmlPath, '.html');
+      }
+      // SPA fallback
+      sendFile(res, path.join(ROOT, 'index.html'), '.html');
     });
+  });
+}
+
+function sendFile(res, filePath, ext) {
+  fs.readFile(filePath, function(err, data) {
+    if (err) { res.writeHead(500); return res.end('Internal server error'); }
+    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+    res.end(data);
   });
 }
 
@@ -227,7 +239,190 @@ function send404(res, url) {
   res.end('Not found: ' + url);
 }
 
+// ─── Route integrity check ────────────────────────────────────────────────────
+function integrityCheck() {
+  var issues = [];
+  function warn(msg) { console.warn('\x1b[33m[check] ' + msg + '\x1b[0m'); issues.push(msg); }
+  function readSrc(rel) {
+    try { return fs.readFileSync(path.join(ROOT, rel), 'utf8'); }
+    catch(e) { warn('Cannot read ' + rel + ' — ' + e.message); return null; }
+  }
+  function extractObjKeys(src, varName) {
+    var start = src.indexOf('var ' + varName + ' ');
+    if (start === -1) return null;
+    var brace = src.indexOf('{', start);
+    if (brace === -1) return null;
+    var keys = [], depth = 0, i = brace;
+    while (i < src.length) {
+      var ch = src[i];
+      if      (ch === '{') { depth++; i++; }
+      else if (ch === '}') { depth--; if (!depth) break; i++; }
+      else if (depth === 1 && ch === "'") {
+        var close = src.indexOf("'", i + 1);
+        if (close === -1) break;
+        if (/^\s*:/.test(src.slice(close + 1))) keys.push(src.slice(i + 1, close));
+        i = close + 1;
+      } else { i++; }
+    }
+    return keys;
+  }
+
+  function decodeUnicode(str) {
+    return str.replace(/\\u([0-9a-fA-F]{4})/g, function(_, hex) {
+      return String.fromCharCode(parseInt(hex, 16));
+    });
+  }
+
+  // Returns { routeKey: { title, desc } } for routeMeta or ROUTES objects.
+  // Handles \uXXXX escapes (router.js) and plain UTF-8 (generate-route-pages.js).
+  function extractMetaValues(src, varName) {
+    var start = src.indexOf('var ' + varName + ' ');
+    if (start === -1) return null;
+    var brace = src.indexOf('{', start);
+    if (brace === -1) return null;
+    var result = {}, depth = 0, i = brace;
+    while (i < src.length) {
+      var ch = src[i];
+      if (ch === '{') { depth++; i++; }
+      else if (ch === '}') { depth--; if (!depth) break; i++; }
+      else if (depth === 1 && ch === "'") {
+        var keyEnd = src.indexOf("'", i + 1);
+        if (keyEnd === -1) break;
+        var key = src.slice(i + 1, keyEnd);
+        var colonPos = src.indexOf(':', keyEnd);
+        var valueBrace = src.indexOf('{', colonPos);
+        if (valueBrace === -1) break;
+        var innerDepth = 0, j = valueBrace;
+        while (j < src.length) {
+          if (src[j] === '{') { innerDepth++; j++; }
+          else if (src[j] === '}') { innerDepth--; if (!innerDepth) { j++; break; } j++; }
+          else { j++; }
+        }
+        var inner = src.slice(valueBrace, j);
+        var tm = inner.match(/title\s*:\s*'((?:[^'\\]|\\.)*)'/);
+        var dm = inner.match(/desc\s*:\s*'((?:[^'\\]|\\.)*)'/);
+        if (tm && dm) result[key] = { title: decodeUnicode(tm[1]), desc: decodeUnicode(dm[1]) };
+        i = j;
+      } else { i++; }
+    }
+    return result;
+  }
+
+  var routerSrc    = readSrc('js/router.js');
+  var genSrc       = readSrc('scripts/generate-route-pages.js');
+  var redirectsSrc = readSrc('_redirects');
+  var headersSrc   = readSrc('_headers');
+  if (!routerSrc || !genSrc || !redirectsSrc || !headersSrc) return;
+
+  var routeMapKeys    = extractObjKeys(routerSrc, 'routeMap');
+  var routeMetaKeys   = extractObjKeys(routerSrc, 'routeMeta');
+  var initializerKeys = extractObjKeys(routerSrc, 'initializers');
+  var genRouteKeys    = extractObjKeys(genSrc,    'ROUTES');
+
+  if (!routeMapKeys || !routeMetaKeys || !initializerKeys || !genRouteKeys) {
+    warn('Could not parse route objects — check JS syntax in router.js / generate-route-pages.js');
+    return;
+  }
+
+  // routeMap key→pageFile pairs e.g. 'estadisticas/inmigracion' → 'estadisticas-inmigracion'
+  var pageFilePairs = [];
+  var rmBlock = routerSrc.match(/var routeMap\s*=\s*\{([\s\S]+?)\n\s*\};/);
+  if (rmBlock) {
+    var re = /'([^']+)'\s*:\s*'([^']+)'/g, pm;
+    while ((pm = re.exec(rmBlock[1])) !== null) pageFilePairs.push({ route: pm[1], file: pm[2] });
+  }
+  var pageFileNames = pageFilePairs.map(function(p) { return p.file; });
+
+  var routes = routeMapKeys.filter(function(r) { return r !== 'inicio'; });
+
+  // _redirects: '/route /routes/file.html 200' — capture both route key and actual filename
+  var redirectRoutes = [], redirectFiles = [];
+  redirectsSrc.split('\n').forEach(function(line) {
+    var m = line.match(/^(\/[^\s#]+)\s+\/routes\/([^\s]+)/);
+    if (m) { redirectRoutes.push(m[1].slice(1)); redirectFiles.push(m[2]); }
+  });
+
+  // _headers: path lines (no wildcards) followed immediately by no-cache
+  var headerRoutes = [];
+  var hLines = headersSrc.split('\n');
+  for (var hi = 0; hi < hLines.length - 1; hi++) {
+    var hm = hLines[hi].match(/^(\/[^*\s#][^*\s]*)$/);
+    if (hm && /no-cache/.test(hLines[hi + 1])) headerRoutes.push(hm[1].slice(1));
+  }
+
+  // 1. router.js routeMap ↔ routeMeta
+  routes.forEach(function(r) {
+    if (routeMetaKeys.indexOf(r) === -1) warn('router.js: "' + r + '" in routeMap but missing from routeMeta');
+  });
+  routeMetaKeys.filter(function(r) { return r !== 'inicio'; }).forEach(function(r) {
+    if (routes.indexOf(r) === -1) warn('router.js: "' + r + '" in routeMeta but not in routeMap');
+  });
+
+  // 2. router.js initializers keys must be valid routeMap page-file names
+  initializerKeys.forEach(function(k) {
+    if (pageFileNames.indexOf(k) === -1)
+      warn('router.js: initializer key "' + k + '" is not a known page-file name in routeMap');
+  });
+
+  // 3. routeMap ↔ generate-route-pages.js ROUTES
+  routes.forEach(function(r) {
+    if (genRouteKeys.indexOf(r) === -1)
+      warn('generate-route-pages.js: "' + r + '" missing from ROUTES — add it and re-run the script');
+  });
+  genRouteKeys.forEach(function(r) {
+    if (routes.indexOf(r) === -1)
+      warn('generate-route-pages.js: "' + r + '" in ROUTES but not in routeMap');
+  });
+
+  // 4. routeMap ↔ _redirects
+  routes.forEach(function(r) {
+    if (redirectRoutes.indexOf(r) === -1) warn('_redirects: missing rewrite rule for "/' + r + '"');
+  });
+  redirectRoutes.forEach(function(r) {
+    if (routes.indexOf(r) === -1) warn('_redirects: "/' + r + '" has no matching entry in routeMap');
+  });
+
+  // 5. routeMap ↔ _headers no-cache
+  routes.forEach(function(r) {
+    if (headerRoutes.indexOf(r) === -1) warn('_headers: missing no-cache entry for "/' + r + '"');
+  });
+
+  // 6. _redirects → routes/ files actually exist on disk
+  redirectFiles.forEach(function(f) {
+    if (!fs.existsSync(path.join(ROOT, 'routes', f)))
+      warn('routes/' + f + ' is missing — run: node scripts/generate-route-pages.js');
+  });
+
+  // 7. routeMap page-file values → pages/ fragments exist on disk
+  pageFilePairs.forEach(function(p) {
+    if (!fs.existsSync(path.join(ROOT, 'pages', p.file + '.html')))
+      warn('pages/' + p.file + '.html missing (needed by router for route "' + p.route + '")');
+  });
+
+  // 8. routeMeta ↔ ROUTES title + desc values
+  var routeMetaValues = extractMetaValues(routerSrc, 'routeMeta');
+  var genRouteValues  = extractMetaValues(genSrc,    'ROUTES');
+  if (routeMetaValues && genRouteValues) {
+    routes.forEach(function(r) {
+      var rm = routeMetaValues[r];
+      var gr = genRouteValues[r];
+      if (!rm || !gr) return; // already caught by key checks above
+      if (rm.title !== gr.title)
+        warn('title mismatch for "' + r + '":\n    router.js:             ' + rm.title + '\n    generate-route-pages:  ' + gr.title);
+      if (rm.desc !== gr.desc)
+        warn('desc mismatch for "' + r + '":\n    router.js:             ' + rm.desc + '\n    generate-route-pages:  ' + gr.desc);
+    });
+  }
+
+  if (issues.length === 0) {
+    console.log('\x1b[32m[check] OK — router.js, generate-route-pages.js, _redirects, _headers all consistent.\x1b[0m');
+  } else {
+    console.warn('\x1b[33m[check] ' + issues.length + ' issue(s) found — see warnings above.\x1b[0m');
+  }
+}
+
 server.listen(PORT, function() {
+  integrityCheck();
   console.log('Dev server → http://localhost:' + PORT);
   console.log('AR date   : ' + arDate + ' (day ' + arDay + ')');
   console.log('Highlighted entries: "Juan Pérez" (birthday) and "Ana Martínez" (death) — day ' + arDay);

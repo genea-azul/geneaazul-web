@@ -11,7 +11,7 @@ GeneaAzul.router = (function() {
 
   /* Maps route keys to page file names */
   var routeMap = {
-    'inicio':                      null,               // inline in index.html
+    'inicio':                      'inicio',
     'buscar':                      'buscar',
     'conexiones':                  'conexiones',
     'estadisticas':                'estadisticas',
@@ -29,24 +29,29 @@ GeneaAzul.router = (function() {
 
   /* Per-route title + description for SEO */
   var routeMeta = {
-    'inicio':                      { title: 'Genea Azul \u2014 Genealog\u00eda azule\u00f1a', desc: 'Investigaci\u00f3n geneal\u00f3gica comunitaria del partido de Azul, Argentina. Busc\u00e1 tu familia, descubr\u00ed tu historia.' },
-    'buscar':                      { title: 'Buscar familia \u2014 Genea Azul',               desc: 'Busc\u00e1 personas en la base geneal\u00f3gica azule\u00f1a. Encontr\u00e1 familiares y antepasados del partido de Azul.' },
-    'conexiones':                  { title: 'Conexiones familiares \u2014 Genea Azul',        desc: 'Descubr\u00ed c\u00f3mo dos personas est\u00e1n emparentadas en el \u00e1rbol geneal\u00f3gico de Azul.' },
-    'estadisticas':                { title: 'Estad\u00edsticas \u2014 Genea Azul',            desc: 'Estad\u00edsticas geneal\u00f3gicas del partido de Azul: personas, familias, apellidos e inmigraci\u00f3n.' },
-    'estadisticas/inmigracion':    { title: 'Inmigraci\u00f3n \u2014 Genea Azul',             desc: 'Oleadas inmigratorias que llegaron al partido de Azul, Buenos Aires, Argentina.' },
-    'estadisticas/personalidades': { title: 'Personalidades \u2014 Genea Azul',               desc: 'Personas distinguidas nacidas o relacionadas con el partido de Azul.' },
-    'estadisticas/apellidos':      { title: 'Apellidos \u2014 Genea Azul',                    desc: 'Apellidos m\u00e1s frecuentes en el partido de Azul seg\u00fan la base geneal\u00f3gica.' },
-    'mapa':                        { title: 'Mapa de or\u00edgenes \u2014 Genea Azul',        desc: 'Mapa interactivo de los pa\u00edses de origen de las familias que llegaron al partido de Azul.' },
-    'historias':                   { title: 'Historias de familia \u2014 Genea Azul',         desc: 'Relatos sobre familias y personajes del partido de Azul escritos por la comunidad.' },
-    'testimonios':                 { title: 'Testimonios \u2014 Genea Azul',                  desc: 'Testimonios de personas que encontraron su historia con Genea Azul.' },
-    'colabora':                    { title: 'Colabor\u00e1 \u2014 Genea Azul',                desc: 'C\u00f3mo colaborar con el proyecto geneal\u00f3gico comunitario Genea Azul.' },
-    'recursos':                    { title: 'Recursos \u2014 Genea Azul',                     desc: 'Recursos geneal\u00f3gicos \u00fatiles para investigar familias del partido de Azul.' },
-    'cronologia':                  { title: 'Cronolog\u00eda \u2014 Genea Azul',              desc: 'L\u00ednea de tiempo hist\u00f3rica del partido de Azul: eventos, genealog\u00eda y curiosidades.' },
-    'sobre-nosotros':              { title: 'Sobre nosotros \u2014 Genea Azul',               desc: 'Conoc\u00e9 al equipo detr\u00e1s de Genea Azul, el proyecto geneal\u00f3gico comunitario de Azul.' }
+    'inicio':                      { title: 'Genea Azul \u2014 Genealog\u00eda azule\u00f1a',     desc: 'Investigaci\u00f3n geneal\u00f3gica comunitaria del partido de Azul, Argentina. Busc\u00e1 tu familia, descubr\u00ed tu historia.' },
+    'buscar':                      { title: 'Buscar personas \u2014 Genea Azul',                  desc: 'Busc\u00e1 personas en la base geneal\u00f3gica azule\u00f1a. Encontr\u00e1 familiares y antepasados del partido de Azul.' },
+    'conexiones':                  { title: 'Conexiones entre personas \u2014 Genea Azul',        desc: 'Descubr\u00ed c\u00f3mo dos personas est\u00e1n emparentadas en el \u00e1rbol geneal\u00f3gico de Azul.' },
+    'estadisticas':                { title: 'Estad\u00edsticas del \u00e1rbol \u2014 Genea Azul', desc: 'Estad\u00edsticas geneal\u00f3gicas del partido de Azul: personas, familias, apellidos e inmigraci\u00f3n.' },
+    'estadisticas/inmigracion':    { title: 'Inmigraci\u00f3n en Azul \u2014 Genea Azul',         desc: 'Oleadas inmigratorias que llegaron al partido de Azul, Buenos Aires, Argentina.' },
+    'estadisticas/personalidades': { title: 'Personalidades destacadas \u2014 Genea Azul',        desc: 'Personas distinguidas nacidas o relacionadas con el partido de Azul.' },
+    'estadisticas/apellidos':      { title: 'Apellidos frecuentes \u2014 Genea Azul',             desc: 'Apellidos m\u00e1s frecuentes en el partido de Azul seg\u00fan la base geneal\u00f3gica.' },
+    'mapa':                        { title: 'Mapa migratorio \u2014 Genea Azul',                  desc: 'Mapa interactivo de los pa\u00edses de origen de las familias que llegaron al partido de Azul.' },
+    'historias':                   { title: 'Historias de familia \u2014 Genea Azul',             desc: 'Relatos sobre familias y personajes del partido de Azul escritos por la comunidad.' },
+    'testimonios':                 { title: 'Testimonios \u2014 Genea Azul',                      desc: 'Testimonios de personas que encontraron su historia con Genea Azul.' },
+    'colabora':                    { title: 'Colabor\u00e1 \u2014 Genea Azul',                    desc: 'C\u00f3mo colaborar con el proyecto geneal\u00f3gico comunitario Genea Azul.' },
+    'recursos':                    { title: 'Recursos geneal\u00f3gicos \u2014 Genea Azul',       desc: 'Recursos geneal\u00f3gicos \u00fatiles para investigar familias del partido de Azul.' },
+    'cronologia':                  { title: 'Cronolog\u00eda de Azul \u2014 Genea Azul',          desc: 'L\u00ednea de tiempo hist\u00f3rica del partido de Azul: eventos, genealog\u00eda y curiosidades.' },
+    'sobre-nosotros':              { title: 'Sobre nosotros \u2014 Genea Azul',                   desc: 'Conoc\u00e9 al equipo detr\u00e1s de Genea Azul, el proyecto geneal\u00f3gico comunitario de Azul.' }
   };
 
   /* Page initializers — called after HTML fragment is injected */
   var initializers = {
+    'inicio':                      function() {
+      if (GeneaAzul.app)         GeneaAzul.app.initHome();
+      if (GeneaAzul.birthdays)   GeneaAzul.birthdays.init();
+      if (GeneaAzul.ephemerides) GeneaAzul.ephemerides.init();
+    },
     'buscar':                      function() { if (GeneaAzul.search)      GeneaAzul.search.init(); },
     'conexiones':                  function() { if (GeneaAzul.connections) GeneaAzul.connections.init(); },
     'estadisticas':                function() { if (GeneaAzul.stats)       GeneaAzul.stats.init(); },
@@ -95,21 +100,11 @@ GeneaAzul.router = (function() {
     return routeMap.hasOwnProperty(routeKey) ? routeMap[routeKey] : null;
   }
 
-  /* Show hero, hide page content container */
-  function showHero() {
-    $('#inicio-section').removeClass('d-none').addClass('ga-page-fade-in');
-    $('#page-content').addClass('d-none').empty();
-    updateNavActive('inicio');
-    GeneaAzul.utils.animateCounters($('#hero-stats'));
-  }
-
-  /* Hide hero, show and populate page content */
-  function showPage($html, pageFile) {
-    $('#inicio-section').addClass('d-none');
+  /* Show page content in #page-content */
+  function showPage($html) {
     var $pc = $('#page-content');
-    $pc.removeClass('d-none ga-page-fade-in').empty();
+    $pc.removeClass('ga-page-fade-in').empty();
     $pc.html($html);
-    // Trigger reflow then fade in
     requestAnimationFrame(function() { $pc.addClass('ga-page-fade-in'); });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -142,7 +137,7 @@ GeneaAzul.router = (function() {
 
   /* Core route handler */
   function handleRoute(routeKey) {
-    var reRunRoutes = ['inicio', 'estadisticas'];
+    var reRunRoutes = ['estadisticas'];
     if (routeKey === currentRoute && reRunRoutes.indexOf(routeKey) === -1) return; // already showing
     currentRoute = routeKey;
 
@@ -157,11 +152,16 @@ GeneaAzul.router = (function() {
       if (bsCollapse) bsCollapse.hide();
     }
 
+    /* Unknown route: redirect to home */
+    if (!routeMap.hasOwnProperty(routeKey) && routeKey.indexOf('historias/') !== 0) {
+      navigate('inicio');
+      return;
+    }
+
     /* Story detail: historias/slug — must be checked before the routeMap fallback */
     if (routeKey.indexOf('historias/') === 0) {
       var slug = routeKey.substring('historias/'.length);
-      $('#inicio-section').addClass('d-none');
-      var $pc = $('#page-content').removeClass('d-none').empty();
+      var $pc = $('#page-content').empty();
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (GeneaAzul.stories) {
         GeneaAzul.stories.loadStory(slug, $pc);
@@ -169,25 +169,17 @@ GeneaAzul.router = (function() {
       return;
     }
 
-    /* Inicio or unknown route: show hero */
-    if (routeKey === 'inicio' || !routeMap.hasOwnProperty(routeKey)) {
-      showHero();
-      return;
-    }
-
     var pageFile = getPageFile(routeKey);
-    if (!pageFile) { showHero(); return; }
 
     /* Use cache if available */
     if (cache[pageFile]) {
-      showPage(cache[pageFile].clone(true), pageFile);
+      showPage(cache[pageFile].clone(true));
       if (initializers[pageFile]) initializers[pageFile]();
       return;
     }
 
     /* Show loading state */
-    $('#inicio-section').addClass('d-none');
-    var $pc = $('#page-content').removeClass('d-none');
+    var $pc = $('#page-content');
     $pc.html('<div class="ga-page-loading"><div class="spinner-border spinner-border-sm" role="status"></div><span>Cargando...</span></div>');
 
     /* Fetch fragment — absolute path so it works from any route depth */
@@ -197,7 +189,7 @@ GeneaAzul.router = (function() {
       success: function(html) {
         var $fragment = $(html);
         cache[pageFile] = $fragment.clone(true);
-        showPage($fragment, pageFile);
+        showPage($fragment);
         if (initializers[pageFile]) initializers[pageFile]();
       },
       error: function() {
@@ -225,6 +217,18 @@ GeneaAzul.router = (function() {
       if (!route) return;
       e.preventDefault();
       navigate(route);
+    });
+
+    // Auto-expand estadísticas dropdown on mobile when on a sub-route.
+    // Uses 'shown' (post-animation) so it runs after Bootstrap's _clearMenus,
+    // which fires on the same hamburger-tap click and would otherwise remove 'show'.
+    $('#navbarContent').on('shown.bs.collapse', function() {
+      if (currentRoute && currentRoute.indexOf('estadisticas') === 0) {
+        var $li = $('#main-navbar .nav-item.dropdown');
+        $li.addClass('show');
+        $li.find('.dropdown-toggle').addClass('show').attr('aria-expanded', 'true');
+        $li.find('.dropdown-menu').addClass('show');
+      }
     });
 
     // Browser back/forward navigation

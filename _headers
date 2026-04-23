@@ -15,6 +15,34 @@
 /
   Cache-Control: no-cache
 
+# SPA route entry points — no-cache so they stay in sync with index.html
+/buscar
+  Cache-Control: no-cache
+/conexiones
+  Cache-Control: no-cache
+/estadisticas
+  Cache-Control: no-cache
+/estadisticas/inmigracion
+  Cache-Control: no-cache
+/estadisticas/personalidades
+  Cache-Control: no-cache
+/estadisticas/apellidos
+  Cache-Control: no-cache
+/mapa
+  Cache-Control: no-cache
+/historias
+  Cache-Control: no-cache
+/testimonios
+  Cache-Control: no-cache
+/colabora
+  Cache-Control: no-cache
+/recursos
+  Cache-Control: no-cache
+/cronologia
+  Cache-Control: no-cache
+/sobre-nosotros
+  Cache-Control: no-cache
+
 # CSS and JavaScript — 1 hour
 /css/*
   Cache-Control: public, max-age=3600, stale-while-revalidate=60
