@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /data/
+Disallow: /pages/
+Disallow: /stories/
 
 Sitemap: https://geneaazul.com.ar/sitemap.xml
