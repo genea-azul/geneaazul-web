@@ -413,7 +413,13 @@ function _adjustSceneForTree(treeRadius) {
 
   // Controls: let users zoom out 3.5× the tree radius
   _controls.minDistance = 3;
-  _controls.maxDistance = Math.min(treeRadius * 3.5, 200);
+  const maxDist = Math.min(treeRadius * 3.5, 200);
+  _controls.maxDistance = maxDist;
+
+  // Far plane: must reach the wall on the opposite side from the camera.
+  // Worst case = camera at maxDist in one direction + wall at 2.5×r in the other.
+  _camera.far = Math.max(200, maxDist + treeRadius * 2.5 + 20);
+  _camera.updateProjectionMatrix();
 
   // Fog: 50% fogged at ~2× tree radius (density scales inversely with size)
   _scene.fog.density = 0.35 / treeRadius;
@@ -641,7 +647,7 @@ window._ga3dInit = function(graphData) {
     _scene.add(sprite);
 
     nodeMap[node.id] = { bust, sprite };
-    avatarGroups.push({ bust, node });
+    avatarGroups.push({ bust, sprite, node });
   });
 
   // Click-to-navigate
@@ -688,6 +694,12 @@ window._ga3dInit = function(graphData) {
   let elapsed  = 0;
 
   function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+  // Distance thresholds for visibility culling (world units).
+  // At 40+ units a sprite is < 24 screen px (unreadable) and a 0.04-radius
+  // particle is < 1.4 px (sub-pixel). Both use the same cutoff for consistency.
+  const SPRITE_VIS_D2   = 40 * 40;
+  const PARTICLE_VIS_D2 = 40 * 40;
 
   function loop() {
     _animId = requestAnimationFrame(loop);
@@ -743,16 +755,26 @@ window._ga3dInit = function(graphData) {
       });
     }
 
-    avatarGroups.forEach(({ bust, node }) => {
-      bust.rotation.y = Math.atan2(
-        _camera.position.x - node.pos.x,
-        _camera.position.z - node.pos.z
-      );
+    avatarGroups.forEach(({ bust, sprite, node }) => {
+      const dx = _camera.position.x - node.pos.x;
+      const dy = _camera.position.y - node.pos.y;
+      const dz = _camera.position.z - node.pos.z;
+      bust.rotation.y = Math.atan2(dx, dz);
+      // Hide labels that are too far to read; keep all visible during settle so
+      // the animation looks complete even before nodes reach their final positions.
+      sprite.visible = !settled || (dx * dx + dy * dy + dz * dz < SPRITE_VIS_D2);
     });
 
     if (settled) {
+      const camX = _camera.position.x, camY = _camera.position.y, camZ = _camera.position.z;
       _edgeParticles.forEach(p => {
-        p.mesh.position.lerpVectors(p.p1, p.p2, (elapsed * p.speed + p.phase) % 1);
+        const dx = camX - p.p1.x, dy = camY - p.p1.y, dz = camZ - p.p1.z;
+        if (dx * dx + dy * dy + dz * dz < PARTICLE_VIS_D2) {
+          p.mesh.visible = true;
+          p.mesh.position.lerpVectors(p.p1, p.p2, (elapsed * p.speed + p.phase) % 1);
+        } else {
+          p.mesh.visible = false;
+        }
       });
     }
 
