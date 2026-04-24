@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
 let _renderer, _scene, _camera, _controls, _animId, _clock, _sun;
 let _ctrlV    = null; // { dTheta, dPhi, dRadius, pan: Vector3 }
@@ -64,9 +67,11 @@ function _buildMaterials() {
 
 function _buildConnectorMats() {
   const COUPLE = 0x8b6010, CHILD = 0x7a5828;
+  const W = _renderer ? _renderer.domElement.clientWidth  : window.innerWidth;
+  const H = _renderer ? _renderer.domElement.clientHeight : window.innerHeight;
   return {
-    coupleLine:   new THREE.LineBasicMaterial({ color: COUPLE, transparent: true, opacity: 0.65, depthWrite: false }),
-    childLine:    new THREE.LineBasicMaterial({ color: CHILD,  transparent: true, opacity: 0.55, depthWrite: false }),
+    coupleLine:   new LineMaterial({ color: COUPLE, transparent: true, opacity: 0.65, depthWrite: false, linewidth: 1.2, resolution: new THREE.Vector2(W, H) }),
+    childLine:    new LineMaterial({ color: CHILD,  transparent: true, opacity: 0.55, depthWrite: false, linewidth: 1.0, resolution: new THREE.Vector2(W, H) }),
     couplePoints: new THREE.PointsMaterial({ color: COUPLE, size: 0.04, transparent: true, opacity: 0.29, depthWrite: false, sizeAttenuation: true }),
     childPoints:  new THREE.PointsMaterial({ color: CHILD,  size: 0.04, transparent: true, opacity: 0.25, depthWrite: false, sizeAttenuation: true }),
     coupleFlow:   new THREE.MeshBasicMaterial({ color: COUPLE, depthWrite: false }),
@@ -140,7 +145,8 @@ function _buildScene(containerId) {
   _sun = new THREE.DirectionalLight(0xffe8b0, 1.6);
   _sun.position.set(6, 12, 8);
   _sun.castShadow = true;
-  _sun.shadow.mapSize.set(1024, 1024);
+  _sun.shadow.mapSize.set(2048, 2048);
+  _sun.shadow.intensity = 0.75; // r162+: softer shadows suit the warm parchment palette
   _scene.add(_sun);
   const fillA = new THREE.DirectionalLight(0xd0c8ff, 0.35);
   fillA.position.set(-5, 2, -4); _scene.add(fillA);
@@ -162,6 +168,10 @@ function _onResize() {
   _camera.fov = aspect < 0.75 ? 68 : 48;
   _camera.updateProjectionMatrix();
   _renderer.setSize(W, H);
+  if (_connMats) {
+    _connMats.coupleLine.resolution.set(W, H);
+    _connMats.childLine.resolution.set(W, H);
+  }
   // Rebuild cinematic path only when the portrait/landscape bucket actually
   // changes. Mobile URL-bar show/hide and on-screen keyboards fire resize
   // events constantly within the same bucket — rebuilding on every one would
@@ -319,7 +329,7 @@ function _buildBust(node) {
 
 function _makeSprite(node) {
   const rawName = node.displayName || '';
-  const label = rawName.split(' ').slice(0, 2).join(' ') || '?';
+  const label = rawName || '?';
 
   const bYear = yearFrom(node.dateOfBirth);
   const dYear = yearFrom(node.dateOfDeath);
@@ -331,16 +341,21 @@ function _makeSprite(node) {
 
   const hasYears = years.length > 0;
   const S = 2; // supersample: 2× canvas resolution → sharper text at same sprite size
-  const CW_B = 300, CH_B = hasYears ? 78 : 52;
+  const CW_B = 300, CH_B = hasYears ? 112 : 74;
   const CW = CW_B * S, CH = CH_B * S;
   const cv  = document.createElement('canvas');
   cv.width = CW; cv.height = CH;
   const ctx = cv.getContext('2d');
-  const fontSize = (node.focal ? 25 : 19) * S;
+  let fontSize = (node.focal ? 38 : 28) * S;
   const nameY = (hasYears ? Math.round(CH_B * 0.38) : CH_B / 2) * S;
 
-  ctx.font = `bold ${fontSize}px Georgia, serif`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = `bold ${fontSize}px Georgia, serif`;
+  const maxNameW = CW * 0.92;
+  while (ctx.measureText(label).width > maxNameW && fontSize > 14 * S) {
+    fontSize -= S;
+    ctx.font = `bold ${fontSize}px Georgia, serif`;
+  }
 
   for (let i = 4; i >= 1; i--) {
     ctx.fillStyle = `rgba(20,30,50,${0.20 - i * 0.04})`;
@@ -360,7 +375,7 @@ function _makeSprite(node) {
   }
 
   if (hasYears) {
-    const ySize = (node.focal ? 16 : 12) * S;
+    const ySize = (node.focal ? 25 : 19) * S;
     ctx.font = `${ySize}px Georgia, serif`;
     const yearsY = Math.round(CH_B * 0.72) * S;
     const yCol = node.focal    ? '#2a1400'
@@ -374,7 +389,7 @@ function _makeSprite(node) {
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
     map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false
   }));
-  sprite.scale.set(1.9, 1.9 * (CH_B / CW_B), 1);
+  sprite.scale.set(2.8, 2.8 * (CH_B / CW_B), 1);
   return sprite;
 }
 
@@ -382,18 +397,12 @@ function _makeSprite(node) {
 
 const _edgeParticles = [];
 
-function _seg(p1, p2, lineMat, ptsMat) {
-  _scene.add(new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([p1.clone(), p2.clone()]),
-    lineMat
-  ));
+function _seg(p1, p2, segs, ptsMat) {
+  segs.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
   const n = Math.max(3, Math.ceil(p1.distanceTo(p2) * 5));
   const pts = [];
   for (let i = 0; i <= n; i++) pts.push(p1.clone().lerp(p2, i / n));
-  _scene.add(new THREE.Points(
-    new THREE.BufferGeometry().setFromPoints(pts),
-    ptsMat
-  ));
+  _scene.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(pts), ptsMat));
 }
 
 function _flowPart(p1, p2, mat, speed, phase) {
@@ -409,6 +418,7 @@ function _flowPart(p1, p2, mat, speed, phase) {
 function _buildConnectors(families, nodeMap) {
   if (!_connMats) _connMats = _buildConnectorMats();
   const { coupleLine, childLine, couplePoints, childPoints, coupleFlow, childFlow, orbMat } = _connMats;
+  const coupleSegs = [], childSegs = [];
 
   families.forEach(fam => {
     const fatherId = (fam.husbandIds && fam.husbandIds.length) ? fam.husbandIds[0] : null;
@@ -426,10 +436,10 @@ function _buildConnectors(families, nodeMap) {
     const midBar = fBar.clone().lerp(mBar, 0.5);
 
     // Vertical legs from each spouse up to the couple bar
-    if (fTop.y < barY - 0.05) _seg(fTop, fBar, coupleLine, couplePoints);
-    if (mTop.y < barY - 0.05) _seg(mTop, mBar, coupleLine, couplePoints);
+    if (fTop.y < barY - 0.05) _seg(fTop, fBar, coupleSegs, couplePoints);
+    if (mTop.y < barY - 0.05) _seg(mTop, mBar, coupleSegs, couplePoints);
     // Horizontal couple bar
-    _seg(fBar, mBar, coupleLine, couplePoints);
+    _seg(fBar, mBar, coupleSegs, couplePoints);
     const orb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), orbMat);
     orb.position.copy(midBar); orb.castShadow = true; _scene.add(orb);
     _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
@@ -445,17 +455,25 @@ function _buildConnectors(families, nodeMap) {
     const juncY = maxChildY + (barY - maxChildY) * 0.4;
     const junc  = new THREE.Vector3(midBar.x, juncY, midBar.z);
 
-    _seg(midBar, junc, coupleLine, couplePoints);
+    _seg(midBar, junc, coupleSegs, couplePoints);
     _flowPart(midBar, junc, coupleFlow, 0.32, Math.random());
 
     // Draw from junction straight to each child's top
     cNodes.forEach(cn => {
       const cp = cn.bust.position;
       const cTop = new THREE.Vector3(cp.x, cp.y + 0.28, cp.z);
-      _seg(junc, cTop, childLine, childPoints);
+      _seg(junc, cTop, childSegs, childPoints);
       _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
     });
   });
+
+  // Flush all segments into two batched LineSegments2 objects (one draw call each)
+  if (coupleSegs.length) {
+    _scene.add(new LineSegments2(new LineSegmentsGeometry().setPositions(coupleSegs), coupleLine));
+  }
+  if (childSegs.length) {
+    _scene.add(new LineSegments2(new LineSegmentsGeometry().setPositions(childSegs), childLine));
+  }
 }
 
 // ── Tree-size-dependent scene tuning ─────────────────────────────────────────
@@ -920,11 +938,12 @@ window._ga3dInit = function(graphData) {
     if (!node) return;
     navTarget = node.pos.clone();
     _controls.autoRotate = false;
-    // Zoom to a comfortable viewing distance (thresholds scale with tree size)
-    const dist = _camera.position.distanceTo(node.pos);
-    if (dist > treeRadius * 0.9)      _navRadius = treeRadius * 0.50;
-    else if (dist < treeRadius * 0.25) _navRadius = treeRadius * 0.45;
-    else                               _navRadius = null;
+    // Zoom in on click: the farther the node, the closer we end up (down to 20%
+    // of tree radius). A near-click pulls back slightly to avoid clipping.
+    const dist          = _camera.position.distanceTo(node.pos);
+    const comfortRadius = THREE.MathUtils.clamp(dist * 0.30, treeRadius * 0.20, treeRadius * 0.38);
+    if (dist > comfortRadius)          _navRadius = comfortRadius;
+    else if (dist < treeRadius * 0.15) _navRadius = comfortRadius;
     _showPersonCard(node);
   }
 
@@ -947,7 +966,7 @@ window._ga3dInit = function(graphData) {
   // Distance thresholds for visibility culling (world units).
   // At 40+ units a sprite is < 24 screen px (unreadable) and a 0.04-radius
   // particle is < 1.4 px (sub-pixel). Both use the same cutoff for consistency.
-  const SPRITE_VIS_D2   = 40 * 40;
+  const SPRITE_VIS_D2   = 65 * 65;
   const PARTICLE_VIS_D2 = 40 * 40;
 
   function loop() {

@@ -135,7 +135,8 @@ var CHECKS = [
   '"@id": "https://geneaazul.com.ar/#webpage"',
   '"name": "Genea Azul — Genealogía azuleña"',
   'Buscá personas en el árbol genealógico del partido de Azul',
-  HOME_BREADCRUMB
+  HOME_BREADCRUMB,
+  'type="importmap"'  // must be present so all routes resolve the Three.js ES module
 ];
 CHECKS.forEach(function(s) {
   var idx = template.indexOf(s);

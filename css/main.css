@@ -1580,6 +1580,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   background: rgba(248, 238, 215, 0.9);
   color: var(--ga-tree3d-text-mid);
   font-size: 13px;
+  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
