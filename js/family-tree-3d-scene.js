@@ -404,8 +404,10 @@ function _buildConnectors(families, nodeMap) {
 // ── Tree-size-dependent scene tuning ─────────────────────────────────────────
 
 function _adjustSceneForTree(treeRadius) {
-  // Camera: start far enough back to see the whole tree
-  _camera.position.set(0, 3, treeRadius * 1.35);
+  // Camera: start focused on the focal person (origin); cap at 15 so large
+  // trees don't open zoomed way out — users can zoom out to explore.
+  const initZ = Math.min(treeRadius * 1.35, 15);
+  _camera.position.set(0, 3, initZ);
   _camera.lookAt(0, 0, 0);
   _initCamPos = _camera.position.clone();
 

@@ -594,7 +594,8 @@ GeneaAzul.search = (function() {
     utils.apiGet(
       cfg.apiBaseUrl + '/api/search/family-tree/' + data.personUuid + '/plainPdf',
       function(pdfData) {
-        var binary = atob(pdfData.pdf);
+        var b64 = pdfData.pdf.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+        var binary = atob(b64);
         var bytes = new Uint8Array(binary.length);
         for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
         var blob = new Blob([bytes], { type: 'application/pdf' });

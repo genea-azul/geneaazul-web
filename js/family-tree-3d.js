@@ -125,21 +125,26 @@ GeneaAzul.familyTree3d = (function() {
   // Mobile: touchstart on document is passive by default in Chrome so jQuery's
   // e.preventDefault() is silently ignored. Use a non-passive native listener
   // scoped to the modal so it doesn't affect page scroll elsewhere.
-  document.getElementById('ga-tree3d-modal').addEventListener('touchstart', function(e) {
-    var el = e.target;
-    while (el && el !== this) {
-      if (el.classList && el.classList.contains('ga-tree3d-ctrl-btn') && el.getAttribute('data-ga3d-ctrl')) {
-        e.preventDefault();
-        _startCtrl(el.getAttribute('data-ga3d-ctrl'));
-        return;
+  // Guard: modal only exists on buscar page; without the check the IIFE would
+  // throw on every other page and leave GeneaAzul.familyTree3d undefined.
+  var _modalEl = document.getElementById('ga-tree3d-modal');
+  if (_modalEl) {
+    _modalEl.addEventListener('touchstart', function(e) {
+      var el = e.target;
+      while (el && el !== this) {
+        if (el.classList && el.classList.contains('ga-tree3d-ctrl-btn') && el.getAttribute('data-ga3d-ctrl')) {
+          e.preventDefault();
+          _startCtrl(el.getAttribute('data-ga3d-ctrl'));
+          return;
+        }
+        el = el.parentElement;
       }
-      el = el.parentElement;
-    }
-  }, { passive: false });
+    }, { passive: false });
+  }
   $(document).on('mouseup touchend touchcancel', function() { _stopCtrl(); });
 
   // Preload the Three.js ES module during idle time so the first open is instant
-  if (window.requestIdleCallback) {
+  if (_modalEl && window.requestIdleCallback) {
     window.requestIdleCallback(function() { _ensureSceneLoaded(function() {}); });
   }
 
