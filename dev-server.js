@@ -141,6 +141,74 @@ var MOCK_PDF_BASE64 = 'JVBERi0xLjAKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgU
   'NSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNTggMDAwMDAgbiAKMDAwMDAwMDExNSAw' +
   'MDAwMCBuIAp0cmFpbGVyPDwvU2l6ZSA0L1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKMTkwCiUlRU9G';
 
+// GET /api/search/family-tree/:uuid/graphJson — mock graph for 3D viewer
+// Complex endogamic graph: 37 persons, 4 generations, cross-generational marriages
+var MOCK_GRAPH = {
+  focalPersonId: 1,
+  truncated: false,
+  totalPersons: 37,
+  persons: [
+    // Gen +2 — founding couples (all deceased)
+    { id: 51, displayName: 'Salvatore Ferrara',  sex: 'M', isAlive: false, generation:  2, relationship: 'bisabuelo',   dateOfBirth: '1872', dateOfDeath: '1948' },
+    { id: 52, displayName: 'Concetta Romano',    sex: 'F', isAlive: false, generation:  2, relationship: 'bisabuela',   dateOfBirth: '1876', dateOfDeath: '1952' },
+    { id: 53, displayName: 'Władysław Nowak',    sex: 'M', isAlive: false, generation:  2, relationship: 'bisabuelo',   dateOfBirth: '1869', dateOfDeath: '1942' },
+    { id: 54, displayName: 'Zofia Kowalski',     sex: 'F', isAlive: false, generation:  2, relationship: 'bisabuela',   dateOfBirth: '1873', dateOfDeath: '1945' },
+    { id: 55, displayName: 'Carlos García',      sex: 'M', isAlive: false, generation:  2, relationship: 'bisabuelo',   dateOfBirth: '1878', dateOfDeath: '1955' },
+    { id: 56, displayName: 'Rosa González',      sex: 'F', isAlive: false, generation:  2, relationship: 'bisabuela',   dateOfBirth: '1880', dateOfDeath: '1960' },
+    // Gen +1 — parents & uncles/aunts
+    { id: 11, displayName: 'Giuseppe Ferrara',   sex: 'M', isAlive: false, generation:  1, relationship: 'padre',       dateOfBirth: '1895', dateOfDeath: '1972' },
+    { id: 12, displayName: 'María F. Ferrara',   sex: 'F', isAlive: false, generation:  1, relationship: 'tía abuela',  dateOfBirth: '1898', dateOfDeath: '1980' },
+    { id: 13, displayName: 'Antonio Ferrara',    sex: 'M', isAlive: true,  generation:  1, relationship: 'tío',         dateOfBirth: '1902' },
+    { id: 14, displayName: 'Carmela Ferrara',    sex: 'F', isAlive: true,  generation:  1, relationship: 'tía',         dateOfBirth: '1905' },
+    { id: 15, displayName: 'Elena Nowak',        sex: 'F', isAlive: false, generation:  1, relationship: 'madre',       dateOfBirth: '1897', dateOfDeath: '1968' },
+    { id: 16, displayName: 'Jan Nowak',          sex: 'M', isAlive: true,  generation:  1, relationship: 'tío',         dateOfBirth: '1900' },
+    { id: 17, displayName: 'Katarzyna Nowak',    sex: 'F', isAlive: true,  generation:  1, relationship: 'tía',         dateOfBirth: '1904' },
+    { id: 18, displayName: 'Rafael García',      sex: 'M', isAlive: true,  generation:  1, relationship: 'tío político',dateOfBirth: '1908' },
+    // Gen 0 — focal + siblings + cousins
+    { id: 1,  displayName: 'Juan C. Ferrara',    sex: 'M', isAlive: true,  generation:  0, relationship: 'Yo',          dateOfBirth: '1925' },
+    { id: 2,  displayName: 'María López',        sex: 'F', isAlive: true,  generation:  0, relationship: 'cónyuge',     dateOfBirth: '1928' },
+    { id: 3,  displayName: 'Sofía Ferrara',      sex: 'F', isAlive: true,  generation:  0, relationship: 'hermana',     dateOfBirth: '1927' },
+    { id: 4,  displayName: 'Marco Ferrara',      sex: 'M', isAlive: true,  generation:  0, relationship: 'hermano',     dateOfBirth: '1929' },
+    { id: 5,  displayName: 'Lucía Ferrara',      sex: 'F', isAlive: true,  generation:  0, relationship: 'hermana',     dateOfBirth: '1931' },
+    { id: 6,  displayName: 'Pedro Ferrara',      sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',       dateOfBirth: '1926' },
+    { id: 7,  displayName: 'Rosa A. Ferrara',    sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',       dateOfBirth: '1928' },
+    { id: 8,  displayName: 'Carla Ferrara',      sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',       dateOfBirth: '1930' },
+    { id: 9,  displayName: 'Diego A. Ferrara',   sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',       dateOfBirth: '1932' },
+    { id: 10, displayName: 'Miguel Nowak',       sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',       dateOfBirth: '1922' },
+    { id: 21, displayName: 'Clara Nowak',        sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',       dateOfBirth: '1924' },
+    { id: 22, displayName: 'Alejandro García',   sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',       dateOfBirth: '1932' },
+    { id: 23, displayName: 'Paula Ríos',         sex: 'F', isAlive: true,  generation:  0, relationship: 'cuñada',      dateOfBirth: '1935' },
+    // Gen -1 — children + endogamic & cross-gen descendants
+    { id: 31, displayName: 'Diego Ferrara',      sex: 'M', isAlive: true,  generation: -1, relationship: 'hijo',        dateOfBirth: '1950' },
+    { id: 32, displayName: 'Laura Ferrara',      sex: 'F', isAlive: true,  generation: -1, relationship: 'hija',        dateOfBirth: '1952' },
+    { id: 33, displayName: 'Valentina Ferrara',  sex: 'F', isAlive: true,  generation: -1, relationship: 'hija',        dateOfBirth: '1955' },
+    { id: 34, displayName: 'Bruno Ferrara',      sex: 'M', isAlive: true,  generation: -1, relationship: 'hijo',        dateOfBirth: '1958' },
+    { id: 35, displayName: 'Tomás Ferrara',      sex: 'M', isAlive: true,  generation: -1, relationship: 'sobrino',     dateOfBirth: '1948' },
+    { id: 36, displayName: 'Isabel Ferrara',     sex: 'F', isAlive: true,  generation: -1, relationship: 'sobrina',     dateOfBirth: '1952' },
+    { id: 37, displayName: 'Andrea Ferrara',     sex: 'F', isAlive: true,  generation: -1, relationship: 'sobrina',     dateOfBirth: '1955' },
+    { id: 38, displayName: 'Nicolás Ferrara',    sex: 'M', isAlive: true,  generation: -1, relationship: 'sobrino',     dateOfBirth: '1956' },
+    // Gen -2 — children of cross-generational F11 (Alejandro gen:0 × Laura gen:-1)
+    { id: 39, displayName: 'Mateo García',       sex: 'M', isAlive: true,  generation: -2, relationship: 'nieto',       dateOfBirth: '1978' },
+    { id: 40, displayName: 'Valentín García',    sex: 'M', isAlive: true,  generation: -2, relationship: 'nieto',       dateOfBirth: '1982' }
+  ],
+  families: [
+    // Founding gen
+    { id: 'F1',  husbandIds: [51], wifeIds: [52], childIds: [11, 12, 13, 14] }, // Ferrara-Romano → 4 children
+    { id: 'F2',  husbandIds: [53], wifeIds: [54], childIds: [15, 16, 17]      }, // Nowak-Kowalski → 3 children
+    { id: 'F3',  husbandIds: [55], wifeIds: [56], childIds: [18]              }, // García-González → 1 child
+    // Parents' gen — cross-family marriages (Ferrara × Nowak)
+    { id: 'F4',  husbandIds: [11], wifeIds: [15], childIds: [1, 3, 4, 5]      }, // Giuseppe+Elena → focal + 3 siblings
+    { id: 'F5',  husbandIds: [13], wifeIds: [17], childIds: [6, 7, 8, 9]      }, // Antonio+Katarzyna → 4 cousins
+    { id: 'F6',  husbandIds: [16], wifeIds: [12], childIds: [10, 21]          }, // Jan+María F. → 2 cousins (in-law endogamy)
+    { id: 'F7',  husbandIds: [18], wifeIds: [14], childIds: [22]              }, // Rafael+Carmela → Alejandro
+    // Focal gen
+    { id: 'F8',  husbandIds: [1],  wifeIds: [2],  childIds: [31, 32, 33, 34]  }, // Juan+María → 4 children
+    { id: 'F9',  husbandIds: [6],  wifeIds: [3],  childIds: [35, 36, 37]      }, // Pedro+Sofía — FIRST-COUSIN MARRIAGE
+    { id: 'F10', husbandIds: [4],  wifeIds: [23], childIds: [38]              }, // Marco+Paula → 1 child
+    { id: 'F11', husbandIds: [22], wifeIds: [32], childIds: [39, 40]          }  // Alejandro+Laura — CROSS-GEN + ENDOGAMIC
+  ]
+};
+
 // ─── MIME types ───────────────────────────────────────────────────────────────
 var MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -170,6 +238,9 @@ var server = http.createServer(function(req, res) {
     if (url === '/api/birthday/ephemerides-this-month')    return sendJson(res, MOCK_EPHEMERIDES);
     if (/^\/api\/search\/family-tree\/[^/]+\/plainPdf$/.test(url)) {
       return sendJson(res, { pdf: MOCK_PDF_BASE64 });
+    }
+    if (/^\/api\/search\/family-tree\/[^/]+\/graphJson$/.test(url)) {
+      return sendJson(res, MOCK_GRAPH);
     }
   }
 

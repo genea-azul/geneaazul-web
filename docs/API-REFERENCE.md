@@ -503,6 +503,56 @@ Content-Type: application/json
 
 ---
 
+### 8. Birthday — Azul Today
+
+```
+GET /api/birthday/azul-today
+```
+
+**Purpose**: Returns alive persons from Azul born on today's date (Argentine time). Used by `js/birthdays.js` for the `#cumpleanos` landing section.
+
+**Response** (`SimplePersonDto[]`, 200 OK): Array is shuffled server-side. Empty array `[]` means no birthdays today — the section stays hidden.
+
+---
+
+### 9. Birthday — Efemérides This Month
+
+```
+GET /api/birthday/ephemerides-this-month
+```
+
+**Purpose**: Returns distinguished persons born or deceased in the current month (Argentine time). Used by `js/ephemerides.js` for the `#efemerides` landing section.
+
+**Response** (`EphemeridesDto`, 200 OK):
+```json
+{
+  "birthdays": [ /* SimplePersonDto[] */ ],
+  "deaths":    [ /* SimplePersonDto[] */ ]
+}
+```
+
+Both arrays are sorted by day-of-month ascending. Empty `birthdays` + empty `deaths` means no entries this month — the section stays hidden.
+
+---
+
+### SimplePersonDto
+
+Returned by the birthday endpoints.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `uuid` | string | Person identifier |
+| `sex` | `"M"` / `"F"` | |
+| `isAlive` | boolean | |
+| `name` | string | Living persons in azul-today have surname abbreviated server-side (e.g. `"María G. R."`) |
+| `aka` | string / null | Nickname/alias — display as `«nickname»` when present |
+| `profilePicture` | string / null | URL or path to profile image |
+| `dateOfBirth` | string / null | GEDCOM date string (e.g. `"15 APR 1985"`, `"ABT 1940"`) |
+| `placeOfBirth` | string / null | |
+| `dateOfDeath` | string / null | Only populated when `obfuscateLiving = false` (public personalities) |
+
+---
+
 ## Date Format Reference
 
 The backend returns dates in GEDCOM format. The frontend must convert these to Spanish display format.

@@ -118,6 +118,10 @@ function buildBreadcrumb(crumbs) {
 
 var template = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 
+// Strip <!-- buscar-only:start --> ... <!-- buscar-only:end --> blocks (including surrounding newline)
+// from any route that is not 'buscar'.
+var BUSCAR_ONLY_RE = /\n[ \t]*<!-- buscar-only:start -->[\s\S]*?<!-- buscar-only:end -->/g;
+
 // Sanity-check that every target string is present in the template exactly once
 var CHECKS = [
   '<title>Genea Azul',
@@ -149,6 +153,11 @@ Object.keys(ROUTES).forEach(function(route) {
   var m   = ROUTES[route];
   var url = BASE + '/' + route;
   var html = template;
+
+  // Strip buscar-only blocks for every route except 'buscar'
+  if (route !== 'buscar') {
+    html = html.replace(BUSCAR_ONLY_RE, '');
+  }
 
   // <head> meta tags
   html = html.replace(/<title>[^<]*<\/title>/,                                    '<title>' + m.title + '</title>');

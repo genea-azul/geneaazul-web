@@ -524,14 +524,23 @@ GeneaAzul.search = (function() {
           .attr('id', 'search-family-tree-btn-' + uid)
           .attr('role', 'button').attr('href', '#').attr('tabindex', '-1')
           .on('click', { personUuid: uid, btnLocator: '#search-family-tree-btn-' + uid, errorLocator: '#search-family-tree-error-' + uid }, downloadFamilyTreePdf)
-          .html('Descargar listado de familiares (PDF)')))
+          .html('<i class="bi bi-download me-1"></i>Descargar listado de familiares')))
       .append($('<div>').addClass('mt-1 text-center')
         .append($('<a>').addClass('btn btn-sm btn-dark view-family-tree-btn disabled')
           .attr('id', 'view-family-tree-btn-' + uid)
           .attr('role', 'button')
           .attr('href', cfg.apiBaseUrl + '/family-tree/' + uid + (cfg.obfuscateLiving ? '' : '?f=0'))
           .attr('target', '_blank')
-          .html('Ver &aacute;rbol geneal&oacute;gico online')))
+          .html('<i class="bi bi-diagram-3-fill me-1"></i>Ver &aacute;rbol geneal&oacute;gico 2D')))
+      .append($('<div>').addClass('mt-1 text-center d-flex align-items-center justify-content-center gap-2')
+        .append($('<button>').addClass('btn btn-sm btn-dark view-family-tree-3d-btn disabled')
+          .attr('id', 'view-family-tree-3d-btn-' + uid)
+          .attr('type', 'button')
+          .on('click', { personUuid: uid }, function(e) {
+            GeneaAzul.familyTree3d.init(e.data.personUuid);
+          })
+          .html('<i class="bi bi-box-fill me-1"></i>Ver &aacute;rbol geneal&oacute;gico 3D'))
+        .append($('<span>').addClass('ga-tree3d-beta-badge').text('Versión de prueba')))
       .append($('<div>').addClass('d-none text-center mt-2').attr('id', 'search-family-tree-error-' + uid));
 
     return $card.append($body);
@@ -571,6 +580,7 @@ GeneaAzul.search = (function() {
     $('#search-family-tree-wait-sign-' + uuid).addClass('d-none');
     $('#search-family-tree-btn-' + uuid).removeClass('disabled');
     $('#view-family-tree-btn-' + uuid).removeClass('disabled');
+    $('#view-family-tree-3d-btn-' + uuid).removeClass('disabled');
   }
 
   function downloadFamilyTreePdf(e) {

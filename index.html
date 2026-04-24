@@ -58,6 +58,18 @@
   <!-- App Styles -->
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/theme-heritage.css" id="theme-stylesheet">
+
+  <!-- buscar-only:start -->
+  <!-- Three.js import map (used by family-tree-3d-scene.js ES module) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <!-- buscar-only:end -->
 </head>
 <body class="theme-heritage">
 
@@ -134,6 +146,70 @@
     </section>
 
   </main>
+
+  <!-- buscar-only:start -->
+  <!-- 3D family tree modal -->
+  <div id="ga-tree3d-modal" class="ga-tree3d-modal" style="display:none" role="dialog" aria-modal="true" aria-label="Árbol genealógico 3D">
+    <button id="ga-tree3d-close" class="ga-tree3d-close" aria-label="Cerrar">&#x2715;</button>
+    <button id="ga-tree3d-download" class="ga-tree3d-download" title="Descargar imagen"><i class="bi bi-download"></i></button>
+    <div id="ga-tree3d-canvas-wrap" class="ga-tree3d-canvas-wrap"></div>
+    <div id="ga-tree3d-title" class="ga-tree3d-title"></div>
+    <div class="ga-tree3d-ctrl-panel">
+      <div id="ga-tree3d-legend" class="ga-tree3d-legend">
+        <div><span class="ga-tree3d-dot" style="background:#2c6fa0"></span> Hombre vivo</div>
+        <div><span class="ga-tree3d-dot" style="background:#9b4c6e"></span> Mujer viva</div>
+        <div><span class="ga-tree3d-dot" style="background:#5a7890;opacity:.8"></span> Hombre fallecido</div>
+        <div><span class="ga-tree3d-dot" style="background:#806070;opacity:.8"></span> Mujer fallecida</div>
+      </div>
+      <div id="ga-tree3d-controls" class="ga-tree3d-controls">
+        <div class="ga-tree3d-ctrl-group">
+          <span class="ga-tree3d-ctrl-label">Navegar</span>
+          <div class="ga-tree3d-ctrl-row">
+            <button class="ga-tree3d-ctrl-btn" data-ga3d-ctrl="zoom-in"  title="Avanzar"><i class="bi bi-zoom-in"></i></button>
+            <button class="ga-tree3d-ctrl-btn" data-ga3d-ctrl="zoom-out" title="Retroceder"><i class="bi bi-zoom-out"></i></button>
+          </div>
+        </div>
+        <div class="ga-tree3d-ctrl-group">
+          <span class="ga-tree3d-ctrl-label">Rotar</span>
+          <div class="ga-tree3d-ctrl-row">
+            <button class="ga-tree3d-ctrl-btn" data-ga3d-ctrl="rotate-left"  title="Rotar izquierda"><i class="bi bi-arrow-counterclockwise"></i></button>
+            <button class="ga-tree3d-ctrl-btn" data-ga3d-ctrl="rotate-right" title="Rotar derecha"><i class="bi bi-arrow-clockwise"></i></button>
+            <button class="ga-tree3d-ctrl-btn" data-ga3d-ctrl="rotate-up"   title="Elevar cámara"><i class="bi bi-chevron-up"></i></button>
+            <button class="ga-tree3d-ctrl-btn" data-ga3d-ctrl="rotate-down" title="Descender cámara"><i class="bi bi-chevron-down"></i></button>
+          </div>
+        </div>
+        <div class="ga-tree3d-ctrl-group">
+          <span class="ga-tree3d-ctrl-label">Mover</span>
+          <div class="ga-tree3d-ctrl-cross">
+            <button class="ga-tree3d-ctrl-btn ga-tree3d-ctrl-n" data-ga3d-ctrl="pan-up"    title="Mover arriba"><i class="bi bi-arrow-up"></i></button>
+            <button class="ga-tree3d-ctrl-btn ga-tree3d-ctrl-w" data-ga3d-ctrl="pan-left"  title="Mover izquierda"><i class="bi bi-arrow-left"></i></button>
+            <span class="ga-tree3d-ctrl-center"><i class="bi bi-arrows-move"></i></span>
+            <button class="ga-tree3d-ctrl-btn ga-tree3d-ctrl-e" data-ga3d-ctrl="pan-right" title="Mover derecha"><i class="bi bi-arrow-right"></i></button>
+            <button class="ga-tree3d-ctrl-btn ga-tree3d-ctrl-s" data-ga3d-ctrl="pan-down"  title="Mover abajo"><i class="bi bi-arrow-down"></i></button>
+          </div>
+        </div>
+        <button class="ga-tree3d-ctrl-btn ga-tree3d-ctrl-home" data-ga3d-ctrl="reset" title="Volver a la persona principal">
+          Restablecer
+        </button>
+      </div>
+    </div>
+    <div id="ga-tree3d-hint" class="ga-tree3d-hint"><i class="bi bi-arrow-repeat"></i> Rotar &nbsp;&middot;&nbsp; <i class="bi bi-zoom-in"></i> Navegar &nbsp;&middot;&nbsp; <i class="bi bi-hand-index"></i> Tocar persona</div>
+    <button class="ga-tree3d-ctrl-btn ga-tree3d-mobile-reset" data-ga3d-ctrl="reset" title="Volver a la persona principal">Restablecer</button>
+    <div id="ga-tree3d-brand" class="ga-tree3d-brand">Árbol Genealógico 3D &middot; Genea Azul &middot; versión de prueba</div>
+    <div id="ga-tree3d-truncated" class="ga-tree3d-truncated d-none"></div>
+    <div id="ga-tree3d-person-card" class="ga-tree3d-person-card d-none">
+      <button id="ga-tree3d-person-card-close" class="ga-tree3d-person-card-close" aria-label="Cerrar">&#x2715;</button>
+      <div class="ga-tree3d-person-card-rel"></div>
+      <div class="ga-tree3d-person-card-name"></div>
+      <div class="ga-tree3d-person-card-years"></div>
+    </div>
+    <div id="ga-tree3d-error" class="ga-tree3d-error" style="display:none"></div>
+    <div id="ga-tree3d-loader" class="ga-tree3d-loader">
+      <p>Construyendo &aacute;rbol&hellip;</p>
+      <div class="ga-tree3d-bar"></div>
+    </div>
+  </div>
+  <!-- buscar-only:end -->
 
   <!-- ═══════════════════════════════════════════════════════ FOOTER -->
   <footer class="ga-footer" role="contentinfo">
@@ -299,6 +375,7 @@
   <script src="/js/birthdays.js"></script>
   <script src="/js/ephemerides.js"></script>
   <script src="/js/cronologia.js"></script>
+  <script src="/js/family-tree-3d.js"></script>
 
   <script>
     $(document).ready(function() {

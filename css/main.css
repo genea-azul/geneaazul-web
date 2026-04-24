@@ -1185,3 +1185,419 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-bda-icon-yt  { color: #FF0000; } /* YouTube red */
 .ga-bda-icon-pdf { color: #c0392b; } /* PDF red     */
 .ga-bda-icon-img { color: #2471a3; } /* image blue  */
+
+/* ── 3D Family Tree Modal ─────────────────────────────────────── */
+.ga-tree3d-beta-badge {
+  font-size: 10px;
+  color: var(--ga-text-muted);
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.ga-tree3d-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: #f0e4c8;
+  display: flex;
+  align-items: stretch;
+}
+
+.ga-tree3d-canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.ga-tree3d-canvas-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.ga-tree3d-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 11;
+  background: rgba(240, 228, 200, 0.93);
+  border: 1px solid rgba(120, 90, 30, 0.25);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  color: #5a3800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ga-tree3d-download {
+  position: absolute;
+  top: 14px;
+  right: 60px;
+  z-index: 11;
+  background: rgba(240, 228, 200, 0.93);
+  border: 1px solid rgba(120, 90, 30, 0.25);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+  color: #5a3800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ga-tree3d-download:hover { background: rgba(210, 180, 120, 0.9); }
+
+.ga-tree3d-person-card {
+  position: absolute;
+  bottom: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(245, 235, 210, 0.97);
+  border: 1px solid rgba(120, 90, 30, 0.28);
+  border-radius: 14px;
+  padding: 10px 44px 10px 18px;
+  z-index: 12;
+  max-width: 300px;
+  max-width: min(300px, calc(100vw - 80px));
+  pointer-events: auto;
+}
+.ga-tree3d-person-card-rel {
+  font-family: Georgia, serif;
+  font-size: 11px;
+  color: #9a6a30;
+  text-transform: lowercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 2px;
+}
+.ga-tree3d-person-card-name {
+  font-family: Georgia, serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #3a2000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ga-tree3d-person-card-years {
+  font-family: Georgia, serif;
+  font-size: 12px;
+  color: #7a5020;
+  margin-top: 2px;
+}
+.ga-tree3d-person-card-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: #7a5020;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.ga-tree3d-person-card-close:hover { background: rgba(120, 80, 20, 0.12); }
+
+.ga-tree3d-title {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(240, 228, 200, 0.93);
+  border: 1px solid rgba(120, 90, 30, 0.18);
+  border-radius: 24px;
+  padding: 6px 20px;
+  font-size: 14px;
+  font-family: Georgia, serif;
+  color: #4a3000;
+  z-index: 10;
+  white-space: nowrap;
+  pointer-events: none;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ga-tree3d-ctrl-panel {
+  position: absolute;
+  left: 14px;
+  bottom: 52px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  user-select: none;
+}
+
+.ga-tree3d-legend {
+  background: rgba(240, 228, 200, 0.93);
+  border: 1px solid rgba(120, 90, 30, 0.18);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #5a4020;
+  font-family: Georgia, serif;
+  line-height: 2;
+}
+
+.ga-tree3d-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.ga-tree3d-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(240, 228, 200, 0.9);
+  border: 1px solid rgba(120, 90, 30, 0.18);
+  border-radius: 30px;
+  padding: 7px 20px;
+  font-size: 11px;
+  color: #7a5a30;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.ga-tree3d-brand {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-family: Georgia, serif;
+  color: rgba(90, 56, 0, 0.52);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  letter-spacing: 0.3px;
+}
+
+.ga-tree3d-truncated {
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(180, 140, 60, 0.15);
+  border: 1px solid rgba(180, 140, 60, 0.4);
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-size: 11px;
+  color: #6a4010;
+  font-family: Georgia, serif;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.ga-tree3d-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(240, 228, 200, 0.95);
+  border: 1px solid rgba(180, 60, 30, 0.35);
+  border-radius: 10px;
+  padding: 14px 24px;
+  font-size: 13px;
+  color: #7a2010;
+  font-family: Georgia, serif;
+  z-index: 10;
+  text-align: center;
+}
+
+.ga-tree3d-controls {
+  background: rgba(240, 228, 200, 0.93);
+  border: 1px solid rgba(120, 90, 30, 0.18);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ga-tree3d-ctrl-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 4px 4px;
+  border-radius: 6px;
+  background: rgba(220, 205, 170, 0.35);
+}
+
+.ga-tree3d-ctrl-group + .ga-tree3d-ctrl-group {
+  margin-top: 3px;
+}
+
+.ga-tree3d-ctrl-label {
+  font-size: 9px;
+  font-family: Georgia, serif;
+  color: #7a5a30;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  line-height: 1;
+  text-align: center;
+}
+
+.ga-tree3d-ctrl-row {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+
+.ga-tree3d-ctrl-cross {
+  display: grid;
+  grid-template-columns: repeat(3, 28px);
+  grid-template-rows: repeat(3, 28px);
+  gap: 2px;
+}
+
+.ga-tree3d-ctrl-n { grid-area: 1 / 2; }
+.ga-tree3d-ctrl-w { grid-area: 2 / 1; }
+.ga-tree3d-ctrl-center {
+  grid-area: 2 / 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: rgba(90, 56, 0, 0.45);
+  pointer-events: none;
+}
+.ga-tree3d-ctrl-e { grid-area: 2 / 3; }
+.ga-tree3d-ctrl-s { grid-area: 3 / 2; }
+
+.ga-tree3d-ctrl-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(120, 90, 30, 0.22);
+  border-radius: 6px;
+  background: rgba(248, 238, 215, 0.9);
+  color: #5a3800;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.08s, border-color 0.08s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ga-tree3d-ctrl-btn:hover {
+  background: rgba(210, 180, 120, 0.85);
+  border-color: rgba(120, 90, 30, 0.4);
+}
+
+.ga-tree3d-ctrl-btn:active {
+  background: rgba(170, 130, 70, 0.85);
+}
+
+.ga-tree3d-ctrl-home {
+  width: 100%;
+  height: auto;
+  margin-top: 4px;
+  padding: 6px 8px;
+  font-size: 10px;
+  font-family: Georgia, serif;
+  letter-spacing: 0.5px;
+  color: #7a4800;
+  border-color: rgba(150, 100, 20, 0.35);
+  background: rgba(230, 200, 140, 0.7);
+}
+
+.ga-tree3d-ctrl-home:hover {
+  background: rgba(200, 160, 80, 0.85);
+}
+
+.ga-tree3d-loader {
+  position: absolute;
+  inset: 0;
+  background: #f0e4c8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: opacity 0.8s;
+}
+
+.ga-tree3d-loader p {
+  color: #7a5a20;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  font-family: Georgia, serif;
+}
+
+.ga-tree3d-bar {
+  width: 160px;
+  height: 1px;
+  background: rgba(120, 90, 30, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.ga-tree3d-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60px;
+  width: 60px;
+  height: 1px;
+  background: #8b6914;
+  animation: ga-tree3d-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes ga-tree3d-slide {
+  0%   { left: -60px; }
+  100% { left: 220px; }
+}
+
+.ga-tree3d-mobile-reset {
+  display: none;
+  position: absolute;
+  bottom: 68px;
+  left: 14px;
+  width: auto !important;
+  height: auto !important;
+  padding: 7px 14px !important;
+  background: rgba(230, 200, 140, 0.88) !important;
+  border: 1px solid rgba(140, 100, 20, 0.38) !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  font-family: Georgia, serif !important;
+  letter-spacing: 0.3px !important;
+  color: #7a4800 !important;
+  cursor: pointer;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .ga-tree3d-ctrl-panel { display: none; }
+  .ga-tree3d-mobile-reset { display: flex; }
+  .ga-tree3d-person-card { bottom: 118px; }
+  /* Anchor title between left edge and right buttons (close + download at right: 106px) */
+  .ga-tree3d-title {
+    left: 10px;
+    right: 106px;
+    transform: none;
+    text-align: center;
+    max-width: none;
+  }
+}

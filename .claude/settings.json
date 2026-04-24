@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node dev-server.js)",
+      "Bash(node scripts/generate-route-pages.js)"
+    ]
+  }
+}
