@@ -257,7 +257,7 @@ function _runLayout(persons, families) {
 
     persons.forEach((n, i) => {
       if (n.focal) return;
-      F[i].y  += 0.07 * ((n.generation || 0) * GY - n.pos.y);
+      F[i].y  += 0.18 * ((n.generation || 0) * GY - n.pos.y);
       F[i].x  -= 0.004 * n.pos.x;
       F[i].z  -= 0.004 * n.pos.z;
     });
@@ -428,16 +428,18 @@ function _buildConnectors(families, nodeMap) {
     if (!fN || !mN) return;
 
     const fp = fN.bust.position, mp = mN.bust.position;
-    const barY   = Math.max(fp.y, mp.y) + 0.28;
-    const fTop   = new THREE.Vector3(fp.x, fp.y + 0.28, fp.z);
-    const mTop   = new THREE.Vector3(mp.x, mp.y + 0.28, mp.z);
+    // Place the couple bar at the BOTTOM of the parent spheres (toward children),
+    // so parents visually sit above the bar and the junction below them.
+    const barY   = Math.min(fp.y, mp.y) - 0.07;
+    const fBot   = new THREE.Vector3(fp.x, fp.y - 0.07, fp.z);
+    const mBot   = new THREE.Vector3(mp.x, mp.y - 0.07, mp.z);
     const fBar   = new THREE.Vector3(fp.x, barY, fp.z);
     const mBar   = new THREE.Vector3(mp.x, barY, mp.z);
     const midBar = fBar.clone().lerp(mBar, 0.5);
 
-    // Vertical legs from each spouse up to the couple bar
-    if (fTop.y < barY - 0.05) _seg(fTop, fBar, coupleSegs, couplePoints);
-    if (mTop.y < barY - 0.05) _seg(mTop, mBar, coupleSegs, couplePoints);
+    // Vertical legs from each spouse down to the couple bar (only when heights differ)
+    if (fBot.y > barY + 0.05) _seg(fBot, fBar, coupleSegs, couplePoints);
+    if (mBot.y > barY + 0.05) _seg(mBot, mBar, coupleSegs, couplePoints);
     // Horizontal couple bar
     _seg(fBar, mBar, coupleSegs, couplePoints);
     const orb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), orbMat);
@@ -450,15 +452,18 @@ function _buildConnectors(families, nodeMap) {
     const cNodes = fam.childIds.map(id => nodeMap[id]).filter(Boolean);
     if (!cNodes.length) return;
 
-    // Junction point: halfway between couple bar and the highest (closest) child
+    // Junction: 40% of the way from the closest child toward the couple bar,
+    // clamped below parents so they always appear above the junction even if
+    // a child drifted upward unexpectedly.
+    const minParentY = Math.min(fp.y, mp.y);
     const maxChildY = Math.max(...cNodes.map(n => n.bust.position.y));
-    const juncY = maxChildY + (barY - maxChildY) * 0.4;
+    const juncY = Math.min(maxChildY + (barY - maxChildY) * 0.4, minParentY - 0.3);
     const junc  = new THREE.Vector3(midBar.x, juncY, midBar.z);
 
     _seg(midBar, junc, coupleSegs, couplePoints);
     _flowPart(midBar, junc, coupleFlow, 0.32, Math.random());
 
-    // Draw from junction straight to each child's top
+    // Draw from junction to each child's top (sphere top = closest point toward junction)
     cNodes.forEach(cn => {
       const cp = cn.bust.position;
       const cTop = new THREE.Vector3(cp.x, cp.y + 0.28, cp.z);
@@ -820,8 +825,8 @@ window._ga3dInit = function(graphData) {
   _runLayout(persons, families);
 
   // Post-layout: snap each couple to the same Y so connector bars are horizontal.
-  // Each person is only snapped once (first family wins) to avoid a second marriage
-  // re-averaging an already-aligned Y.
+  // When one spouse was already snapped by a prior marriage, pull the new spouse
+  // to that established Y. If both are already snapped, skip to avoid conflict.
   const personById = {};
   persons.forEach(n => { personById[n.id] = n; });
   const ySnapped = new Set();
@@ -832,13 +837,42 @@ window._ga3dInit = function(graphData) {
     const mN = motherId != null ? personById[motherId] : null;
     if (!fN || !mN) return;
     if ((fN.generation || 0) !== (mN.generation || 0)) return; // cross-gen: keep natural heights
-    if (ySnapped.has(fN.id) || ySnapped.has(mN.id)) return;
-    const avgY = (fN.finalPos.y + mN.finalPos.y) / 2;
-    fN.finalPos.y = avgY;
-    mN.finalPos.y = avgY;
+    const fSnapped = ySnapped.has(fN.id);
+    const mSnapped = ySnapped.has(mN.id);
+    if (fSnapped && mSnapped) return;
+    const targetY = fSnapped ? fN.finalPos.y : mSnapped ? mN.finalPos.y : (fN.finalPos.y + mN.finalPos.y) / 2;
+    fN.finalPos.y = targetY;
+    mN.finalPos.y = targetY;
     ySnapped.add(fN.id);
     ySnapped.add(mN.id);
   });
+
+  // Enforce generational ordering: every child must sit below its parents in Y.
+  // One pass propagates the constraint one generation level; worst-case passes
+  // equals the tree depth (max gen − min gen). Stop early when nothing changed.
+  const GEN_GAP   = 2.0;
+  const genValues = persons.map(n => n.generation || 0);
+  const genDepth  = Math.max(...genValues) - Math.min(...genValues);
+  for (let pass = 0; pass < genDepth; pass++) {
+    let changed = false;
+    families.forEach(fam => {
+      const fId = fam.husbandIds && fam.husbandIds.length ? fam.husbandIds[0] : null;
+      const mId = fam.wifeIds    && fam.wifeIds.length    ? fam.wifeIds[0]    : null;
+      const fP = fId != null ? personById[fId] : null;
+      const mP = mId != null ? personById[mId] : null;
+      if (!fP || !mP) return;
+      const parentMinY = Math.min(fP.finalPos.y, mP.finalPos.y);
+      (fam.childIds || []).forEach(cid => {
+        const cP = personById[cid];
+        if (!cP || cP.focal) return;
+        if (cP.finalPos.y > parentMinY - GEN_GAP) {
+          cP.finalPos.y = parentMinY - GEN_GAP;
+          changed = true;
+        }
+      });
+    });
+    if (!changed) break;
+  }
 
   // Drop connected components not containing the focal person (isolated mini-trees
   // caused by the backend person limit cutting the connecting ancestor).
