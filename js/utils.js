@@ -81,20 +81,24 @@ GeneaAzul.utils = (function() {
   }
 
   /* Like apiGet but deduplicates: concurrent or repeated calls for the same
-     URL share one request. Resolved/rejected callbacks fire immediately for
-     calls that arrive after the request completes. */
+     URL share one request. Successful responses stay cached for the session.
+     Failed responses are evicted so subsequent callers can retry — otherwise
+     a transient wake-up timeout would permanently break every caller. */
   var _getCache = {};
   function apiGetCached(url, successFn, errorFn) {
     if (!_getCache[url]) {
       var deferred = $.Deferred();
+      _getCache[url] = deferred;
       $.ajax({
         type: 'GET',
         url: url,
         contentType: 'application/json',
         success: function(data) { deferred.resolve(data); },
-        error: function(xhr)    { deferred.reject(xhr); }
+        error: function(xhr) {
+          if (_getCache[url] === deferred) delete _getCache[url];
+          deferred.reject(xhr);
+        }
       });
-      _getCache[url] = deferred;
     }
     _getCache[url]
       .done(successFn  || function() {})

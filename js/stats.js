@@ -141,7 +141,8 @@ GeneaAzul.stats = (function() {
     var $el = $(selector).empty();
     if (!data || data.length === 0) { $el.html('<p class="text-muted small">Sin datos.</p>'); return; }
     data.forEach(function(row) {
-      var pct = row.percentage.toFixed(row.percentage < 10 ? 2 : 1);
+      var pctNum = typeof row.percentage === 'number' ? row.percentage : 0;
+      var pct = pctNum.toFixed(pctNum < 10 ? 2 : 1);
       $el.append(
         $('<div>').addClass('mb-2')
           .append($('<div>').addClass('d-flex justify-content-between small mb-1')
@@ -210,7 +211,8 @@ GeneaAzul.stats = (function() {
     $el.append($table);
 
     data.forEach(function(row, idx) {
-      var pct = row.percentage.toFixed(row.percentage < 10 ? 2 : 1);
+      var pctNum = typeof row.percentage === 'number' ? row.percentage : 0;
+      var pct = pctNum.toFixed(pctNum < 10 ? 2 : 1);
       var surnamesText = row.topSurnames && row.topSurnames.length > 0
         ? row.topSurnames.join(', ')
         : '';

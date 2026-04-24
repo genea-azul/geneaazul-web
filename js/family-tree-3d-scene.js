@@ -5,17 +5,50 @@ let _renderer, _scene, _camera, _controls, _animId, _clock, _sun;
 let _ctrlV    = null; // { dTheta, dPhi, dRadius, pan: Vector3 }
 let _navRadius = null; // target orbit radius after click-to-navigate
 let _navReset  = null; // { target, spherical } for reset-to-home animation
-let _initCamPos, _initTarget; // stored at scene build time
+// Home-position snapshot captured after layout settles in _adjustSceneForTree;
+// used by the reset action and cinematic exit to restore a well-defined camera pose.
+let _initCamPos, _initTarget;
 // Stored listener refs so they can be removed on dispose
 let _onPointerDown, _onWheel, _onCanvasClick, _onCanvasTouchEnd;
-// Flag to cancel in-flight logo texture load on dispose
-let _wallTexDisposed = false;
+// Generation counter for in-flight logo texture loads.
+// Incremented on every _buildLogoWalls call and on dispose so stale callbacks
+// from a previous open can never add walls to the new scene.
+let _wallTexGen = 0;
 // Render-on-demand: only draw when something changed
 let _needsRender = true;
 // Shared connector materials (pooled across all edges to avoid per-edge allocations)
 let _connMats = null;
+// Shared particle geometry — one sphere reused across every edge flow mesh
+let _particleGeo = null;
 // Focal person name used for PNG export filename
 let _focalName = '';
+// Pointer-down position — compared against click position to skip drag-end events in onPick
+let _pdX = 0, _pdY = 0;
+// Cinematic flythrough state
+let _cinematic = false;
+let _cinematicT = 0;
+let _cinematicPath = null;  // { camCurve, lookCurve, speed }
+let _cinematicFogBase = 0;
+let _cinematicPersons    = null; // kept so path can be rebuilt on each activation
+let _cinematicTreeRadius = 0;
+let _cinematicAspectIsPortrait = null; // last aspect bucket the path was built for
+// Warmup: smooth camera fly-in from current position to path start
+const CINEMATIC_WARMUP_DUR = 2.5; // seconds
+let _cinematicInWarmup  = false;
+let _cinematicWarmupT   = 0;
+let _cinematicEntryPos  = null; // camera position when cinematic was activated
+let _cinematicEntryLook = null; // controls.target when cinematic was activated
+// Y bounds of tree nodes — look-at target is clamped to this range so the
+// camera never stares above the tree top or below the lowest node (spline overshoot)
+let _cinematicTreeMinY = null;
+let _cinematicTreeMaxY = null;
+// Pooled work objects reused every frame by the render loop (prevents GC churn
+// in hot paths — _ctrlV block, navigation, cinematic banking).
+const _tmpSph   = new THREE.Spherical();
+const _tmpVec3A = new THREE.Vector3();
+const _tmpBank  = new THREE.Vector3();
+
+function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
 
 function _buildMaterials() {
   return {
@@ -68,7 +101,7 @@ function _buildScene(containerId) {
   _scene.background = new THREE.Color(0xf0e4c8);
   _scene.fog = new THREE.FogExp2(0xf0e4c8, 0.016);
 
-  _camera = new THREE.PerspectiveCamera(48, W / H, 0.1, 200);
+  _camera = new THREE.PerspectiveCamera(W / H < 0.75 ? 68 : 48, W / H, 0.1, 200);
   _camera.position.set(0, 3, 24);
 
   _controls = new OrbitControls(_camera, _renderer.domElement);
@@ -80,7 +113,7 @@ function _buildScene(containerId) {
   _controls.autoRotate = true;
   _controls.autoRotateSpeed = 0.2;
   _controls.zoomSpeed = 3;
-  _onPointerDown = () => { _controls.autoRotate = false; };
+  _onPointerDown = e => { _controls.autoRotate = false; if (e) { _pdX = e.clientX; _pdY = e.clientY; } };
   _renderer.domElement.addEventListener('pointerdown', _onPointerDown);
   _controls.addEventListener('change', () => { _needsRender = true; });
 
@@ -123,9 +156,28 @@ function _onResize() {
   if (!wrap) return;
   const W = wrap.clientWidth, H = wrap.clientHeight;
   if (!W || !H) return;
-  _camera.aspect = W / H;
+  const aspect = W / H;
+  _camera.aspect = aspect;
+  // Wider vertical FOV on portrait so the horizontal frustum isn't too narrow
+  _camera.fov = aspect < 0.75 ? 68 : 48;
   _camera.updateProjectionMatrix();
   _renderer.setSize(W, H);
+  // Rebuild cinematic path only when the portrait/landscape bucket actually
+  // changes. Mobile URL-bar show/hide and on-screen keyboards fire resize
+  // events constantly within the same bucket — rebuilding on every one would
+  // reset _cinematicT = 0 and snap the camera back to the overview each time.
+  if (_cinematic && _cinematicPersons && _cinematicTreeRadius > 0) {
+    const isPortrait = aspect < 0.75;
+    if (_cinematicAspectIsPortrait !== isPortrait) {
+      _cinematicPath      = _buildCinematicPath(_cinematicPersons, _cinematicTreeRadius, aspect);
+      _cinematicAspectIsPortrait = isPortrait;
+      _cinematicT         = 0;
+      _cinematicEntryPos  = _camera.position.clone();
+      _cinematicEntryLook = _controls.target.clone();
+      _cinematicInWarmup  = true;
+      _cinematicWarmupT   = 0;
+    }
+  }
 }
 
 // ── Force-directed layout ────────────────────────────────────────────────────
@@ -165,31 +217,32 @@ function _runLayout(persons, families) {
 
   persons.forEach(n => { n.spherePos = n.pos.clone(); });
 
-  const F = persons.map(() => new THREE.Vector3());
+  const F    = persons.map(() => new THREE.Vector3());
+  const diff = new THREE.Vector3(); // reused every iteration — avoids per-pair allocations
   const maxIter = Math.min(350, Math.max(100, persons.length * 5));
   for (let iter = 0; iter < maxIter; iter++) {
     F.forEach(f => f.set(0, 0, 0));
 
     for (let i = 0; i < persons.length; i++) {
       for (let j = i + 1; j < persons.length; j++) {
-        const d = persons[i].pos.clone().sub(persons[j].pos);
-        const l = Math.max(d.length(), 0.4);
+        diff.subVectors(persons[i].pos, persons[j].pos);
+        const l = Math.max(diff.length(), 0.4);
         const f = 16 / (l * l);
-        d.normalize().multiplyScalar(f);
-        F[i].add(d); F[j].sub(d);
+        diff.normalize().multiplyScalar(f);
+        F[i].add(diff); F[j].sub(diff);
       }
     }
 
     edges.forEach(e => {
       const i = idx[e.a], j = idx[e.b];
       if (i === undefined || j === undefined) return;
-      const d = persons[j].pos.clone().sub(persons[i].pos);
-      const l = d.length();
+      diff.subVectors(persons[j].pos, persons[i].pos);
+      const l = diff.length();
       const rest = e.t === 'm' ? 1.8 : 3.0;
       const f = 0.05 * (l - rest);
-      d.normalize().multiplyScalar(f);
-      if (!persons[i].focal) F[i].add(d);
-      if (!persons[j].focal) F[j].sub(d);
+      diff.normalize().multiplyScalar(f);
+      if (!persons[i].focal) F[i].add(diff);
+      if (!persons[j].focal) F[j].sub(diff);
     });
 
     persons.forEach((n, i) => {
@@ -344,7 +397,11 @@ function _seg(p1, p2, lineMat, ptsMat) {
 }
 
 function _flowPart(p1, p2, mat, speed, phase) {
-  const m = new THREE.Mesh(new THREE.SphereGeometry(0.04, 7, 7), mat);
+  // Share a single sphere geometry across every flow particle — a large tree
+  // can have hundreds of these, so per-particle geometry allocation was
+  // wasting GPU buffer slots for no visual gain.
+  if (!_particleGeo) _particleGeo = new THREE.SphereGeometry(0.04, 7, 7);
+  const m = new THREE.Mesh(_particleGeo, mat);
   _scene.add(m);
   _edgeParticles.push({ mesh: m, p1: p1.clone(), p2: p2.clone(), speed, phase });
 }
@@ -432,37 +489,146 @@ function _adjustSceneForTree(treeRadius) {
   _sun.shadow.camera.updateProjectionMatrix();
 }
 
+// ── Cinematic flythrough path ────────────────────────────────────────────────
+
+// Returns the centroid of the k nearest persons to camPos.
+// Used as look-at target so the camera always faces populated space.
+function _nearestCentroid(camPos, persons, k) {
+  const sorted = persons.slice().sort((a, b) =>
+    a.finalPos.distanceToSquared(camPos) - b.finalPos.distanceToSquared(camPos)
+  );
+  const take = sorted.slice(0, Math.min(k, sorted.length));
+  return new THREE.Vector3(
+    take.reduce((s, n) => s + n.finalPos.x, 0) / take.length,
+    take.reduce((s, n) => s + n.finalPos.y, 0) / take.length,
+    take.reduce((s, n) => s + n.finalPos.z, 0) / take.length
+  );
+}
+
+function _buildCinematicPath(persons, treeRadius, aspect) {
+  const portrait = aspect < 0.75;
+
+  // On portrait the horizontal frustum is ~43° (even at FOV 68°) vs ~77° on landscape,
+  // so the camera must orbit closer to clusters and the overview should look more top-down.
+  const camR       = portrait ? Math.min(treeRadius * 0.35, 10) : Math.min(treeRadius * 0.65, 18);
+  const orbitRLo   = portrait ? 0.25 : 0.40; // inner orbit radius as fraction of camR
+  const orbitRHi   = portrait ? 0.35 : 0.50; // outer orbit radius fraction
+  const orbitHBase = portrait ? 3    : 2;     // base height above cluster centroid
+  const orbitHRand = portrait ? 6    : 4;     // random height added on top
+
+  const byGen = {};
+  persons.forEach(n => {
+    const g = n.generation || 0;
+    if (!byGen[g]) byGen[g] = [];
+    byGen[g].push(n);
+  });
+
+  // Visit ancestor gens first (highest number = oldest), then down to descendants
+  const genKeys = Object.keys(byGen).map(Number).sort((a, b) => b - a);
+  const camPts  = [];
+  const lookPts = [];
+
+  // ── 1. Opening overview: high angle showing the whole tree ────────────────
+  // Portrait: near-vertical top-down (exploits tall screen, avoids narrow horizontal).
+  // Landscape: wide elevated side-angle to show the full horizontal spread.
+  const overviewAngle = Math.random() * Math.PI * 2;
+  const overviewR = portrait
+    ? treeRadius * (0.2 + Math.random() * 0.2)   // close horizontally → top-down
+    : treeRadius * (0.5 + Math.random() * 0.4);   // wider side angle
+  const overviewH = portrait
+    ? treeRadius * (1.5 + Math.random() * 0.5)    // high on portrait
+    : treeRadius * (1.2 + Math.random() * 0.5);
+  const ovPos = new THREE.Vector3(
+    Math.cos(overviewAngle) * overviewR,
+    overviewH,
+    Math.sin(overviewAngle) * overviewR
+  );
+  camPts.push(ovPos);
+  lookPts.push(new THREE.Vector3(0, 0, 0)); // always look at tree centre from overview
+
+  // ── 2. Per-generation cluster flybys ──────────────────────────────────────
+  genKeys.forEach(gen => {
+    const nodes = byGen[gen];
+    const cx = nodes.reduce((s, n) => s + n.finalPos.x, 0) / nodes.length;
+    const cy = nodes.reduce((s, n) => s + n.finalPos.y, 0) / nodes.length;
+    const cz = nodes.reduce((s, n) => s + n.finalPos.z, 0) / nodes.length;
+    const baseAngle = Math.random() * Math.PI * 2;
+    for (let j = 0; j < 2; j++) {
+      const angle = baseAngle + (j === 0 ? 0 : Math.PI * (0.7 + Math.random() * 0.6));
+      const r = camR * (orbitRLo + Math.random() * orbitRHi);
+      const h = orbitHBase + Math.random() * orbitHRand + Math.abs(gen) * 1.2;
+      const cp = new THREE.Vector3(cx + Math.cos(angle) * r, cy + h, cz + Math.sin(angle) * r);
+      camPts.push(cp);
+      // Look at the nearest populated cluster from this camera position — never empty space
+      lookPts.push(_nearestCentroid(cp, persons, 5));
+    }
+  });
+
+  // CatmullRomCurve3 needs ≥ 4 points; pad tiny trees
+  while (camPts.length < 4) {
+    const a = Math.random() * Math.PI * 2;
+    const cp = new THREE.Vector3(Math.cos(a) * camR * 0.6, 4 + Math.random() * 3, Math.sin(a) * camR * 0.6);
+    camPts.push(cp);
+    lookPts.push(_nearestCentroid(cp, persons, 5));
+  }
+
+  // Duration: 10 s for a 2-person tree, scales up to 60 s for large ones
+  const duration = Math.min(60, Math.max(10, persons.length * 0.45 + genKeys.length * 4));
+  return {
+    // 'centripetal' parameterisation avoids cusps and self-intersections on
+    // unevenly-spaced control points — exactly what camera flythrough paths need.
+    camCurve:  new THREE.CatmullRomCurve3(camPts,  true, 'centripetal'),
+    lookCurve: new THREE.CatmullRomCurve3(lookPts, true, 'centripetal'),
+    speed: 1 / duration
+  };
+}
+
 // ── Logo background walls ────────────────────────────────────────────────────
 
 function _buildLogoWalls(treeRadius) {
-  _wallTexDisposed = false;
+  const myGen = ++_wallTexGen;
   const loader = new THREE.TextureLoader();
-  loader.load('/img/logo-simple-2500x2500-no-bg.png', function(tex) {
-    if (_wallTexDisposed || !_scene) { tex.dispose(); return; }
-    tex.colorSpace = THREE.SRGBColorSpace;
+  loader.load('/img/logo-simple-2500x2500-no-bg.png',
+    function(tex) {
+      if (myGen !== _wallTexGen || !_scene) { tex.dispose(); return; }
+      tex.colorSpace = THREE.SRGBColorSpace;
 
-    // Walls sit far enough that the orbiting camera never gets closer than ~treeRadius away
-    const wallDist  = treeRadius * 2.5;
-    const planeSize = treeRadius * 3;
+      // Walls sit far enough that the orbiting camera never gets closer than ~treeRadius away
+      const wallDist  = treeRadius * 2.5;
+      const planeSize = treeRadius * 3;
 
-    const WALLS = [
-      { pos: [        0, 0, -wallDist], rotY:  0           },
-      { pos: [-wallDist, 0,         0], rotY:  Math.PI / 2 },
-      { pos: [ wallDist, 0,         0], rotY: -Math.PI / 2 },
-      { pos: [        0, 0,  wallDist], rotY:  Math.PI     },
-    ];
+      const WALLS = [
+        { pos: [        0, 0, -wallDist], rotY:  0           },
+        { pos: [-wallDist, 0,         0], rotY:  Math.PI / 2 },
+        { pos: [ wallDist, 0,         0], rotY: -Math.PI / 2 },
+        { pos: [        0, 0,  wallDist], rotY:  Math.PI     },
+      ];
 
-    WALLS.forEach(function(w) {
-      const mat = new THREE.MeshBasicMaterial({
-        map: tex, transparent: true, opacity: 0.25,
-        depthWrite: false, side: THREE.DoubleSide
+      // Track the shared texture on the first wall so dispose only releases it once
+      // instead of calling tex.dispose() four times via the traverse-dispose loop.
+      WALLS.forEach(function(w, idx) {
+        const mat = new THREE.MeshBasicMaterial({
+          map: tex, transparent: true, opacity: 0.25,
+          depthWrite: false, side: THREE.DoubleSide
+        });
+        if (idx > 0) mat.userData.sharedMap = true; // later walls skip disposal of the shared map
+        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(planeSize, planeSize), mat);
+        mesh.position.set(w.pos[0], w.pos[1], w.pos[2]);
+        mesh.rotation.y = w.rotY;
+        _scene.add(mesh);
       });
-      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(planeSize, planeSize), mat);
-      mesh.position.set(w.pos[0], w.pos[1], w.pos[2]);
-      mesh.rotation.y = w.rotY;
-      _scene.add(mesh);
-    });
-  });
+    },
+    undefined,
+    function(err) {
+      // Without this handler TextureLoader only logs to console — the scene would
+      // render cleanly but silently miss the branded backdrop. Surface it loudly
+      // so a renamed/missing asset is obvious in dev and in production logs.
+      if (myGen !== _wallTexGen) return; // stale callback after dispose
+      if (window.console && console.error) {
+        console.error('[3D tree] logo walls texture failed to load:', err);
+      }
+    }
+  );
 }
 
 // ── Person card overlay ──────────────────────────────────────────────────────
@@ -510,42 +676,108 @@ window._ga3dExport = function() {
   out.width = W; out.height = H;
   const ctx = out.getContext('2d');
   ctx.drawImage(src, 0, 0);
-  const img = new Image();
-  img.onload = function() {
-    const margin = Math.round(W * 0.025);
-    const logoW  = Math.round(W * 0.11);
-    const logoH  = Math.round(logoW * (img.height / img.width));
-    ctx.globalAlpha = 0.60;
-    ctx.drawImage(img, W - logoW - margin, H - logoH - Math.round(margin * 2.2), logoW, logoH);
-    ctx.globalAlpha = 1;
-    const fs = Math.max(14, Math.round(W * 0.014));
+
+  const safeName = (_focalName || 'familia')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').toLowerCase();
+  const margin = Math.round(W * 0.025);
+  const fs = Math.max(14, Math.round(W * 0.014));
+
+  function writeCaptionAndDownload() {
+    // Caption is drawn regardless \u2014 even when the logo fails to load the
+    // exported image still carries the site attribution and the personalised
+    // filename, so unbranded PNGs never circulate silently.
     ctx.font = fs + 'px Georgia, serif';
     ctx.fillStyle = 'rgba(90, 56, 0, 0.65)';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'bottom';
     ctx.fillText('geneaazul.com.ar', W - margin, H - margin);
-    const safeName = (_focalName || 'familia')
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').toLowerCase();
     const link = document.createElement('a');
     link.download = 'arbol-' + safeName + '.png';
     link.href = out.toDataURL('image/png');
     link.click();
+  }
+
+  const img = new Image();
+  img.onload = function() {
+    const logoW = Math.round(W * 0.11);
+    const logoH = Math.round(logoW * (img.height / img.width));
+    ctx.globalAlpha = 0.60;
+    ctx.drawImage(img, W - logoW - margin, H - logoH - Math.round(margin * 2.2), logoW, logoH);
+    ctx.globalAlpha = 1;
+    writeCaptionAndDownload();
   };
   img.onerror = function() {
-    const link = document.createElement('a');
-    link.download = 'arbol.png';
-    link.href = src.toDataURL('image/png');
-    link.click();
+    if (window.console && console.warn) console.warn('[3D tree] logo image failed to load for PNG export; exporting without watermark');
+    writeCaptionAndDownload();
   };
   img.src = '/img/logo-simple-2500x2500-no-bg.png';
 };
+
+let _cinematicAutoRotate = false;
+
+window._ga3dCinematic = function(enable) {
+  if (!_renderer) return;
+  _cinematic = !!enable;
+  if (_cinematic) {
+    _cinematicAutoRotate = _controls.autoRotate;
+    _controls.enabled    = false;
+    _controls.autoRotate = false;
+    _ctrlV               = null; // stop any in-flight button-held movement
+    _cinematicFogBase    = _scene.fog.density;
+    // Fresh random path every activation so each session is different.
+    // t=0 on the new path is always the opening overview shot.
+    _cinematicPath = _buildCinematicPath(_cinematicPersons, _cinematicTreeRadius, _camera.aspect);
+    _cinematicAspectIsPortrait = _camera.aspect < 0.75;
+    _cinematicT    = 0;
+    _camera.up.set(0, 1, 0);
+    // Record current camera state so we can glide smoothly to the path start
+    _cinematicEntryPos  = _camera.position.clone();
+    _cinematicEntryLook = _controls.target.clone();
+    // Skip warmup only if camera is already very close to the path's first waypoint
+    const pathStart    = _cinematicPath.camCurve.getPointAt(0);
+    const distToStart  = _cinematicEntryPos.distanceTo(pathStart);
+    if (distToStart < _cinematicTreeRadius * 0.15) {
+      _cinematicInWarmup = false;
+      _cinematicWarmupT  = 1;
+    } else {
+      _cinematicInWarmup = true;
+      _cinematicWarmupT  = 0;
+    }
+  } else {
+    _ctrlV               = null; // discard any delta accumulated while cinematic suppressed it
+    _controls.enabled    = true;
+    _controls.autoRotate = _cinematicAutoRotate;
+    if (_scene) _scene.fog.density = _cinematicFogBase;
+    _camera.up.set(0, 1, 0);
+    // Return to the opening position so OrbitControls resumes from a well-defined
+    // state — avoids a near-degenerate phi when the cinematic path left the camera
+    // almost directly above the focal person.
+    if (_initCamPos) {
+      _camera.position.copy(_initCamPos);
+      _camera.lookAt(0, 0, 0);
+    }
+    _controls.target.set(0, 0, 0);
+    _controls.update();
+  }
+  _needsRender = true;
+};
+
+// Returns true when the scene is alive and ready to accept export/cinematic
+// actions. Used by family-tree-3d.js to gate the download and cinematic buttons.
+window._ga3dRendererReady = function() { return !!_renderer; };
 
 // ── Main init / dispose ──────────────────────────────────────────────────────
 
 window._ga3dInit = function(graphData) {
   if (!graphData || !Array.isArray(graphData.persons) || !Array.isArray(graphData.families)) {
-    console.error('_ga3dInit: invalid graphData', graphData);
+    // Previously this just console.error'd and returned, leaving the loader
+    // spinner forever. Surface it so the user isn't staring at a hung modal.
+    if (window.console && console.error) console.error('_ga3dInit: invalid graphData', graphData);
+    const loader = document.getElementById('ga-tree3d-loader');
+    if (loader) { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; setTimeout(() => loader.style.display = 'none', 400); }
+    const errEl = document.getElementById('ga-tree3d-error');
+    if (errEl) { errEl.textContent = 'El árbol tiene un formato inesperado. Si persiste, contactanos.'; errEl.style.display = 'block'; }
     return;
   }
 
@@ -630,6 +862,14 @@ window._ga3dInit = function(graphData) {
     if (r > treeRadius) treeRadius = r;
   });
   _adjustSceneForTree(treeRadius);
+  _cinematicPersons    = persons;
+  _cinematicTreeRadius = treeRadius;
+  _cinematicTreeMinY   = Infinity;
+  _cinematicTreeMaxY   = -Infinity;
+  persons.forEach(n => {
+    if (n.finalPos.y < _cinematicTreeMinY) _cinematicTreeMinY = n.finalPos.y;
+    if (n.finalPos.y > _cinematicTreeMaxY) _cinematicTreeMaxY = n.finalPos.y;
+  });
   _buildLogoWalls(treeRadius);
 
   const nodeMap      = {};
@@ -653,11 +893,22 @@ window._ga3dInit = function(graphData) {
   // Click-to-navigate
   const raycaster = new THREE.Raycaster();
   const mouse     = new THREE.Vector2();
-  let lastTouch   = 0;
-  let navTarget   = null;
+  let lastTouch    = 0;
+  let navTarget    = null;
 
   function onPick(cx, cy) {
     if (!settled) return;
+    // Skip if the pointer moved more than 5 px — user was orbiting, not clicking
+    const ddx = cx - _pdX, ddy = cy - _pdY;
+    if (ddx * ddx + ddy * ddy > 25) return;
+    if (_cinematic) {
+      window._ga3dCinematic(false);
+      const btn = document.getElementById('ga-tree3d-cinematic');
+      if (btn) btn.classList.remove('ga-active');
+      const modal = document.getElementById('ga-tree3d-modal');
+      if (modal) modal.classList.remove('ga-tree3d-modal--cinematic');
+      return;
+    }
     _navReset = null;
     const rect = _renderer.domElement.getBoundingClientRect();
     mouse.x =  ((cx - rect.left) / rect.width)  * 2 - 1;
@@ -693,8 +944,6 @@ window._ga3dInit = function(graphData) {
   const SETTLE_DUR = 1.8;
   let elapsed  = 0;
 
-  function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
-
   // Distance thresholds for visibility culling (world units).
   // At 40+ units a sprite is < 24 screen px (unreadable) and a 0.04-radius
   // particle is < 1.4 px (sub-pixel). Both use the same cutoff for consistency.
@@ -707,17 +956,16 @@ window._ga3dInit = function(graphData) {
     elapsed += dt;
 
     // Smooth control velocity — decay to 10% in 0.35 s (frame-rate independent)
-    if (_ctrlV) {
+    if (_ctrlV && !_cinematic) {
       const decay = Math.pow(0.1, dt / 0.35);
-      const sv = new THREE.Spherical().setFromVector3(
-        _camera.position.clone().sub(_controls.target)
-      );
-      sv.radius = Math.max(_controls.minDistance,
-                  Math.min(_controls.maxDistance, sv.radius + _ctrlV.dRadius));
-      sv.theta += _ctrlV.dTheta;
-      sv.phi    = Math.max(0.05, Math.min(Math.PI - 0.05, sv.phi + _ctrlV.dPhi));
-      sv.makeSafe();
-      _camera.position.setFromSpherical(sv).add(_controls.target);
+      _tmpVec3A.copy(_camera.position).sub(_controls.target);
+      _tmpSph.setFromVector3(_tmpVec3A);
+      _tmpSph.radius = Math.max(_controls.minDistance,
+                  Math.min(_controls.maxDistance, _tmpSph.radius + _ctrlV.dRadius));
+      _tmpSph.theta += _ctrlV.dTheta;
+      _tmpSph.phi    = Math.max(0.05, Math.min(Math.PI - 0.05, _tmpSph.phi + _ctrlV.dPhi));
+      _tmpSph.makeSafe();
+      _camera.position.setFromSpherical(_tmpSph).add(_controls.target);
       _camera.lookAt(_controls.target);
       if (_ctrlV.pan.lengthSq() > 0.00001) {
         _camera.position.add(_ctrlV.pan);
@@ -736,7 +984,7 @@ window._ga3dInit = function(graphData) {
     _controls.update();
 
     // Skip rendering when nothing has changed (idle scene with no animations)
-    const _hasAnimation = !settled || _ctrlV || navTarget || _navRadius !== null || _navReset || _edgeParticles.length > 0;
+    const _hasAnimation = !settled || _ctrlV || navTarget || _navRadius !== null || _navReset || _edgeParticles.length > 0 || _cinematic;
     if (!_hasAnimation && !_needsRender) return;
     _needsRender = false;
 
@@ -780,22 +1028,21 @@ window._ga3dInit = function(graphData) {
 
     if (_navReset) {
       _controls.target.lerp(_navReset.target, 0.08);
-      const rs = new THREE.Spherical().setFromVector3(
-        _camera.position.clone().sub(_controls.target)
-      );
-      let dTheta = _navReset.spherical.theta - rs.theta;
+      _tmpVec3A.copy(_camera.position).sub(_controls.target);
+      _tmpSph.setFromVector3(_tmpVec3A);
+      let dTheta = _navReset.spherical.theta - _tmpSph.theta;
       while (dTheta >  Math.PI) dTheta -= 2 * Math.PI;
       while (dTheta < -Math.PI) dTheta += 2 * Math.PI;
-      rs.radius = THREE.MathUtils.lerp(rs.radius, _navReset.spherical.radius, 0.08);
-      rs.theta += dTheta * 0.08;
-      rs.phi    = THREE.MathUtils.lerp(rs.phi, _navReset.spherical.phi, 0.08);
-      rs.makeSafe();
-      _camera.position.setFromSpherical(rs).add(_controls.target);
+      _tmpSph.radius = THREE.MathUtils.lerp(_tmpSph.radius, _navReset.spherical.radius, 0.08);
+      _tmpSph.theta += dTheta * 0.08;
+      _tmpSph.phi    = THREE.MathUtils.lerp(_tmpSph.phi, _navReset.spherical.phi, 0.08);
+      _tmpSph.makeSafe();
+      _camera.position.setFromSpherical(_tmpSph).add(_controls.target);
       _camera.lookAt(_controls.target);
       if (_controls.target.distanceTo(_navReset.target) < 0.08 &&
-          Math.abs(rs.radius - _navReset.spherical.radius) < 0.15 &&
+          Math.abs(_tmpSph.radius - _navReset.spherical.radius) < 0.15 &&
           Math.abs(dTheta) < 0.02 &&
-          Math.abs(rs.phi - _navReset.spherical.phi) < 0.02) {
+          Math.abs(_tmpSph.phi - _navReset.spherical.phi) < 0.02) {
         _navReset = null;
       }
     } else {
@@ -804,14 +1051,61 @@ window._ga3dInit = function(graphData) {
         if (_controls.target.distanceTo(navTarget) < 0.05) navTarget = null;
       }
       if (_navRadius !== null) {
-        const ns = new THREE.Spherical().setFromVector3(
-          _camera.position.clone().sub(_controls.target)
-        );
-        ns.radius = THREE.MathUtils.lerp(ns.radius, _navRadius, 0.07);
-        ns.makeSafe();
-        _camera.position.setFromSpherical(ns).add(_controls.target);
+        _tmpVec3A.copy(_camera.position).sub(_controls.target);
+        _tmpSph.setFromVector3(_tmpVec3A);
+        _tmpSph.radius = THREE.MathUtils.lerp(_tmpSph.radius, _navRadius, 0.07);
+        _tmpSph.makeSafe();
+        _camera.position.setFromSpherical(_tmpSph).add(_controls.target);
         _camera.lookAt(_controls.target);
-        if (Math.abs(ns.radius - _navRadius) < 0.1) _navRadius = null;
+        if (Math.abs(_tmpSph.radius - _navRadius) < 0.1) _navRadius = null;
+      }
+    }
+
+    if (_cinematic && _cinematicPath && settled) {
+      // Cancel any pending navigation so none of them fight the cinematic camera.
+      navTarget  = null;
+      _navRadius = null;
+      _navReset  = null;
+      // Cap dt so a tab-suspend/resume doesn't teleport the camera along the path.
+      const cdt = Math.min(dt, 0.1);
+
+      if (_cinematicInWarmup) {
+        // Phase 1: glide smoothly from the camera's position at activation time
+        // to the path's first waypoint (the opening overview shot).
+        _cinematicWarmupT += cdt / CINEMATIC_WARMUP_DUR;
+        if (_cinematicWarmupT >= 1) {
+          _cinematicWarmupT  = 1;
+          _cinematicInWarmup = false;
+        }
+        const w         = easeInOut(_cinematicWarmupT);
+        const pathStart = _cinematicPath.camCurve.getPointAt(0);
+        const lookStart = _cinematicPath.lookCurve.getPointAt(0);
+        _camera.position.lerpVectors(_cinematicEntryPos,  pathStart, w);
+        _controls.target.lerpVectors(_cinematicEntryLook, lookStart, w);
+        _camera.lookAt(_controls.target);
+        _scene.fog.density = _cinematicFogBase;
+      } else {
+        // Phase 2: follow the pre-built flythrough path
+        _cinematicT = (_cinematicT + cdt * _cinematicPath.speed) % 1;
+        const pos    = _cinematicPath.camCurve.getPointAt(_cinematicT);
+        const lookAt = _cinematicPath.lookCurve.getPointAt(_cinematicT);
+        // Clamp look-at Y to tree node bounds so spline overshoot never points
+        // the camera above the highest person or below the lowest one.
+        if (_cinematicTreeMinY !== null) {
+          lookAt.y = Math.max(_cinematicTreeMinY - 0.5, Math.min(_cinematicTreeMaxY + 0.5, lookAt.y));
+        }
+        _camera.position.copy(pos);
+        // Banking: dt-compensated lerp so the lean rate is consistent at any frame rate.
+        const bankF = 1 - Math.pow(0.94, cdt * 60);
+        const tan   = _cinematicPath.camCurve.getTangentAt(_cinematicT);
+        _tmpBank.set(-tan.z * 0.45, 1, tan.x * 0.45).normalize();
+        _camera.up.lerp(_tmpBank, bankF);
+        // Lerp the look target so the camera swings smoothly rather than snapping
+        // when transitioning between widely-separated cluster centroids.
+        _controls.target.lerp(lookAt, Math.min(1, cdt * 2.5));
+        _camera.lookAt(_controls.target);
+        // Fog pulse: subtle ripple adds depth to the fly-through
+        _scene.fog.density = _cinematicFogBase * (1 + 0.12 * Math.sin(_cinematicT * Math.PI * 8));
       }
     }
 
@@ -829,23 +1123,28 @@ window._ga3dInit = function(graphData) {
 
 window._ga3dDispose = function() {
   if (_animId) { cancelAnimationFrame(_animId); _animId = null; }
-  _wallTexDisposed = true;
+  _wallTexGen++; // invalidate any in-flight texture load from the previous scene
   window.removeEventListener('resize', _onResize);
   if (_scene) {
     _scene.traverse(obj => {
-      if (obj.geometry) obj.geometry.dispose();
+      // Shared geometries (_particleGeo) are disposed once below — skip per-mesh
+      // traversal disposal so we don't double-dispose.
+      if (obj.geometry && obj.geometry !== _particleGeo) obj.geometry.dispose();
       if (obj.material) {
         const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
         mats.forEach(m => {
           if (MAT      && Object.values(MAT).indexOf(m)       !== -1) return;
           if (_connMats && Object.values(_connMats).indexOf(m) !== -1) return;
-          if (m.map) m.map.dispose();
+          // Wall materials share a single texture across 4 planes — only the
+          // first wall owns the map; the rest skip to avoid double-disposing.
+          if (m.map && !(m.userData && m.userData.sharedMap)) m.map.dispose();
           m.dispose();
         });
       }
     });
-    _edgeParticles.forEach(p => _scene.remove(p.mesh));
+    _edgeParticles.forEach(p => { _scene.remove(p.mesh); }); // geometry is the shared pool; material is pooled in _connMats
   }
+  if (_particleGeo) { _particleGeo.dispose(); _particleGeo = null; }
   _edgeParticles.length = 0;
   if (MAT)       { Object.values(MAT).forEach(m => m.dispose());       MAT       = null; }
   if (_connMats) { Object.values(_connMats).forEach(m => m.dispose()); _connMats = null; }
@@ -866,6 +1165,18 @@ window._ga3dDispose = function() {
   _onPointerDown = _onWheel = _onCanvasClick = _onCanvasTouchEnd = null;
   _ctrlV = _navReset = null;
   _navRadius = null;
+  _pdX = 0; _pdY = 0;
+  _cinematic = false;
+  _cinematicPath = null;
+  _cinematicPersons = null;
+  _cinematicTreeRadius = 0;
+  _cinematicT = 0;
+  _cinematicInWarmup  = false;
+  _cinematicWarmupT   = 0;
+  _cinematicEntryPos  = null;
+  _cinematicEntryLook = null;
+  _cinematicTreeMinY  = null;
+  _cinematicTreeMaxY  = null;
   _needsRender = true;
   _initCamPos = _initTarget = null;
   const titleEl = document.getElementById('ga-tree3d-title');

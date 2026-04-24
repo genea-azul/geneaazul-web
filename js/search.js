@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════
    Genea Azul — search.js
-   Family search page logic — ported and refactored from index.ftlh
+   Family search page logic — wires #buscar-section to /api/search/family
    ═══════════════════════════════════════════════════════════════════ */
 var GeneaAzul = window.GeneaAzul || {};
 
@@ -77,7 +77,7 @@ GeneaAzul.search = (function() {
       var show = $(this).prop('checked');
       $('#grandparentsContainer').toggleClass('d-none', !show);
     });
-    $('#grandparentsContainer').addClass('d-none'); // hidden by default
+    $('#grandparentsContainer').addClass('d-none');
 
     // Spouse toggle
     $('#spouseContainerShowBtn').off('change').on('change', function() {
@@ -91,10 +91,16 @@ GeneaAzul.search = (function() {
       utils.maxLengthCheck(this);
     });
 
-    // Allow Enter key to submit
-    $('#buscar-section').off('keydown').on('keydown', 'input', function(e) {
-      if (e.key === 'Enter') { e.preventDefault(); $('#searchBtn').trigger('click'); }
-    });
+    // Enter on any input submits — but respect the disabled state so we don't
+    // fire a second request while one is already in flight.
+    $('#buscar-section').off('keydown.search-form')
+      .on('keydown.search-form', 'input', function(e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        var $btn = $('#searchBtn');
+        if ($btn.prop('disabled')) return;
+        $btn.trigger('click');
+      });
   }
 
   function toggleYearOfDeath(isAliveSelector, yearOfDeathSelector) {
@@ -126,14 +132,12 @@ GeneaAzul.search = (function() {
     $card.find('i.card-header-icon').toggleClass('bi-gender-male', isMale).toggleClass('bi-gender-female', !isMale);
   }
 
-  /* ── Backend initialisation (health check) ──────────────────────── */
+  /* ── Backend readiness gate (unlocks form when /api/gedcom-analyzer responds) ─ */
   function initBackend() {
-    // Obfuscation from URL
     if (/[?&]f=0/.test(window.location.search)) {
       cfg.obfuscateLiving = false;
     }
 
-    // Delayed spinner reveal
     setTimeout(function() {
       if ($('#search-form-container').hasClass('d-none')) {
         $('#search-spinner').css('visibility', 'visible');
@@ -171,6 +175,11 @@ GeneaAzul.search = (function() {
   }
 
   function clearForm() {
+    // Stop any in-flight countdowns / delayed activations — otherwise they
+    // keep ticking against DOM that clearForm is about to detach.
+    _activeTimers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
+    _activeTimers = [];
+
     var $section = $('#buscar-section');
     // Clear text and number inputs (preserve contact)
     $section.find('input[type=text]:not(#individualContact), input[type=number]').val('');
@@ -227,16 +236,18 @@ GeneaAzul.search = (function() {
       cfg.apiBaseUrl + '/api/search/family',
       rq,
       function(data) {
+        try {
         $resultBody.empty();
         var timeoutMs = 0;
+        var people = (data && Array.isArray(data.people)) ? data.people : [];
 
-        data.people.forEach(function(person, idx) {
+        people.forEach(function(person, idx) {
           var $card = buildPersonComponent(person, idx);
           $resultBody.append($card);
           timeoutMs += enableFamilyTreeButtons(person.uuid, person.personsCountInTree, timeoutMs);
         });
 
-        if (data.people.length === 0) {
+        if (people.length === 0) {
           if (data.errors && data.errors.length > 0) {
             $resultBody.html('<p>&#9888;&#65039; Se produjo un error en la b&uacute;squeda. &#9888;&#65039;</p>');
             data.errors.forEach(function(code) { $resultBody.append(i18n.displayErrorCodeInSpanish(code)); });
@@ -277,6 +288,11 @@ GeneaAzul.search = (function() {
             setTimeout(function() { searchSurnames(surnamesInRq); }, 1500);
           });
         } else {
+          finalizeSearch($btn, $resultCard);
+        }
+        } catch (err) {
+          if (window.console && console.error) console.error('[search] render error:', err);
+          $resultBody.html('<p>&#9888;&#65039; Ocurri&oacute; un error al mostrar los resultados. Por favor intent&aacute; de nuevo. &#9888;&#65039;</p>');
           finalizeSearch($btn, $resultCard);
         }
       },
@@ -414,7 +430,6 @@ GeneaAzul.search = (function() {
 
     var $body = $('<div>').addClass('card-body small');
 
-    // AKA
     if (person.aka) {
       $body.append($('<div>').addClass('text-muted fst-italic mb-1').html(i18n.displayNameInSpanish(person.aka)));
     }
@@ -434,12 +449,10 @@ GeneaAzul.search = (function() {
     }
     $body.append($bd);
 
-    // Place of birth
     if (person.placeOfBirth) {
       $body.append($('<div>').addClass('mt-1').html('Pa&iacute;s de nacimiento: ' + utils.escHtml(person.placeOfBirth)));
     }
 
-    // Parents
     if (person.parents && person.parents.length > 0) {
       var $ul = $('<ul>').addClass('mb-0');
       person.parents.forEach(function(parent) {
@@ -449,7 +462,6 @@ GeneaAzul.search = (function() {
       $body.append($('<div>').addClass('mt-1').html('Padres: ').append($ul));
     }
 
-    // Spouses + children
     if (person.spouses && person.spouses.length > 0) {
       var $spouseUl = $('<ul>').addClass('mb-0');
       person.spouses.forEach(function(sw) {
@@ -466,7 +478,6 @@ GeneaAzul.search = (function() {
       $body.append($('<div>').addClass('mt-1').html('Parejas: ').append($spouseUl));
     }
 
-    // Tree info
     var hasPC  = person.personsCountInTree != null;
     var hasSC  = person.surnamesCountInTree != null;
     var hasAG  = person.ancestryGenerations && (person.ancestryGenerations.ascending > 0 || person.ancestryGenerations.directDescending > 0);
@@ -490,7 +501,7 @@ GeneaAzul.search = (function() {
       if (hasDPT) {
         var $dpDiv = $('<div>').addClass('mb-0');
         person.distinguishedPersonsInTree.forEach(function(np) {
-          var $img = (np.file && np.file.indexOf('http') === 0)
+          var $img = (np.file && /^https?:\/\//i.test(np.file))
             ? $('<img>').attr('src', np.file).attr('alt', np.name + ' (foto)').addClass('profile-picture-small')
             : $('<i>').attr('style', 'font-size:32px').addClass('bi bi-person');
           $dpDiv.append(
@@ -506,14 +517,12 @@ GeneaAzul.search = (function() {
       $body.append($('<div>').addClass('mt-1').html('Informaci&oacute;n en el &aacute;rbol: ').append($tul));
     }
 
-    // Ancestry countries
     if (person.ancestryCountries && person.ancestryCountries.length > 0) {
       var $cul = $('<ul>').addClass('mb-0');
       person.ancestryCountries.forEach(function(c) { $cul.append($('<li>').text(c)); });
       $body.append($('<div>').addClass('mt-1').html('Pa&iacute;ses en su ascendencia: ').append($cul));
     }
 
-    // Action buttons
     var uid = person.uuid;
     $body
       .append($('<div>').addClass('mt-2 text-center').attr('id', 'search-family-tree-wait-sign-' + uid)
@@ -566,8 +575,8 @@ GeneaAzul.search = (function() {
       );
       var interval = setInterval(function() {
         remaining--;
+        if (remaining <= 0) { clearInterval(interval); return; }
         $('#search-family-tree-countdown-' + uuid).text(remaining);
-        if (remaining <= 0) clearInterval(interval);
       }, 1000);
       _activeTimers.push(interval);
       _activeTimers.push(setTimeout(function() { activateFamilyTreeButtons(uuid); }, totalMs));
@@ -591,29 +600,67 @@ GeneaAzul.search = (function() {
     $btn.prop('disabled', true).addClass('disabled');
     $err.addClass('d-none').empty();
 
+    function showPdfError(code) {
+      $err.removeClass('d-none').html(i18n.displayErrorCodeInSpanish(code || 'ERROR'));
+      $btn.prop('disabled', false).removeClass('disabled');
+    }
+
     utils.apiGet(
       cfg.apiBaseUrl + '/api/search/family-tree/' + data.personUuid + '/plainPdf',
       function(pdfData) {
-        var b64 = pdfData.pdf.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
-        var binary = atob(b64);
-        var bytes = new Uint8Array(binary.length);
-        for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
-        var blob = new Blob([bytes], { type: 'application/pdf' });
-        var url = URL.createObjectURL(blob);
-        var link = document.createElement('a');
-        link.href = url;
-        link.download = 'familiares-' + data.personUuid + '.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
-        $btn.prop('disabled', false).removeClass('disabled');
+        // Validate shape and guard the whole decode path — a missing/malformed
+        // payload used to throw inside the success handler, which jQuery would
+        // swallow into console.error while the button stayed disabled forever.
+        if (!pdfData || typeof pdfData.pdf !== 'string' || !pdfData.pdf.length) {
+          if (window.console && console.error) console.error('[pdf] empty or malformed payload', pdfData);
+          showPdfError('ERROR');
+          return;
+        }
+        try {
+          var b64 = pdfData.pdf.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+          // Restore base64 padding stripped by url-safe encoders (iOS Safari's atob is strict)
+          var pad = b64.length % 4;
+          if (pad === 2) b64 += '==';
+          else if (pad === 3) b64 += '=';
+          var binary = atob(b64);
+          var bytes = new Uint8Array(binary.length);
+          for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
+          // PDFs always start with "%PDF"; anything else would download a corrupt file.
+          if (bytes.length < 4 ||
+              bytes[0] !== 0x25 || bytes[1] !== 0x50 || bytes[2] !== 0x44 || bytes[3] !== 0x46) {
+            if (window.console && console.error) console.error('[pdf] decoded payload is not a PDF');
+            showPdfError('ERROR');
+            return;
+          }
+          var blob = new Blob([bytes], { type: 'application/pdf' });
+          var url = URL.createObjectURL(blob);
+          var link = document.createElement('a');
+          link.href = url;
+          link.download = 'familiares-' + data.personUuid + '.pdf';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
+          $btn.prop('disabled', false).removeClass('disabled');
+        } catch (err) {
+          if (window.console && console.error) console.error('[pdf] decode failed:', err);
+          showPdfError('ERROR');
+        }
       },
       function(xhr) {
-        $err.removeClass('d-none').html(i18n.displayErrorCodeInSpanish(
-          (xhr.responseJSON && xhr.responseJSON.errorCode) ? xhr.responseJSON.errorCode : 'ERROR'
-        ));
-        $btn.prop('disabled', false).removeClass('disabled');
+        // Distinguish network loss (xhr.status === 0) from server-side errors so
+        // the user can act on the right problem.
+        var code;
+        if (xhr && xhr.responseJSON && xhr.responseJSON.errorCode) {
+          code = xhr.responseJSON.errorCode;
+        } else if (xhr && xhr.status === 0) {
+          code = 'NETWORK';
+        } else if (xhr && xhr.status === 429) {
+          code = 'TOO-MANY-REQUESTS';
+        } else {
+          code = 'ERROR';
+        }
+        showPdfError(code);
       }
     );
   }
@@ -664,11 +711,13 @@ GeneaAzul.search = (function() {
 
   /* ── Error handler ──────────────────────────────────────────────── */
   function handleAjaxError(xhr, $container) {
-    var code = xhr.responseJSON && xhr.responseJSON.errorCode ? xhr.responseJSON.errorCode : null;
+    var code = xhr && xhr.responseJSON && xhr.responseJSON.errorCode ? xhr.responseJSON.errorCode : null;
     if (code) {
       $container.html(i18n.displayErrorCodeInSpanish(code));
-    } else if (xhr.status === 429) {
+    } else if (xhr && xhr.status === 429) {
       $container.html(i18n.displayErrorCodeInSpanish('TOO-MANY-REQUESTS'));
+    } else if (xhr && xhr.status === 0) {
+      $container.html('<p>No hay conexi&oacute;n. Verific&aacute; tu internet e intent&aacute; de nuevo.</p>');
     } else {
       $container.html('<p>Ocurri&oacute; un error inesperado. Por favor intent&aacute; de nuevo.</p>');
     }
@@ -684,6 +733,12 @@ GeneaAzul.search = (function() {
     _activeTimers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
     _activeTimers = [];
     $(document).off('.search-form').off('.search');
+    // Dispose the 3D tree modal if it's open — otherwise body.style.overflow
+    // stays locked and the scene keeps its resize/keydown listeners bound
+    // after SPA navigation away from /buscar.
+    if (GeneaAzul.familyTree3d && GeneaAzul.familyTree3d.dispose) {
+      GeneaAzul.familyTree3d.dispose();
+    }
   }
 
   return { init: init, cleanup: cleanup };

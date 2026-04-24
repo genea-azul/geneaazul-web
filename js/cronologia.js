@@ -109,9 +109,12 @@ GeneaAzul.cronologia = (function() {
     var $card = $('<div>').addClass('ga-tl-card ga-tl-card-' + dotType);
 
     if (entry.imageUrl) {
+      // Editorial thumbnail — mirror the card title as alt text so screen
+      // readers don't skip it silently. Keep loading lazy so off-screen
+      // timeline entries don't block the initial paint.
       $card.append(
         $('<img>').addClass('ga-tl-img')
-          .attr({ src: entry.imageUrl, alt: '', 'aria-hidden': 'true' })
+          .attr({ src: entry.imageUrl, alt: entry.title || '', loading: 'lazy' })
       );
     }
 
@@ -119,10 +122,19 @@ GeneaAzul.cronologia = (function() {
     $titleRow.append($('<i>').addClass('bi ' + (TYPE_ICONS[dotType] || 'bi-clock-history')));
     $titleRow.append($('<span>').text(entry.title));
     $card.append($titleRow);
-    var bodyHtml = DOMPurify.sanitize(marked.parseInline(entry.body || ''));
+    // Timeline body supports inline markdown, but marked/DOMPurify come from a
+    // CDN — a blocked/failed load would previously crash this entire forEach
+    // and leave a half-rendered list. Fall back to escaped text + line breaks.
+    var rawBody = entry.body || '';
+    var bodyHtml;
+    if (typeof DOMPurify !== 'undefined' && typeof marked !== 'undefined' && marked.parseInline) {
+      bodyHtml = DOMPurify.sanitize(marked.parseInline(rawBody));
+    } else {
+      bodyHtml = utils.escHtml(rawBody).replace(/\n/g, '<br>');
+    }
     $card.append($('<div>').addClass('ga-tl-body').html(bodyHtml));
 
-    if (entry.sourceUrl && entry.sourceUrl.indexOf('http') === 0) {
+    if (entry.sourceUrl && /^https?:\/\//i.test(entry.sourceUrl)) {
       $card.append(
         $('<a>').addClass('ga-tl-source-link')
           .attr({ href: entry.sourceUrl, target: '_blank', rel: 'noopener' })

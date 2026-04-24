@@ -1194,11 +1194,30 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   white-space: nowrap;
 }
 
+/* ─── 3D family tree modal ──────────────────────────────────────────
+   The modal palette is deliberately pinned to a cream/gold scheme that
+   matches the WebGL scene background (family-tree-3d-scene.js sets
+   _scene.background = 0xf0e4c8 and the logo walls use the same tone).
+   These locals centralise the palette so the hex values are not
+   scattered — the modal does NOT follow the site theme switcher because
+   the 3D canvas cannot recolour at runtime. */
 .ga-tree3d-modal {
+  --ga-tree3d-bg:         #f0e4c8;
+  --ga-tree3d-text:       #3a2000;
+  --ga-tree3d-text-mid:   #5a3800;
+  --ga-tree3d-text-soft:  #7a5a30;
+  --ga-tree3d-text-dim:   #9a6a30;
+  --ga-tree3d-text-warn:  #7a2010;
+  --ga-tree3d-text-muted: #7a5020;
+  --ga-tree3d-title:      #4a3000;
+  --ga-tree3d-trunc:      #6a4010;
+  --ga-tree3d-home:       #7a4800;
+  --ga-tree3d-ctrl-label: #7a5a30;
+  --ga-tree3d-legend:     #5a4020;
   position: fixed;
   inset: 0;
   z-index: 1050;
-  background: #f0e4c8;
+  background: var(--ga-tree3d-bg);
   display: flex;
   align-items: stretch;
 }
@@ -1226,7 +1245,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   width: 36px;
   height: 36px;
   font-size: 16px;
-  color: #5a3800;
+  color: var(--ga-tree3d-text-mid);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1234,6 +1253,72 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 }
 
 .ga-tree3d-download {
+  position: absolute;
+  top: 14px;
+  right: 106px;
+  z-index: 11;
+  background: rgba(240, 228, 200, 0.93);
+  border: 1px solid rgba(120, 90, 30, 0.25);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+  color: var(--ga-tree3d-text-mid);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ga-tree3d-download:hover { background: rgba(210, 180, 120, 0.9); }
+
+/* Cinematic mode — fade UI out, keep only exit controls dimly visible */
+.ga-tree3d-ctrl-panel,
+.ga-tree3d-hint,
+.ga-tree3d-mobile-reset,
+.ga-tree3d-brand,
+.ga-tree3d-title,
+.ga-tree3d-truncated,
+.ga-tree3d-download,
+.ga-tree3d-close,
+.ga-tree3d-error {
+  transition: opacity 0.5s ease;
+}
+.ga-tree3d-modal--cinematic .ga-tree3d-ctrl-panel,
+.ga-tree3d-modal--cinematic .ga-tree3d-hint,
+.ga-tree3d-modal--cinematic .ga-tree3d-mobile-reset,
+.ga-tree3d-modal--cinematic .ga-tree3d-brand,
+.ga-tree3d-modal--cinematic .ga-tree3d-title,
+.ga-tree3d-modal--cinematic .ga-tree3d-truncated,
+.ga-tree3d-modal--cinematic .ga-tree3d-download,
+.ga-tree3d-modal--cinematic .ga-tree3d-error {
+  opacity: 0;
+  pointer-events: none;
+}
+/* Buttons are non-functional until the scene is live. Gate them visibly so
+   taps are not silent no-ops while the Three.js module loads. */
+.ga-tree3d-modal:not(.ga-tree3d-modal--ready) .ga-tree3d-download,
+.ga-tree3d-modal:not(.ga-tree3d-modal--ready) .ga-tree3d-cinematic {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.ga-tree3d-retry-link {
+  color: var(--ga-tree3d-text-warn, #7a2010);
+  text-decoration: underline;
+  margin-left: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ga-tree3d-retry-link:hover { color: var(--ga-tree3d-text, #3a2000); }
+
+.ga-tree3d-modal--cinematic .ga-tree3d-close,
+.ga-tree3d-modal--cinematic .ga-tree3d-cinematic { opacity: 0.25; }
+.ga-tree3d-modal--cinematic .ga-tree3d-close:hover,
+.ga-tree3d-modal--cinematic .ga-tree3d-cinematic:hover { opacity: 1; }
+.ga-tree3d-modal--cinematic .ga-tree3d-cinematic.ga-active { opacity: 0.45; }
+.ga-tree3d-modal--cinematic .ga-tree3d-cinematic.ga-active:hover { opacity: 0.85; }
+
+.ga-tree3d-cinematic {
   position: absolute;
   top: 14px;
   right: 60px;
@@ -1244,13 +1329,19 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   width: 36px;
   height: 36px;
   font-size: 15px;
-  color: #5a3800;
+  color: var(--ga-tree3d-text-mid);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.2s, color 0.2s, opacity 0.5s ease;
 }
-.ga-tree3d-download:hover { background: rgba(210, 180, 120, 0.9); }
+.ga-tree3d-cinematic:hover { background: rgba(210, 180, 120, 0.9); }
+.ga-tree3d-cinematic.ga-active {
+  background: rgba(90, 56, 0, 0.45);
+  color: var(--ga-tree3d-bg);
+  border-color: rgba(120, 90, 30, 0.5);
+}
 
 .ga-tree3d-person-card {
   position: absolute;
@@ -1269,7 +1360,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-tree3d-person-card-rel {
   font-family: Georgia, serif;
   font-size: 11px;
-  color: #9a6a30;
+  color: var(--ga-tree3d-text-dim);
   text-transform: lowercase;
   letter-spacing: 0.4px;
   margin-bottom: 2px;
@@ -1278,7 +1369,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   font-family: Georgia, serif;
   font-size: 14px;
   font-weight: bold;
-  color: #3a2000;
+  color: var(--ga-tree3d-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1286,7 +1377,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-tree3d-person-card-years {
   font-family: Georgia, serif;
   font-size: 12px;
-  color: #7a5020;
+  color: var(--ga-tree3d-text-muted);
   margin-top: 2px;
 }
 .ga-tree3d-person-card-close {
@@ -1298,7 +1389,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   border: none;
   background: transparent;
   font-size: 13px;
-  color: #7a5020;
+  color: var(--ga-tree3d-text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1318,7 +1409,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   padding: 6px 20px;
   font-size: 14px;
   font-family: Georgia, serif;
-  color: #4a3000;
+  color: var(--ga-tree3d-title);
   z-index: 10;
   white-space: nowrap;
   pointer-events: none;
@@ -1344,7 +1435,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   border-radius: 10px;
   padding: 8px 12px;
   font-size: 11px;
-  color: #5a4020;
+  color: var(--ga-tree3d-legend);
   font-family: Georgia, serif;
   line-height: 2;
 }
@@ -1368,7 +1459,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   border-radius: 30px;
   padding: 7px 20px;
   font-size: 11px;
-  color: #7a5a30;
+  color: var(--ga-tree3d-ctrl-label);
   pointer-events: none;
   white-space: nowrap;
   z-index: 10;
@@ -1398,7 +1489,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   border-radius: 8px;
   padding: 6px 16px;
   font-size: 11px;
-  color: #6a4010;
+  color: var(--ga-tree3d-trunc);
   font-family: Georgia, serif;
   z-index: 10;
   white-space: nowrap;
@@ -1414,7 +1505,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   border-radius: 10px;
   padding: 14px 24px;
   font-size: 13px;
-  color: #7a2010;
+  color: var(--ga-tree3d-text-warn);
   font-family: Georgia, serif;
   z-index: 10;
   text-align: center;
@@ -1447,7 +1538,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-tree3d-ctrl-label {
   font-size: 9px;
   font-family: Georgia, serif;
-  color: #7a5a30;
+  color: var(--ga-tree3d-ctrl-label);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   line-height: 1;
@@ -1487,7 +1578,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   border: 1px solid rgba(120, 90, 30, 0.22);
   border-radius: 6px;
   background: rgba(248, 238, 215, 0.9);
-  color: #5a3800;
+  color: var(--ga-tree3d-text-mid);
   font-size: 13px;
   cursor: pointer;
   display: flex;
@@ -1514,7 +1605,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   font-size: 10px;
   font-family: Georgia, serif;
   letter-spacing: 0.5px;
-  color: #7a4800;
+  color: var(--ga-tree3d-home);
   border-color: rgba(150, 100, 20, 0.35);
   background: rgba(230, 200, 140, 0.7);
 }
@@ -1526,7 +1617,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-tree3d-loader {
   position: absolute;
   inset: 0;
-  background: #f0e4c8;
+  background: var(--ga-tree3d-bg, #f0e4c8);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1536,7 +1627,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 }
 
 .ga-tree3d-loader p {
-  color: #7a5a20;
+  color: var(--ga-tree3d-text-muted, #7a5a20);
   font-size: 12px;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -1559,7 +1650,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   left: -60px;
   width: 60px;
   height: 1px;
-  background: #8b6914;
+  background: var(--ga-tree3d-home, #8b6914);
   animation: ga-tree3d-slide 1.2s ease-in-out infinite;
 }
 
@@ -1582,7 +1673,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   font-size: 13px !important;
   font-family: Georgia, serif !important;
   letter-spacing: 0.3px !important;
-  color: #7a4800 !important;
+  color: var(--ga-tree3d-home, #7a4800) !important;
   cursor: pointer;
   z-index: 10;
   white-space: nowrap;
@@ -1592,10 +1683,13 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   .ga-tree3d-ctrl-panel { display: none; }
   .ga-tree3d-mobile-reset { display: flex; }
   .ga-tree3d-person-card { bottom: 118px; }
-  /* Anchor title between left edge and right buttons (close + download at right: 106px) */
+  /* Stack cinematic then download below the X button instead of beside it */
+  .ga-tree3d-cinematic { top: 60px;  right: 14px; }
+  .ga-tree3d-download  { top: 106px; right: 14px; }
+  /* Title only needs to clear the single X button on the right */
   .ga-tree3d-title {
     left: 10px;
-    right: 106px;
+    right: 60px;
     transform: none;
     text-align: center;
     max-width: none;

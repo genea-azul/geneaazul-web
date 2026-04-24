@@ -78,7 +78,7 @@ var MOCK_SEARCH_FAMILY = {
       dateOfBirth: '15 MAR 1945',
       dateOfDeath: '20 JUN 2010',
       placeOfBirth: 'Azul, Buenos Aires',
-      personsCountInTree: 42,
+      personsCountInTree: 70,
       surnamesCountInTree: 8,
       ancestryGenerations: { ascending: 3, directDescending: 2 },
       maxDistantRelationship: {
@@ -142,70 +142,132 @@ var MOCK_PDF_BASE64 = 'JVBERi0xLjAKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgU
   'MDAwMCBuIAp0cmFpbGVyPDwvU2l6ZSA0L1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKMTkwCiUlRU9G';
 
 // GET /api/search/family-tree/:uuid/graphJson — mock graph for 3D viewer
-// Complex endogamic graph: 37 persons, 4 generations, cross-generational marriages
+// 70 persons, gen+2→gen-2, 8-child family, 3-marriage person, endogamy on two levels
 var MOCK_GRAPH = {
   focalPersonId: 1,
   truncated: false,
-  totalPersons: 37,
+  totalPersons: 70,
   persons: [
-    // Gen +2 — founding couples (all deceased)
-    { id: 51, displayName: 'Salvatore Ferrara',  sex: 'M', isAlive: false, generation:  2, relationship: 'bisabuelo',   dateOfBirth: '1872', dateOfDeath: '1948' },
-    { id: 52, displayName: 'Concetta Romano',    sex: 'F', isAlive: false, generation:  2, relationship: 'bisabuela',   dateOfBirth: '1876', dateOfDeath: '1952' },
-    { id: 53, displayName: 'Władysław Nowak',    sex: 'M', isAlive: false, generation:  2, relationship: 'bisabuelo',   dateOfBirth: '1869', dateOfDeath: '1942' },
-    { id: 54, displayName: 'Zofia Kowalski',     sex: 'F', isAlive: false, generation:  2, relationship: 'bisabuela',   dateOfBirth: '1873', dateOfDeath: '1945' },
-    { id: 55, displayName: 'Carlos García',      sex: 'M', isAlive: false, generation:  2, relationship: 'bisabuelo',   dateOfBirth: '1878', dateOfDeath: '1955' },
-    { id: 56, displayName: 'Rosa González',      sex: 'F', isAlive: false, generation:  2, relationship: 'bisabuela',   dateOfBirth: '1880', dateOfDeath: '1960' },
-    // Gen +1 — parents & uncles/aunts
-    { id: 11, displayName: 'Giuseppe Ferrara',   sex: 'M', isAlive: false, generation:  1, relationship: 'padre',       dateOfBirth: '1895', dateOfDeath: '1972' },
-    { id: 12, displayName: 'María F. Ferrara',   sex: 'F', isAlive: false, generation:  1, relationship: 'tía abuela',  dateOfBirth: '1898', dateOfDeath: '1980' },
-    { id: 13, displayName: 'Antonio Ferrara',    sex: 'M', isAlive: true,  generation:  1, relationship: 'tío',         dateOfBirth: '1902' },
-    { id: 14, displayName: 'Carmela Ferrara',    sex: 'F', isAlive: true,  generation:  1, relationship: 'tía',         dateOfBirth: '1905' },
-    { id: 15, displayName: 'Elena Nowak',        sex: 'F', isAlive: false, generation:  1, relationship: 'madre',       dateOfBirth: '1897', dateOfDeath: '1968' },
-    { id: 16, displayName: 'Jan Nowak',          sex: 'M', isAlive: true,  generation:  1, relationship: 'tío',         dateOfBirth: '1900' },
-    { id: 17, displayName: 'Katarzyna Nowak',    sex: 'F', isAlive: true,  generation:  1, relationship: 'tía',         dateOfBirth: '1904' },
-    { id: 18, displayName: 'Rafael García',      sex: 'M', isAlive: true,  generation:  1, relationship: 'tío político',dateOfBirth: '1908' },
-    // Gen 0 — focal + siblings + cousins
-    { id: 1,  displayName: 'Juan C. Ferrara',    sex: 'M', isAlive: true,  generation:  0, relationship: 'Yo',          dateOfBirth: '1925' },
-    { id: 2,  displayName: 'María López',        sex: 'F', isAlive: true,  generation:  0, relationship: 'cónyuge',     dateOfBirth: '1928' },
-    { id: 3,  displayName: 'Sofía Ferrara',      sex: 'F', isAlive: true,  generation:  0, relationship: 'hermana',     dateOfBirth: '1927' },
-    { id: 4,  displayName: 'Marco Ferrara',      sex: 'M', isAlive: true,  generation:  0, relationship: 'hermano',     dateOfBirth: '1929' },
-    { id: 5,  displayName: 'Lucía Ferrara',      sex: 'F', isAlive: true,  generation:  0, relationship: 'hermana',     dateOfBirth: '1931' },
-    { id: 6,  displayName: 'Pedro Ferrara',      sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',       dateOfBirth: '1926' },
-    { id: 7,  displayName: 'Rosa A. Ferrara',    sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',       dateOfBirth: '1928' },
-    { id: 8,  displayName: 'Carla Ferrara',      sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',       dateOfBirth: '1930' },
-    { id: 9,  displayName: 'Diego A. Ferrara',   sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',       dateOfBirth: '1932' },
-    { id: 10, displayName: 'Miguel Nowak',       sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',       dateOfBirth: '1922' },
-    { id: 21, displayName: 'Clara Nowak',        sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',       dateOfBirth: '1924' },
-    { id: 22, displayName: 'Alejandro García',   sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',       dateOfBirth: '1932' },
-    { id: 23, displayName: 'Paula Ríos',         sex: 'F', isAlive: true,  generation:  0, relationship: 'cuñada',      dateOfBirth: '1935' },
-    // Gen -1 — children + endogamic & cross-gen descendants
-    { id: 31, displayName: 'Diego Ferrara',      sex: 'M', isAlive: true,  generation: -1, relationship: 'hijo',        dateOfBirth: '1950' },
-    { id: 32, displayName: 'Laura Ferrara',      sex: 'F', isAlive: true,  generation: -1, relationship: 'hija',        dateOfBirth: '1952' },
-    { id: 33, displayName: 'Valentina Ferrara',  sex: 'F', isAlive: true,  generation: -1, relationship: 'hija',        dateOfBirth: '1955' },
-    { id: 34, displayName: 'Bruno Ferrara',      sex: 'M', isAlive: true,  generation: -1, relationship: 'hijo',        dateOfBirth: '1958' },
-    { id: 35, displayName: 'Tomás Ferrara',      sex: 'M', isAlive: true,  generation: -1, relationship: 'sobrino',     dateOfBirth: '1948' },
-    { id: 36, displayName: 'Isabel Ferrara',     sex: 'F', isAlive: true,  generation: -1, relationship: 'sobrina',     dateOfBirth: '1952' },
-    { id: 37, displayName: 'Andrea Ferrara',     sex: 'F', isAlive: true,  generation: -1, relationship: 'sobrina',     dateOfBirth: '1955' },
-    { id: 38, displayName: 'Nicolás Ferrara',    sex: 'M', isAlive: true,  generation: -1, relationship: 'sobrino',     dateOfBirth: '1956' },
-    // Gen -2 — children of cross-generational F11 (Alejandro gen:0 × Laura gen:-1)
-    { id: 39, displayName: 'Mateo García',       sex: 'M', isAlive: true,  generation: -2, relationship: 'nieto',       dateOfBirth: '1978' },
-    { id: 40, displayName: 'Valentín García',    sex: 'M', isAlive: true,  generation: -2, relationship: 'nieto',       dateOfBirth: '1982' }
+    // Gen +2 — grandparents (6 people)
+    { id: 51, displayName: 'Salvatore Ferrara',   sex: 'M', isAlive: false, generation:  2, relationship: 'abuelo',          dateOfBirth: '12 MAR 1872', dateOfDeath: '5 NOV 1948' },
+    { id: 52, displayName: 'Concetta Romano',     sex: 'F', isAlive: false, generation:  2, relationship: 'abuela',          dateOfBirth: '8 JUL 1876',  dateOfDeath: '14 FEB 1952' },
+    { id: 53, displayName: 'Władysław Nowak',     sex: 'M', isAlive: false, generation:  2, relationship: 'abuelo',          dateOfBirth: '3 SEP 1869',  dateOfDeath: '22 OCT 1942' },
+    { id: 54, displayName: 'Zofia Kowalski',      sex: 'F', isAlive: false, generation:  2, relationship: 'abuela',          dateOfBirth: '18 APR 1873', dateOfDeath: '7 JAN 1945' },
+    { id: 55, displayName: 'Carlos García',       sex: 'M', isAlive: false, generation:  2, relationship: 'abuelo',          dateOfBirth: '29 JUN 1878', dateOfDeath: '11 MAR 1955' },
+    { id: 56, displayName: 'Rosa González',       sex: 'F', isAlive: false, generation:  2, relationship: 'abuela',          dateOfBirth: '5 DEC 1880',  dateOfDeath: '30 SEP 1960' },
+
+    // Gen +1 — 8 Ferrara children (F1, >6 ✓), 3 Nowak, 2 García
+    { id: 11, displayName: 'Giuseppe Ferrara',    sex: 'M', isAlive: false, generation:  1, relationship: 'padre',           dateOfBirth: '3 FEB 1895',  dateOfDeath: '12 JUL 1972' },
+    { id: 12, displayName: 'Antonio Ferrara',     sex: 'M', isAlive: true,  generation:  1, relationship: 'tío',             dateOfBirth: '19 MAY 1898' },
+    { id: 13, displayName: 'Carmen Ferrara',      sex: 'F', isAlive: true,  generation:  1, relationship: 'tía',             dateOfBirth: '7 NOV 1900' },
+    { id: 14, displayName: 'Rosario Ferrara',     sex: 'M', isAlive: false, generation:  1, relationship: 'tío',             dateOfBirth: '22 AUG 1902', dateOfDeath: '4 MAR 1978' },
+    { id: 15, displayName: 'Lucia Ferrara',       sex: 'F', isAlive: true,  generation:  1, relationship: 'tía',             dateOfBirth: '14 JAN 1905' },
+    { id: 16, displayName: 'Piero Ferrara',       sex: 'M', isAlive: true,  generation:  1, relationship: 'tío',             dateOfBirth: '30 MAR 1907' },
+    { id: 17, displayName: 'Nunzio Ferrara',      sex: 'M', isAlive: false, generation:  1, relationship: 'tío',             dateOfBirth: '9 OCT 1909',  dateOfDeath: '16 JUN 1944' },
+    { id: 18, displayName: 'Graziella Ferrara',   sex: 'F', isAlive: true,  generation:  1, relationship: 'tía',             dateOfBirth: '27 FEB 1912' },
+    { id: 19, displayName: 'Elena Nowak',         sex: 'F', isAlive: false, generation:  1, relationship: 'madre',           dateOfBirth: '15 JUN 1897', dateOfDeath: '9 APR 1968' },
+    { id: 20, displayName: 'Jan Nowak',           sex: 'M', isAlive: true,  generation:  1, relationship: 'tío',             dateOfBirth: '4 OCT 1900' },
+    { id: 21, displayName: 'Katarzyna Nowak',     sex: 'F', isAlive: true,  generation:  1, relationship: 'tía',             dateOfBirth: '11 MAR 1904' },
+    { id: 22, displayName: 'Rafael García',       sex: 'M', isAlive: true,  generation:  1, relationship: 'tío político',   dateOfBirth: '8 SEP 1908' },
+    { id: 23, displayName: 'Mercedes García',     sex: 'F', isAlive: false, generation:  1, relationship: 'tía política',   dateOfBirth: '21 DEC 1910', dateOfDeath: '2 JAN 1985' },
+
+    // Gen +1 — spouses from outside
+    { id: 24, displayName: 'Beatriz Herrera',     sex: 'F', isAlive: false, generation:  1, relationship: 'tía',             dateOfBirth: '6 APR 1900',  dateOfDeath: '14 AUG 1930' },
+    { id: 25, displayName: 'Sofía Méndez',        sex: 'F', isAlive: false, generation:  1, relationship: 'tía',             dateOfBirth: '17 SEP 1908', dateOfDeath: '30 NOV 1975' },
+    { id: 26, displayName: 'Valentina Cruz',      sex: 'F', isAlive: true,  generation:  1, relationship: 'tía',             dateOfBirth: '23 JAN 1925' },
+    { id: 27, displayName: 'Hugo Romero',         sex: 'M', isAlive: true,  generation:  1, relationship: 'tío político',   dateOfBirth: '11 MAY 1898' },
+    { id: 28, displayName: 'Marta Sosa',          sex: 'F', isAlive: false, generation:  1, relationship: 'tía',             dateOfBirth: '3 JUN 1904',  dateOfDeath: '7 SEP 1980' },
+    { id: 29, displayName: 'Fernando Ruiz',       sex: 'M', isAlive: true,  generation:  1, relationship: 'tío político',   dateOfBirth: '19 FEB 1902' },
+    { id: 30, displayName: 'Alicia Pedraza',      sex: 'F', isAlive: true,  generation:  1, relationship: 'tía política',   dateOfBirth: '8 NOV 1909' },
+    { id: 31, displayName: 'Diego Álvarez',       sex: 'M', isAlive: true,  generation:  1, relationship: 'tío político',   dateOfBirth: '24 AUG 1910' },
+    { id: 32, displayName: 'Patricia Vidal',      sex: 'F', isAlive: true,  generation:  1, relationship: 'tía política',   dateOfBirth: '13 JUL 1903' },
+    { id: 33, displayName: 'Roberto Reyes',       sex: 'M', isAlive: true,  generation:  1, relationship: 'tío político',   dateOfBirth: '2 MAR 1902' },
+    { id: 34, displayName: 'Inés López',          sex: 'F', isAlive: true,  generation:  1, relationship: 'tía política',   dateOfBirth: '16 OCT 1911' },
+    { id: 35, displayName: 'Bernardo Torres',     sex: 'M', isAlive: false, generation:  1, relationship: 'tío político',   dateOfBirth: '28 JAN 1908', dateOfDeath: '3 MAY 1992' },
+
+    // Gen 0 — focal + siblings + spouse
+    { id: 1,  displayName: 'Juan C. Ferrara',     sex: 'M', isAlive: true,  generation:  0, relationship: 'Yo',              dateOfBirth: '7 MAR 1925' },
+    { id: 2,  displayName: 'Sofía Ferrara',       sex: 'F', isAlive: true,  generation:  0, relationship: 'hermana',         dateOfBirth: '14 OCT 1927' },
+    { id: 3,  displayName: 'Marco Ferrara',       sex: 'M', isAlive: true,  generation:  0, relationship: 'hermano',         dateOfBirth: '9 JUN 1929' },
+    { id: 4,  displayName: 'Lucía Ferrara',       sex: 'F', isAlive: true,  generation:  0, relationship: 'hermana',         dateOfBirth: '22 FEB 1932' },
+    { id: 5,  displayName: 'María López',         sex: 'F', isAlive: true,  generation:  0, relationship: 'cónyuge',         dateOfBirth: '18 MAY 1928' },
+
+    // Gen 0 — cousins from Antonio (3 marriages: F5a, F5b, F5c)
+    { id: 6,  displayName: 'Pedro Ferrara',       sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '3 JAN 1922' },
+    { id: 7,  displayName: 'Rosa A. Ferrara',     sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '19 NOV 1924' },
+    { id: 8,  displayName: 'Alberto Ferrara',     sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '30 MAY 1932' },
+    { id: 9,  displayName: 'Carlos Ferrara',      sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '14 AUG 1935' },
+    { id: 10, displayName: 'Ana Ferrara',         sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '7 APR 1938' },
+    { id: 71, displayName: 'Fabio Ferrara',       sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '12 DEC 1950' },
+
+    // Gen 0 — cousins from Carmen, Rosario, Lucia, Piero, Graziella
+    { id: 72, displayName: 'Valentina Romero',    sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '25 SEP 1926' },
+    { id: 73, displayName: 'Hugo Jr. Romero',     sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '8 FEB 1928' },
+    { id: 74, displayName: 'Isabel Romero',       sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '17 JUL 1931' },
+    { id: 75, displayName: 'Tomás Ferrara',       sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '2 MAR 1926' },
+    { id: 76, displayName: 'Flor Ferrara',        sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '29 AUG 1928' },
+    { id: 77, displayName: 'Diego Ruiz',          sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '11 APR 1930' },
+    { id: 78, displayName: 'Carla Ruiz',          sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '6 NOV 1932' },
+    { id: 79, displayName: 'Gianni Ferrara',      sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '13 JAN 1933' },
+    { id: 80, displayName: 'Silvia Ferrara',      sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '4 SEP 1935' },
+    { id: 81, displayName: 'Bruno Ferrara',       sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '21 MAR 1938' },
+    { id: 82, displayName: 'Nicolás Álvarez',     sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '8 JUN 1934' },
+    { id: 83, displayName: 'Clara Álvarez',       sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '30 OCT 1936' },
+
+    // Gen 0 — cousins from Jan, Katarzyna (Nowak line), Rafael, Mercedes (García line)
+    { id: 84, displayName: 'Pablo Nowak',         sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '17 MAR 1928' },
+    { id: 85, displayName: 'Agustina Nowak',      sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '9 AUG 1930' },
+    { id: 86, displayName: 'Rodrigo Reyes',       sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '5 FEB 1930' },
+    { id: 87, displayName: 'Elena García',        sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '22 NOV 1935' },
+    { id: 88, displayName: 'Manuel García',       sex: 'M', isAlive: true,  generation:  0, relationship: 'primo',           dateOfBirth: '14 APR 1938' },
+    { id: 89, displayName: 'Beatriz Torres',      sex: 'F', isAlive: true,  generation:  0, relationship: 'prima',           dateOfBirth: '11 SEP 1933' },
+
+    // Gen -1 — focal's children
+    { id: 93, displayName: 'Valentina Ferrara',   sex: 'F', isAlive: true,  generation: -1, relationship: 'hija',            dateOfBirth: '18 JAN 1952' },
+    { id: 94, displayName: 'Roberto Ferrara',     sex: 'M', isAlive: true,  generation: -1, relationship: 'hijo',            dateOfBirth: '29 JUN 1954' },
+    { id: 95, displayName: 'Giulia Ferrara',      sex: 'F', isAlive: true,  generation: -1, relationship: 'hija',            dateOfBirth: '3 NOV 1957' },
+
+    // Gen -1 — children of 1st-cousin marriage F16: Pedro(6)×Sofía(2) — ENDOGAMY Lv.1
+    { id: 90, displayName: 'Claudio Ferrara',     sex: 'M', isAlive: true,  generation: -1, relationship: 'sobrino',         dateOfBirth: '4 MAY 1950' },
+    { id: 91, displayName: 'Paola Ferrara',       sex: 'F', isAlive: true,  generation: -1, relationship: 'sobrina',         dateOfBirth: '12 OCT 1952' },
+    { id: 92, displayName: 'Sergio Ferrara',      sex: 'M', isAlive: true,  generation: -1, relationship: 'sobrino',         dateOfBirth: '7 MAR 1955' },
+
+    // Gen -1 — children of 1st-cousin marriage F17: Marco(3)×Agustina(85) — ENDOGAMY Lv.1 Nowak line
+    { id: 98, displayName: 'Elena Ferrara-N.',    sex: 'F', isAlive: true,  generation: -1, relationship: 'sobrina',         dateOfBirth: '22 APR 1955' },
+    { id: 99, displayName: 'Ricardo Ferrara-N.',  sex: 'M', isAlive: true,  generation: -1, relationship: 'sobrino',         dateOfBirth: '14 SEP 1957' },
+
+    // Gen -2 — children of 2nd-cousin marriage F18: Claudio(90)×Valentina(93) — ENDOGAMY Lv.2
+    { id: 96, displayName: 'Luca Ferrara',        sex: 'M', isAlive: true,  generation: -2, relationship: 'nieto',           dateOfBirth: '6 FEB 1978' },
+    { id: 97, displayName: 'Chiara Ferrara',      sex: 'F', isAlive: true,  generation: -2, relationship: 'nieta',           dateOfBirth: '30 AUG 1981' }
   ],
   families: [
-    // Founding gen
-    { id: 'F1',  husbandIds: [51], wifeIds: [52], childIds: [11, 12, 13, 14] }, // Ferrara-Romano → 4 children
-    { id: 'F2',  husbandIds: [53], wifeIds: [54], childIds: [15, 16, 17]      }, // Nowak-Kowalski → 3 children
-    { id: 'F3',  husbandIds: [55], wifeIds: [56], childIds: [18]              }, // García-González → 1 child
-    // Parents' gen — cross-family marriages (Ferrara × Nowak)
-    { id: 'F4',  husbandIds: [11], wifeIds: [15], childIds: [1, 3, 4, 5]      }, // Giuseppe+Elena → focal + 3 siblings
-    { id: 'F5',  husbandIds: [13], wifeIds: [17], childIds: [6, 7, 8, 9]      }, // Antonio+Katarzyna → 4 cousins
-    { id: 'F6',  husbandIds: [16], wifeIds: [12], childIds: [10, 21]          }, // Jan+María F. → 2 cousins (in-law endogamy)
-    { id: 'F7',  husbandIds: [18], wifeIds: [14], childIds: [22]              }, // Rafael+Carmela → Alejandro
-    // Focal gen
-    { id: 'F8',  husbandIds: [1],  wifeIds: [2],  childIds: [31, 32, 33, 34]  }, // Juan+María → 4 children
-    { id: 'F9',  husbandIds: [6],  wifeIds: [3],  childIds: [35, 36, 37]      }, // Pedro+Sofía — FIRST-COUSIN MARRIAGE
-    { id: 'F10', husbandIds: [4],  wifeIds: [23], childIds: [38]              }, // Marco+Paula → 1 child
-    { id: 'F11', husbandIds: [22], wifeIds: [32], childIds: [39, 40]          }  // Alejandro+Laura — CROSS-GEN + ENDOGAMIC
+    // Gen+2 → Gen+1
+    { id: 'F1',  husbandIds: [51], wifeIds: [52], childIds: [11,12,13,14,15,16,17,18] }, // 8 children ✓
+    { id: 'F2',  husbandIds: [53], wifeIds: [54], childIds: [19,20,21]                },
+    { id: 'F3',  husbandIds: [55], wifeIds: [56], childIds: [22,23]                   },
+
+    // Gen+1 → Gen+0
+    { id: 'F4',  husbandIds: [11], wifeIds: [19], childIds: [1,2,3,4]                 }, // Ferrara×Nowak cross-family
+    { id: 'F5a', husbandIds: [12], wifeIds: [24], childIds: [6,7]                     }, // Antonio 1st marriage
+    { id: 'F5b', husbandIds: [12], wifeIds: [25], childIds: [8,9,10]                  }, // Antonio 2nd marriage
+    { id: 'F5c', husbandIds: [12], wifeIds: [26], childIds: [71]                      }, // Antonio 3rd marriage ✓
+    { id: 'F6',  husbandIds: [27], wifeIds: [13], childIds: [72,73,74]                },
+    { id: 'F7',  husbandIds: [14], wifeIds: [28], childIds: [75,76]                   },
+    { id: 'F8',  husbandIds: [29], wifeIds: [15], childIds: [77,78]                   },
+    { id: 'F9',  husbandIds: [16], wifeIds: [30], childIds: [79,80,81]                },
+    { id: 'F10', husbandIds: [31], wifeIds: [18], childIds: [82,83]                   },
+    { id: 'F11', husbandIds: [20], wifeIds: [32], childIds: [84,85]                   },
+    { id: 'F12', husbandIds: [33], wifeIds: [21], childIds: [86]                      },
+    { id: 'F13', husbandIds: [22], wifeIds: [34], childIds: [87,88]                   },
+    { id: 'F14', husbandIds: [35], wifeIds: [23], childIds: [89]                      },
+
+    // Gen+0 marriages
+    { id: 'F15', husbandIds: [1],  wifeIds: [5],  childIds: [93,94,95]                },
+    { id: 'F16', husbandIds: [6],  wifeIds: [2],  childIds: [90,91,92]                }, // 1st-cousin endogamy ✓
+    { id: 'F17', husbandIds: [3],  wifeIds: [85], childIds: [98,99]                   }, // 1st-cousin endogamy (Nowak) ✓
+
+    // Gen-1 × Gen-1
+    { id: 'F18', husbandIds: [90], wifeIds: [93], childIds: [96,97]                   }  // 2nd-cousin endogamy ✓
   ]
 };
 
