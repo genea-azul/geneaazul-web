@@ -11,11 +11,14 @@
 /*.html
   Cache-Control: no-cache
 
-# Page fragments and story sources — short TTL matches data files
+# Page fragments and story sources — short TTL matches data files; noindex so raw
+# fragments aren't indexed as standalone pages (the SPA routes are the canonical URLs)
 /pages/*
   Cache-Control: public, max-age=3600, stale-while-revalidate=60
+  X-Robots-Tag: noindex
 /stories/*
   Cache-Control: public, max-age=3600, stale-while-revalidate=60
+  X-Robots-Tag: noindex
 
 # Root (SPA — served as index.html)
 /
@@ -38,6 +41,8 @@
   Cache-Control: no-cache
 /historias
   Cache-Control: no-cache
+/historias/*
+  Cache-Control: no-cache
 /testimonios
   Cache-Control: no-cache
 /colabora
@@ -56,9 +61,11 @@
 /js/*
   Cache-Control: public, max-age=3600, stale-while-revalidate=60
 
-# Data files — 1 hour (personalities.json, surnames.json, etc.)
+# Data files — 1 hour (personalities.json, surnames.json, etc.); noindex so raw JSON
+# isn't indexed as standalone pages
 /data/*
   Cache-Control: public, max-age=3600, stale-while-revalidate=60
+  X-Robots-Tag: noindex
 
 # Images — 1 week
 /img/*
