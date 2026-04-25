@@ -1,8 +1,10 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
-import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+// Full CDN URLs so no import map is required — works in Safari iOS 15 and any
+// browser that supports ES modules but not import maps (Safari 16.0–16.3).
+import * as THREE               from 'https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.min.js';
+import { OrbitControls }        from 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/controls/OrbitControls.js';
+import { LineSegments2 }        from 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/lines/LineSegmentsGeometry.js';
+import { LineMaterial }         from 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/lines/LineMaterial.js';
 
 let _renderer, _scene, _camera, _controls, _animId, _clock, _sun;
 let _ctrlV    = null; // { dTheta, dPhi, dRadius, pan: Vector3 }
@@ -93,11 +95,19 @@ function _buildScene(containerId) {
   let W = wrap.clientWidth, H = wrap.clientHeight;
   if (!W || !H) { W = window.innerWidth; H = window.innerHeight; }
 
-  _renderer = new THREE.WebGLRenderer({ antialias: true });
+  const _isMobile   = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  // Flag low-end mobile only: ≤2 GB RAM (deviceMemory, Chrome/Android) or ≤4 CPU cores.
+  // High-end phones (≥6 cores, ≥4 GB) render at full quality.
+  // iOS never exposes deviceMemory; A-series GPUs are fast enough to skip degradation.
+  const _isSlowMobile = _isMobile && (
+    (navigator.deviceMemory      && navigator.deviceMemory      <= 2) ||
+    (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+  );
+  _renderer = new THREE.WebGLRenderer({ antialias: !_isSlowMobile });
   _renderer.setSize(W, H);
-  _renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  _renderer.setPixelRatio(Math.min(devicePixelRatio, _isSlowMobile ? 1.5 : 2));
   _renderer.shadowMap.enabled = true;
-  _renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  _renderer.shadowMap.type = _isSlowMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   _renderer.toneMapping = THREE.ACESFilmicToneMapping;
   _renderer.toneMappingExposure = 1.0;
   wrap.appendChild(_renderer.domElement);
@@ -145,7 +155,7 @@ function _buildScene(containerId) {
   _sun = new THREE.DirectionalLight(0xffe8b0, 1.6);
   _sun.position.set(6, 12, 8);
   _sun.castShadow = true;
-  _sun.shadow.mapSize.set(2048, 2048);
+  _sun.shadow.mapSize.set(_isSlowMobile ? 512 : 2048, _isSlowMobile ? 512 : 2048);
   _sun.shadow.intensity = 0.75; // r162+: softer shadows suit the warm parchment palette
   _scene.add(_sun);
   const fillA = new THREE.DirectionalLight(0xd0c8ff, 0.35);

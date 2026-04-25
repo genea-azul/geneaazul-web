@@ -13,6 +13,9 @@ GeneaAzul.connections = (function() {
     i18n  = GeneaAzul.i18n;
     utils = GeneaAzul.utils;
 
+    var currentYear = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric' }); // en-CA → guaranteed ASCII year
+    $('#person1YearOfBirth, #person2YearOfBirth').attr('max', currentYear);
+
     initBackend();
     wireButton();
     wireEnter();
@@ -78,6 +81,7 @@ GeneaAzul.connections = (function() {
     if (isRequestEmpty(rq)) {
       $resultBody.html('<p><b>Error:</b> Ten&eacute;s que llenar todos los datos.</p>');
       $btn.prop('disabled', false);
+      $resultCard.get(0).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       return;
     }
 
@@ -88,10 +92,9 @@ GeneaAzul.connections = (function() {
         $resultBody.empty();
 
         if (data.errors && data.errors.length > 0) {
-          $resultBody.html('<p>&#9888;&#65039; Se produjo un error en la b&uacute;squeda. &#9888;&#65039;</p>');
-          data.errors.forEach(function(code) {
-            $resultBody.append(i18n.displayErrorCodeInSpanish(code));
-          });
+          var errHtml = '<p>&#9888;&#65039; Se produjo un error en la b&uacute;squeda. &#9888;&#65039;</p>';
+          data.errors.forEach(function(code) { errHtml += i18n.displayErrorCodeInSpanish(code); });
+          $resultBody.html(errHtml);
         } else if (!data.connections || data.connections.length === 0) {
           $resultBody.html(
             '<p>&#128270; No se encontr&oacute; conexi&oacute;n entre estas personas. &#128269;</p>'
@@ -114,12 +117,15 @@ GeneaAzul.connections = (function() {
         var code = xhr.responseJSON && xhr.responseJSON.errorCode ? xhr.responseJSON.errorCode : null;
         if (code) {
           $resultBody.html(i18n.displayErrorCodeInSpanish(code));
+        } else if (xhr.status === 0) {
+          $resultBody.html(i18n.displayErrorCodeInSpanish('NETWORK'));
         } else if (xhr.status === 429) {
           $resultBody.html(i18n.displayErrorCodeInSpanish('TOO-MANY-REQUESTS'));
         } else {
-          $resultBody.html('<p>Ocurri&oacute; un error inesperado. Por favor intent&aacute; de nuevo.</p>');
+          $resultBody.html(i18n.displayErrorCodeInSpanish('ERROR'));
         }
         $btn.prop('disabled', false);
+        $resultCard.get(0).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     );
   }

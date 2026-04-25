@@ -223,6 +223,9 @@ GeneaAzul.i18n = (function() {
 
   /* User-friendly error messages */
   function displayErrorCodeInSpanish(errorCode) {
+    if (errorCode === 'NETWORK') {
+      return '<p>No hay conexi&oacute;n. Verific&aacute; tu internet e intent&aacute; de nuevo.</p>';
+    }
     if (errorCode === 'TOO-MANY-REQUESTS') {
       return '<p>Realizaste demasiadas consultas en la &uacute;ltima hora, por favor esper&aacute; unos minutos o contactanos en redes sociales: <b>@genea.azul</b></p>'
         + '<p>Este es un proyecto de investigaci&oacute;n sin fines de lucro, no hay costo de servicio. 😊</p>';
@@ -247,7 +250,7 @@ GeneaAzul.i18n = (function() {
       return '<p class="fw-semibold">Las personas 1 y 2 son las mismas</p>'
         + '<p>No se puede calcular la conexi&oacute;n entre mismas personas.</p>';
     }
-    return '<p>' + errorCode + '</p>';
+    return '<p>Ocurrió un error inesperado. Por favor intentá de nuevo en unos minutos.</p>';
   }
 
   return {

@@ -24,6 +24,9 @@ GeneaAzul.search = (function() {
     i18n  = GeneaAzul.i18n;
     utils = GeneaAzul.utils;
 
+    var currentYear = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric' }); // en-CA → guaranteed ASCII year
+    $('#buscar-section input[type=number]').attr('max', currentYear);
+
     wireAdvancedToggle();
     wireFormInteractions();
     wireSearchButton();
@@ -261,7 +264,7 @@ GeneaAzul.search = (function() {
                 .append($('<p>').addClass('text-center')
                   .html('&iexcl;Solicit&aacute; acceso al &aacute;rbol y carg&aacute; info!')
                   .append($('<a>').addClass('link-secondary text-decoration-none ms-2')
-                    .attr('href', 'https://instagram.com/_u/genea.azul').attr('target', '_blank')
+                    .attr('href', 'https://instagram.com/_u/genea.azul').attr('target', '_blank').attr('rel', 'noopener')
                     .append($('<i>').addClass('bi bi-instagram'))));
               if (rq.individual && rq.individual.sex) {
                 $resultBody.append('<p>Verific&aacute; que el <span class="text-danger fw-semibold">sexo</span> de la persona est&eacute; bien seleccionado.</p>');
@@ -539,7 +542,8 @@ GeneaAzul.search = (function() {
           .attr('id', 'view-family-tree-btn-' + uid)
           .attr('role', 'button')
           .attr('href', cfg.apiBaseUrl + '/family-tree/' + uid + (cfg.obfuscateLiving ? '' : '?f=0'))
-          .attr('target', '_blank')
+          .attr('target', '_blank').attr('rel', 'noopener noreferrer')
+          .attr('tabindex', '-1')
           .html('<i class="bi bi-diagram-3-fill me-1"></i>Ver &aacute;rbol geneal&oacute;gico 2D')))
       .append($('<div>').addClass('mt-1 text-center d-flex align-items-center justify-content-center gap-2')
         .append($('<button>').addClass('btn btn-sm btn-dark view-family-tree-3d-btn disabled')
@@ -600,7 +604,16 @@ GeneaAzul.search = (function() {
     $btn.prop('disabled', true).addClass('disabled');
     $err.addClass('d-none').empty();
 
+    // iOS Safari ignores the `download` attribute and blocks programmatic clicks
+    // triggered from async (AJAX) callbacks. Open a blank window NOW, while we
+    // are still inside the synchronous tap handler, then navigate it once the
+    // data arrives. On all other browsers we use the standard blob + anchor approach.
+    var _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var iosWin = _isIOS ? window.open('', '_blank') : null;
+
     function showPdfError(code) {
+      if (iosWin && !iosWin.closed) iosWin.close();
       $err.removeClass('d-none').html(i18n.displayErrorCodeInSpanish(code || 'ERROR'));
       $btn.prop('disabled', false).removeClass('disabled');
     }
@@ -634,13 +647,20 @@ GeneaAzul.search = (function() {
           }
           var blob = new Blob([bytes], { type: 'application/pdf' });
           var url = URL.createObjectURL(blob);
-          var link = document.createElement('a');
-          link.href = url;
-          link.download = 'familiares-' + data.personUuid + '.pdf';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
+          if (iosWin) {
+            // Navigate the pre-opened window to the blob URL. iOS will show the PDF
+            // in its viewer; the user can save it via the Share sheet (⬆).
+            iosWin.location.href = url;
+            setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
+          } else {
+            var link = document.createElement('a');
+            link.href = url;
+            link.download = 'familiares-' + data.personUuid + '.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
+          }
           $btn.prop('disabled', false).removeClass('disabled');
         } catch (err) {
           if (window.console && console.error) console.error('[pdf] decode failed:', err);
@@ -650,9 +670,14 @@ GeneaAzul.search = (function() {
       function(xhr) {
         // Distinguish network loss (xhr.status === 0) from server-side errors so
         // the user can act on the right problem.
+        // apiGet has no dataType:'json', so on error responses (e.g. Fly.io 502/503
+        // HTML pages during cold-start) jQuery won't auto-parse responseJSON — try
+        // parsing responseText manually as a fallback.
         var code;
-        if (xhr && xhr.responseJSON && xhr.responseJSON.errorCode) {
-          code = xhr.responseJSON.errorCode;
+        var json = (xhr && xhr.responseJSON) ||
+                   (function() { try { return JSON.parse(xhr && xhr.responseText); } catch (e) { return null; } })();
+        if (json && json.errorCode) {
+          code = json.errorCode;
         } else if (xhr && xhr.status === 0) {
           code = 'NETWORK';
         } else if (xhr && xhr.status === 429) {
@@ -717,9 +742,9 @@ GeneaAzul.search = (function() {
     } else if (xhr && xhr.status === 429) {
       $container.html(i18n.displayErrorCodeInSpanish('TOO-MANY-REQUESTS'));
     } else if (xhr && xhr.status === 0) {
-      $container.html('<p>No hay conexi&oacute;n. Verific&aacute; tu internet e intent&aacute; de nuevo.</p>');
+      $container.html(i18n.displayErrorCodeInSpanish('NETWORK'));
     } else {
-      $container.html('<p>Ocurri&oacute; un error inesperado. Por favor intent&aacute; de nuevo.</p>');
+      $container.html(i18n.displayErrorCodeInSpanish('ERROR'));
     }
   }
 

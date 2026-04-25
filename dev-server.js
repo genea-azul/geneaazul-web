@@ -15,7 +15,7 @@ var PORT = 8090;
 var ROOT = __dirname;
 
 // ─── Argentine "today" ────────────────────────────────────────────────────────
-var arDate  = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+var arDate  = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }); // en-CA → guaranteed ASCII YYYY-MM-DD
 var arParts = arDate.split('-');
 var arDay   = parseInt(arParts[2], 10);
 var arMonth = parseInt(arParts[1], 10);

@@ -11,7 +11,7 @@
 
       <!-- ═══ LOADING STATE ═══ -->
       <div id="search-loading-container" class="ga-server-status">
-        <div class="spinner-border mb-3" role="status" id="search-spinner" style="visibility:hidden"></div>
+        <div class="spinner-border mb-3" role="status" id="search-spinner" style="visibility:hidden"><span class="visually-hidden">Cargando...</span></div>
         <div id="search-spinner-msg"></div>
       </div>
 
@@ -35,19 +35,19 @@
               <div class="row g-2">
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="individualGivenName">Nombre</label>
-                  <input type="text" class="form-control form-control-sm" id="individualGivenName" placeholder="" autocomplete="given-name">
+                  <input type="text" class="form-control form-control-sm" id="individualGivenName" autocomplete="given-name">
                 </div>
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="individualSurname">Apellido <span class="text-muted fw-normal">(requerido)</span></label>
-                  <input type="text" class="form-control form-control-sm" id="individualSurname" placeholder="" autocomplete="family-name">
+                  <input type="text" class="form-control form-control-sm" id="individualSurname" autocomplete="family-name">
                 </div>
                 <div class="col-sm-4">
                   <label class="form-label small fw-semibold" for="individualYearOfBirth">Año de nacimiento</label>
-                  <input type="number" class="form-control form-control-sm" id="individualYearOfBirth" placeholder="" min="1600" max="2026">
+                  <input type="number" class="form-control form-control-sm" id="individualYearOfBirth" min="1600" max="9999">
                 </div>
                 <div class="col-sm-4">
                   <label class="form-label small fw-semibold" for="individualYearOfDeath">Año de fallecimiento</label>
-                  <input type="number" class="form-control form-control-sm" id="individualYearOfDeath" placeholder="" min="1600" max="2026">
+                  <input type="number" class="form-control form-control-sm" id="individualYearOfDeath" min="1600" max="9999">
                 </div>
                 <div class="col-sm-4 d-flex align-items-end pb-1">
                   <div class="form-check form-check-inline mb-0">
@@ -57,7 +57,7 @@
                 </div>
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="individualPlaceOfBirth">País de nacimiento</label>
-                  <input type="text" class="form-control form-control-sm" id="individualPlaceOfBirth" placeholder="">
+                  <input type="text" class="form-control form-control-sm" id="individualPlaceOfBirth">
                 </div>
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="individualContact">Tu contacto <span class="text-muted fw-normal">(requerido)</span></label>
@@ -104,19 +104,19 @@
                   <div class="row g-2">
                     <div class="col-sm-6">
                       <label class="form-label small fw-semibold" for="spouseGivenName">Nombre</label>
-                      <input type="text" class="form-control form-control-sm" id="spouseGivenName" placeholder="">
+                      <input type="text" class="form-control form-control-sm" id="spouseGivenName">
                     </div>
                     <div class="col-sm-6">
                       <label class="form-label small fw-semibold" for="spouseSurname">Apellido</label>
-                      <input type="text" class="form-control form-control-sm" id="spouseSurname" placeholder="">
+                      <input type="text" class="form-control form-control-sm" id="spouseSurname">
                     </div>
                     <div class="col-sm-4">
                       <label class="form-label small fw-semibold" for="spouseYearOfBirth">Año de nacimiento</label>
-                      <input type="number" class="form-control form-control-sm" id="spouseYearOfBirth" placeholder="" min="1600" max="2026">
+                      <input type="number" class="form-control form-control-sm" id="spouseYearOfBirth" min="1600" max="9999">
                     </div>
                     <div class="col-sm-4">
                       <label class="form-label small fw-semibold" for="spouseYearOfDeath">Año de fallecimiento</label>
-                      <input type="number" class="form-control form-control-sm" id="spouseYearOfDeath" placeholder="" min="1600" max="2026">
+                      <input type="number" class="form-control form-control-sm" id="spouseYearOfDeath" min="1600" max="9999">
                     </div>
                     <div class="col-sm-4 d-flex align-items-end pb-1">
                       <div class="form-check form-check-inline mb-0">
@@ -126,7 +126,7 @@
                     </div>
                     <div class="col-sm-6">
                       <label class="form-label small fw-semibold" for="spousePlaceOfBirth">País de nacimiento</label>
-                      <input type="text" class="form-control form-control-sm" id="spousePlaceOfBirth" placeholder="">
+                      <input type="text" class="form-control form-control-sm" id="spousePlaceOfBirth">
                     </div>
                   </div>
                 </div>
@@ -143,19 +143,19 @@
               <div class="row g-2">
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="fatherGivenName">Nombre</label>
-                  <input type="text" class="form-control form-control-sm" id="fatherGivenName" placeholder="">
+                  <input type="text" class="form-control form-control-sm" id="fatherGivenName">
                 </div>
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="fatherSurname">Apellido</label>
-                  <input type="text" class="form-control form-control-sm" id="fatherSurname" placeholder="">
+                  <input type="text" class="form-control form-control-sm" id="fatherSurname">
                 </div>
                 <div class="col-sm-4">
                   <label class="form-label small fw-semibold" for="fatherYearOfBirth">Año de nacimiento</label>
-                  <input type="number" class="form-control form-control-sm" id="fatherYearOfBirth" placeholder="" min="1600" max="2026">
+                  <input type="number" class="form-control form-control-sm" id="fatherYearOfBirth" min="1600" max="9999">
                 </div>
                 <div class="col-sm-4">
                   <label class="form-label small fw-semibold" for="fatherYearOfDeath">Año de fallecimiento</label>
-                  <input type="number" class="form-control form-control-sm" id="fatherYearOfDeath" placeholder="" min="1600" max="2026">
+                  <input type="number" class="form-control form-control-sm" id="fatherYearOfDeath" min="1600" max="9999">
                 </div>
                 <div class="col-sm-4 d-flex align-items-end pb-1">
                   <div class="form-check form-check-inline mb-0">
@@ -165,7 +165,7 @@
                 </div>
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="fatherPlaceOfBirth">País de nacimiento</label>
-                  <input type="text" class="form-control form-control-sm" id="fatherPlaceOfBirth" placeholder="">
+                  <input type="text" class="form-control form-control-sm" id="fatherPlaceOfBirth">
                 </div>
               </div>
             </div>
@@ -180,19 +180,19 @@
               <div class="row g-2">
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="motherGivenName">Nombre</label>
-                  <input type="text" class="form-control form-control-sm" id="motherGivenName" placeholder="">
+                  <input type="text" class="form-control form-control-sm" id="motherGivenName">
                 </div>
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="motherSurname">Apellido</label>
-                  <input type="text" class="form-control form-control-sm" id="motherSurname" placeholder="">
+                  <input type="text" class="form-control form-control-sm" id="motherSurname">
                 </div>
                 <div class="col-sm-4">
                   <label class="form-label small fw-semibold" for="motherYearOfBirth">Año de nacimiento</label>
-                  <input type="number" class="form-control form-control-sm" id="motherYearOfBirth" placeholder="" min="1600" max="2026">
+                  <input type="number" class="form-control form-control-sm" id="motherYearOfBirth" min="1600" max="9999">
                 </div>
                 <div class="col-sm-4">
                   <label class="form-label small fw-semibold" for="motherYearOfDeath">Año de fallecimiento</label>
-                  <input type="number" class="form-control form-control-sm" id="motherYearOfDeath" placeholder="" min="1600" max="2026">
+                  <input type="number" class="form-control form-control-sm" id="motherYearOfDeath" min="1600" max="9999">
                 </div>
                 <div class="col-sm-4 d-flex align-items-end pb-1">
                   <div class="form-check form-check-inline mb-0">
@@ -202,7 +202,7 @@
                 </div>
                 <div class="col-sm-6">
                   <label class="form-label small fw-semibold" for="motherPlaceOfBirth">País de nacimiento</label>
-                  <input type="text" class="form-control form-control-sm" id="motherPlaceOfBirth" placeholder="">
+                  <input type="text" class="form-control form-control-sm" id="motherPlaceOfBirth">
                 </div>
               </div>
             </div>
@@ -224,19 +224,19 @@
                 <div class="row g-2">
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="paternalGrandfatherGivenName">Nombre</label>
-                    <input type="text" class="form-control form-control-sm" id="paternalGrandfatherGivenName" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandfatherGivenName">
                   </div>
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="paternalGrandfatherSurname">Apellido</label>
-                    <input type="text" class="form-control form-control-sm" id="paternalGrandfatherSurname" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandfatherSurname">
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="paternalGrandfatherYearOfBirth">Año de nacimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="paternalGrandfatherYearOfBirth" placeholder="" min="1600" max="2026">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandfatherYearOfBirth" min="1600" max="9999">
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="paternalGrandfatherYearOfDeath">Año de fallecimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="paternalGrandfatherYearOfDeath" placeholder="" min="1600" max="2026">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandfatherYearOfDeath" min="1600" max="9999">
                   </div>
                   <div class="col-sm-4 d-flex align-items-end pb-1">
                     <div class="form-check form-check-inline mb-0">
@@ -246,7 +246,7 @@
                   </div>
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="paternalGrandfatherPlaceOfBirth">País de nacimiento</label>
-                    <input type="text" class="form-control form-control-sm" id="paternalGrandfatherPlaceOfBirth" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandfatherPlaceOfBirth">
                   </div>
                 </div>
               </div>
@@ -261,19 +261,19 @@
                 <div class="row g-2">
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="paternalGrandmotherGivenName">Nombre</label>
-                    <input type="text" class="form-control form-control-sm" id="paternalGrandmotherGivenName" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandmotherGivenName">
                   </div>
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="paternalGrandmotherSurname">Apellido</label>
-                    <input type="text" class="form-control form-control-sm" id="paternalGrandmotherSurname" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandmotherSurname">
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="paternalGrandmotherYearOfBirth">Año de nacimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="paternalGrandmotherYearOfBirth" placeholder="" min="1600" max="2026">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandmotherYearOfBirth" min="1600" max="9999">
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="paternalGrandmotherYearOfDeath">Año de fallecimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="paternalGrandmotherYearOfDeath" placeholder="" min="1600" max="2026">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandmotherYearOfDeath" min="1600" max="9999">
                   </div>
                   <div class="col-sm-4 d-flex align-items-end pb-1">
                     <div class="form-check form-check-inline mb-0">
@@ -283,7 +283,7 @@
                   </div>
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="paternalGrandmotherPlaceOfBirth">País de nacimiento</label>
-                    <input type="text" class="form-control form-control-sm" id="paternalGrandmotherPlaceOfBirth" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="paternalGrandmotherPlaceOfBirth">
                   </div>
                 </div>
               </div>
@@ -298,19 +298,19 @@
                 <div class="row g-2">
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="maternalGrandfatherGivenName">Nombre</label>
-                    <input type="text" class="form-control form-control-sm" id="maternalGrandfatherGivenName" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandfatherGivenName">
                   </div>
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="maternalGrandfatherSurname">Apellido</label>
-                    <input type="text" class="form-control form-control-sm" id="maternalGrandfatherSurname" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandfatherSurname">
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="maternalGrandfatherYearOfBirth">Año de nacimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="maternalGrandfatherYearOfBirth" placeholder="" min="1600" max="2026">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandfatherYearOfBirth" min="1600" max="9999">
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="maternalGrandfatherYearOfDeath">Año de fallecimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="maternalGrandfatherYearOfDeath" placeholder="" min="1600" max="2026">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandfatherYearOfDeath" min="1600" max="9999">
                   </div>
                   <div class="col-sm-4 d-flex align-items-end pb-1">
                     <div class="form-check form-check-inline mb-0">
@@ -320,7 +320,7 @@
                   </div>
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="maternalGrandfatherPlaceOfBirth">País de nacimiento</label>
-                    <input type="text" class="form-control form-control-sm" id="maternalGrandfatherPlaceOfBirth" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandfatherPlaceOfBirth">
                   </div>
                 </div>
               </div>
@@ -335,19 +335,19 @@
                 <div class="row g-2">
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="maternalGrandmotherGivenName">Nombre</label>
-                    <input type="text" class="form-control form-control-sm" id="maternalGrandmotherGivenName" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandmotherGivenName">
                   </div>
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="maternalGrandmotherSurname">Apellido</label>
-                    <input type="text" class="form-control form-control-sm" id="maternalGrandmotherSurname" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandmotherSurname">
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="maternalGrandmotherYearOfBirth">Año de nacimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="maternalGrandmotherYearOfBirth" placeholder="" min="1600" max="2026">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandmotherYearOfBirth" min="1600" max="9999">
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="maternalGrandmotherYearOfDeath">Año de fallecimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="maternalGrandmotherYearOfDeath" placeholder="" min="1600" max="2026">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandmotherYearOfDeath" min="1600" max="9999">
                   </div>
                   <div class="col-sm-4 d-flex align-items-end pb-1">
                     <div class="form-check form-check-inline mb-0">
@@ -357,7 +357,7 @@
                   </div>
                   <div class="col-sm-6">
                     <label class="form-label small fw-semibold" for="maternalGrandmotherPlaceOfBirth">País de nacimiento</label>
-                    <input type="text" class="form-control form-control-sm" id="maternalGrandmotherPlaceOfBirth" placeholder="">
+                    <input type="text" class="form-control form-control-sm" id="maternalGrandmotherPlaceOfBirth">
                   </div>
                 </div>
               </div>
@@ -381,7 +381,7 @@
             <i class="bi bi-list-ul me-1"></i>
             <span>Resultados</span>
           </div>
-          <div class="card-body overflow-auto" style="max-height: 70vh;"></div>
+          <div class="card-body overflow-auto" style="max-height: 70vh;" aria-live="polite" aria-atomic="true"></div>
         </div>
 
       </div><!-- /search-form-container -->

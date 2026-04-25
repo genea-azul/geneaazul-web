@@ -137,7 +137,7 @@ GeneaAzul.cronologia = (function() {
     if (entry.sourceUrl && /^https?:\/\//i.test(entry.sourceUrl)) {
       $card.append(
         $('<a>').addClass('ga-tl-source-link')
-          .attr({ href: entry.sourceUrl, target: '_blank', rel: 'noopener' })
+          .attr({ href: entry.sourceUrl, target: '_blank', rel: 'noopener noreferrer' })
           .text(entry.source || 'Fuente')
       );
     } else if (entry.source) {
