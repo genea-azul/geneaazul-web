@@ -107,7 +107,7 @@ function _buildScene(containerId) {
   _renderer.setSize(W, H);
   _renderer.setPixelRatio(Math.min(devicePixelRatio, _isSlowMobile ? 1.5 : 2));
   _renderer.shadowMap.enabled = true;
-  _renderer.shadowMap.type = _isSlowMobile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+  _renderer.shadowMap.type = THREE.PCFShadowMap;
   _renderer.toneMapping = THREE.ACESFilmicToneMapping;
   _renderer.toneMappingExposure = 1.0;
   wrap.appendChild(_renderer.domElement);
@@ -435,51 +435,75 @@ function _buildConnectors(families, nodeMap) {
     const motherId = (fam.wifeIds    && fam.wifeIds.length)    ? fam.wifeIds[0]    : null;
     const fN = fatherId != null ? nodeMap[fatherId] : null;
     const mN = motherId != null ? nodeMap[motherId] : null;
-    if (!fN || !mN) return;
+    if (!fN && !mN) return;
 
-    const fp = fN.bust.position, mp = mN.bust.position;
-    // Place the couple bar at the BOTTOM of the parent spheres (toward children),
-    // so parents visually sit above the bar and the junction below them.
-    const barY   = Math.min(fp.y, mp.y) - 0.07;
-    const fBot   = new THREE.Vector3(fp.x, fp.y - 0.07, fp.z);
-    const mBot   = new THREE.Vector3(mp.x, mp.y - 0.07, mp.z);
-    const fBar   = new THREE.Vector3(fp.x, barY, fp.z);
-    const mBar   = new THREE.Vector3(mp.x, barY, mp.z);
-    const midBar = fBar.clone().lerp(mBar, 0.5);
+    if (fN && mN) {
+      const fp = fN.bust.position, mp = mN.bust.position;
+      // Place the couple bar at the BOTTOM of the parent spheres (toward children),
+      // so parents visually sit above the bar and the junction below them.
+      const barY   = Math.min(fp.y, mp.y) - 0.07;
+      const fBot   = new THREE.Vector3(fp.x, fp.y - 0.07, fp.z);
+      const mBot   = new THREE.Vector3(mp.x, mp.y - 0.07, mp.z);
+      const fBar   = new THREE.Vector3(fp.x, barY, fp.z);
+      const mBar   = new THREE.Vector3(mp.x, barY, mp.z);
+      const midBar = fBar.clone().lerp(mBar, 0.5);
 
-    // Vertical legs from each spouse down to the couple bar (only when heights differ)
-    if (fBot.y > barY + 0.05) _seg(fBot, fBar, coupleSegs, couplePoints);
-    if (mBot.y > barY + 0.05) _seg(mBot, mBar, coupleSegs, couplePoints);
-    // Horizontal couple bar
-    _seg(fBar, mBar, coupleSegs, couplePoints);
-    const orb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), orbMat);
-    orb.position.copy(midBar); orb.castShadow = true; _scene.add(orb);
-    _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
-    _flowPart(mBar, midBar, coupleFlow, 0.35, Math.random() * 0.5);
+      // Vertical legs from each spouse down to the couple bar (only when heights differ)
+      if (fBot.y > barY + 0.05) _seg(fBot, fBar, coupleSegs, couplePoints);
+      if (mBot.y > barY + 0.05) _seg(mBot, mBar, coupleSegs, couplePoints);
+      // Horizontal couple bar
+      _seg(fBar, mBar, coupleSegs, couplePoints);
+      const orb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), orbMat);
+      orb.position.copy(midBar); orb.castShadow = true; _scene.add(orb);
+      _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
+      _flowPart(mBar, midBar, coupleFlow, 0.35, Math.random() * 0.5);
 
-    if (!fam.childIds || !fam.childIds.length) return;
+      if (!fam.childIds || !fam.childIds.length) return;
+      const cNodes = fam.childIds.map(id => nodeMap[id]).filter(Boolean);
+      if (!cNodes.length) return;
 
-    const cNodes = fam.childIds.map(id => nodeMap[id]).filter(Boolean);
-    if (!cNodes.length) return;
+      // Junction: 40% of the way from the closest child toward the couple bar,
+      // clamped below parents so they always appear above the junction even if
+      // a child drifted upward unexpectedly.
+      const minParentY = Math.min(fp.y, mp.y);
+      const maxChildY = Math.max(...cNodes.map(n => n.bust.position.y));
+      const juncY = Math.min(maxChildY + (barY - maxChildY) * 0.4, minParentY - 0.3);
+      const junc  = new THREE.Vector3(midBar.x, juncY, midBar.z);
 
-    // Junction: 40% of the way from the closest child toward the couple bar,
-    // clamped below parents so they always appear above the junction even if
-    // a child drifted upward unexpectedly.
-    const minParentY = Math.min(fp.y, mp.y);
-    const maxChildY = Math.max(...cNodes.map(n => n.bust.position.y));
-    const juncY = Math.min(maxChildY + (barY - maxChildY) * 0.4, minParentY - 0.3);
-    const junc  = new THREE.Vector3(midBar.x, juncY, midBar.z);
+      _seg(midBar, junc, coupleSegs, couplePoints);
+      _flowPart(midBar, junc, coupleFlow, 0.32, Math.random());
 
-    _seg(midBar, junc, coupleSegs, couplePoints);
-    _flowPart(midBar, junc, coupleFlow, 0.32, Math.random());
+      // Draw from junction to each child's top (sphere top = closest point toward junction)
+      cNodes.forEach(cn => {
+        const cp = cn.bust.position;
+        const cTop = new THREE.Vector3(cp.x, cp.y + 0.28, cp.z);
+        _seg(junc, cTop, childSegs, childPoints);
+        _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
+      });
+    } else {
+      // Only one parent is present in the tree (the other was filtered out or never loaded).
+      // Draw a vertical drop from the known parent down to a junction, then fan out to children.
+      if (!fam.childIds || !fam.childIds.length) return;
+      const cNodes = fam.childIds.map(id => nodeMap[id]).filter(Boolean);
+      if (!cNodes.length) return;
 
-    // Draw from junction to each child's top (sphere top = closest point toward junction)
-    cNodes.forEach(cn => {
-      const cp = cn.bust.position;
-      const cTop = new THREE.Vector3(cp.x, cp.y + 0.28, cp.z);
-      _seg(junc, cTop, childSegs, childPoints);
-      _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
-    });
+      const parentN = fN || mN;
+      const pp   = parentN.bust.position;
+      const pBot = new THREE.Vector3(pp.x, pp.y - 0.07, pp.z);
+      const maxChildY = Math.max(...cNodes.map(n => n.bust.position.y));
+      const juncY = Math.min(maxChildY + (pBot.y - maxChildY) * 0.4, pBot.y - 0.3);
+      const junc  = new THREE.Vector3(pBot.x, juncY, pBot.z);
+
+      _seg(pBot, junc, coupleSegs, couplePoints);
+      _flowPart(pBot, junc, coupleFlow, 0.32, Math.random());
+
+      cNodes.forEach(cn => {
+        const cp = cn.bust.position;
+        const cTop = new THREE.Vector3(cp.x, cp.y + 0.28, cp.z);
+        _seg(junc, cTop, childSegs, childPoints);
+        _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
+      });
+    }
   });
 
   // Flush all segments into two batched LineSegments2 objects (one draw call each)
@@ -544,10 +568,11 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
   // On portrait the horizontal frustum is ~43° (even at FOV 68°) vs ~77° on landscape,
   // so the camera must orbit closer to clusters and the overview should look more top-down.
   const camR       = portrait ? Math.min(treeRadius * 0.35, 10) : Math.min(treeRadius * 0.65, 18);
-  const orbitRLo   = portrait ? 0.25 : 0.40; // inner orbit radius as fraction of camR
-  const orbitRHi   = portrait ? 0.35 : 0.50; // outer orbit radius fraction
-  const orbitHBase = portrait ? 3    : 2;     // base height above cluster centroid
-  const orbitHRand = portrait ? 6    : 4;     // random height added on top
+  const orbitRLo   = portrait ? 0.50 : 0.50; // inner orbit radius as fraction of camR — wide enough to avoid clipping
+  const orbitRHi   = portrait ? 0.40 : 0.40; // added on top of orbitRLo
+  // Height is capped: no gen multiplier so deep ancestors don't drift off to a top-down extreme.
+  const orbitHBase = portrait ? 1.5  : 1.0;  // base height above cluster centroid
+  const orbitHCap  = portrait ? 4.0  : 3.0;  // maximum height added above base
 
   const byGen = {};
   persons.forEach(n => {
@@ -556,8 +581,11 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
     byGen[g].push(n);
   });
 
-  // Visit ancestor gens first (highest number = oldest), then down to descendants
-  const genKeys = Object.keys(byGen).map(Number).sort((a, b) => b - a);
+  // Visit ancestor gens first (highest number = oldest), then down to descendants.
+  // Skip singleton generations — a single node doesn't need its own cluster flyby.
+  const allGenKeys = Object.keys(byGen).map(Number).sort((a, b) => b - a);
+  const genKeys    = allGenKeys.filter(g => byGen[g].length >= 2);
+
   const camPts  = [];
   const lookPts = [];
 
@@ -579,7 +607,21 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
   camPts.push(ovPos);
   lookPts.push(new THREE.Vector3(0, 0, 0)); // always look at tree centre from overview
 
-  // ── 2. Per-generation cluster flybys ──────────────────────────────────────
+  // ── 2. Focal person (gen 0) close-up — the most meaningful moment ─────────
+  const focalNodes = byGen[0] || [];
+  if (focalNodes.length > 0) {
+    const fx = focalNodes.reduce((s, n) => s + n.finalPos.x, 0) / focalNodes.length;
+    const fy = focalNodes.reduce((s, n) => s + n.finalPos.y, 0) / focalNodes.length;
+    const fz = focalNodes.reduce((s, n) => s + n.finalPos.z, 0) / focalNodes.length;
+    const fAngle = Math.random() * Math.PI * 2;
+    const fR     = camR * (0.45 + Math.random() * 0.25); // deliberately close for intimacy
+    const fH     = orbitHBase + Math.random() * 1.5;     // low — eye-level shot
+    const fcp    = new THREE.Vector3(fx + Math.cos(fAngle) * fR, fy + fH, fz + Math.sin(fAngle) * fR);
+    camPts.push(fcp);
+    lookPts.push(_nearestCentroid(fcp, persons, 12));
+  }
+
+  // ── 3. Per-generation cluster flybys ──────────────────────────────────────
   genKeys.forEach(gen => {
     const nodes = byGen[gen];
     const cx = nodes.reduce((s, n) => s + n.finalPos.x, 0) / nodes.length;
@@ -589,11 +631,12 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
     for (let j = 0; j < 2; j++) {
       const angle = baseAngle + (j === 0 ? 0 : Math.PI * (0.7 + Math.random() * 0.6));
       const r = camR * (orbitRLo + Math.random() * orbitRHi);
-      const h = orbitHBase + Math.random() * orbitHRand + Math.abs(gen) * 1.2;
+      // Cap height — no gen multiplier prevents top-down drift on deep ancestry
+      const h = orbitHBase + Math.random() * orbitHCap;
       const cp = new THREE.Vector3(cx + Math.cos(angle) * r, cy + h, cz + Math.sin(angle) * r);
       camPts.push(cp);
-      // Look at the nearest populated cluster from this camera position — never empty space
-      lookPts.push(_nearestCentroid(cp, persons, 5));
+      // Use k=12 so look-at spans mid-ground rather than locking onto the nearest bust
+      lookPts.push(_nearestCentroid(cp, persons, 12));
     }
   });
 
@@ -602,11 +645,12 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
     const a = Math.random() * Math.PI * 2;
     const cp = new THREE.Vector3(Math.cos(a) * camR * 0.6, 4 + Math.random() * 3, Math.sin(a) * camR * 0.6);
     camPts.push(cp);
-    lookPts.push(_nearestCentroid(cp, persons, 5));
+    lookPts.push(_nearestCentroid(cp, persons, 12));
   }
 
-  // Duration: 10 s for a 2-person tree, scales up to 60 s for large ones
-  const duration = Math.min(60, Math.max(10, persons.length * 0.45 + genKeys.length * 4));
+  // Duration scales with waypoint count (5 s each) so large trees aren't rushed,
+  // capped at 90 s. Minimum 15 s for very small trees.
+  const duration = Math.min(90, Math.max(15, camPts.length * 5));
   return {
     // 'centripetal' parameterisation avoids cusps and self-intersections on
     // unevenly-spaced control points — exactly what camera flythrough paths need.
@@ -627,15 +671,14 @@ function _buildLogoWalls(treeRadius) {
       tex.colorSpace = THREE.SRGBColorSpace;
 
       // Walls sit far enough that the orbiting camera never gets closer than ~treeRadius away
-      const wallDist  = treeRadius * 2.5;
-      const planeSize = treeRadius * 3;
+      const wallDist  = treeRadius * 2.5; // keep walls beyond the max orbit distance (~3.5×r)
+      const planeSize = treeRadius * 2.0; // 80% of wallDist — logo occupies most of each panel
 
-      const WALLS = [
-        { pos: [        0, 0, -wallDist], rotY:  0           },
-        { pos: [-wallDist, 0,         0], rotY:  Math.PI / 2 },
-        { pos: [ wallDist, 0,         0], rotY: -Math.PI / 2 },
-        { pos: [        0, 0,  wallDist], rotY:  Math.PI     },
-      ];
+      const WALLS = [];
+      for (let i = 0; i < 8; i++) {
+        const a = i * Math.PI / 4;
+        WALLS.push({ pos: [wallDist * Math.sin(a), -treeRadius * 0.3, -wallDist * Math.cos(a)], rotY: -a });
+      }
 
       // Track the shared texture on the first wall so dispose only releases it once
       // instead of calling tex.dispose() four times via the traverse-dispose loop.
@@ -818,7 +861,7 @@ window._ga3dInit = function(graphData) {
 
   MAT = _buildMaterials();
   _buildScene('ga-tree3d-canvas-wrap');
-  _clock = new THREE.Clock();
+  _clock = new THREE.Timer();
   _initTarget = new THREE.Vector3(); // focal person sits at origin after layout
 
   let persons  = graphData.persons.map(n => Object.assign({}, n));
@@ -1015,6 +1058,7 @@ window._ga3dInit = function(graphData) {
 
   function loop() {
     _animId = requestAnimationFrame(loop);
+    _clock.update();
     const dt = _clock.getDelta();
     elapsed += dt;
 
@@ -1165,15 +1209,19 @@ window._ga3dInit = function(graphData) {
         _camera.up.lerp(_tmpBank, bankF);
         // Lerp the look target so the camera swings smoothly rather than snapping
         // when transitioning between widely-separated cluster centroids.
-        _controls.target.lerp(lookAt, Math.min(1, cdt * 2.5));
+        // Slower than 2.5 so distant cluster transitions feel like a graceful swing.
+        _controls.target.lerp(lookAt, Math.min(1, cdt * 1.5));
         _camera.lookAt(_controls.target);
-        // Fog pulse: subtle ripple adds depth to the fly-through
-        _scene.fog.density = _cinematicFogBase * (1 + 0.12 * Math.sin(_cinematicT * Math.PI * 8));
+        // Fog density driven by camera height: higher shots get more atmospheric haze,
+        // low close-ups clear out — reinforces depth at dramatic moments.
+        const normH = THREE.MathUtils.clamp((_camera.position.y - (_cinematicTreeMinY || 0)) / Math.max(1, (_cinematicTreeMaxY || 1) - (_cinematicTreeMinY || 0)), 0, 1);
+        _scene.fog.density = _cinematicFogBase * (1 + 0.35 * normH);
       }
     }
 
     _renderer.render(_scene, _camera);
   }
+  _clock.reset(); // snap the Timer's baseline to now so the first getDelta() is ~0
   loop();
 
   const loader = document.getElementById('ga-tree3d-loader');
@@ -1224,7 +1272,8 @@ window._ga3dDispose = function() {
     _renderer.dispose();
     if (_renderer.domElement.parentElement) _renderer.domElement.remove();
   }
-  _renderer = _scene = _camera = _clock = _sun = null;
+  if (_clock) { _clock.dispose(); _clock = null; }
+  _renderer = _scene = _camera = _sun = null;
   _onPointerDown = _onWheel = _onCanvasClick = _onCanvasTouchEnd = null;
   _ctrlV = _navReset = null;
   _navRadius = null;

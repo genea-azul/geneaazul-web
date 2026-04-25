@@ -34,7 +34,7 @@
             <div class="card-body">
               <div class="row g-2">
                 <div class="col-sm-6">
-                  <label class="form-label small fw-semibold" for="individualGivenName">Nombre</label>
+                  <label class="form-label small fw-semibold" for="individualGivenName">Nombre <span class="text-muted fw-normal">(requerido)</span></label>
                   <input type="text" class="form-control form-control-sm" id="individualGivenName" autocomplete="given-name">
                 </div>
                 <div class="col-sm-6">
@@ -47,16 +47,16 @@
                 </div>
                 <div class="col-sm-4">
                   <label class="form-label small fw-semibold" for="individualYearOfDeath">Año de fallecimiento</label>
-                  <input type="number" class="form-control form-control-sm" id="individualYearOfDeath" min="1600" max="9999">
+                  <input type="number" class="form-control form-control-sm" id="individualYearOfDeath" min="1600" max="9999" disabled>
                 </div>
                 <div class="col-sm-4 d-flex align-items-end pb-1">
                   <div class="form-check form-check-inline mb-0">
-                    <input class="form-check-input" type="checkbox" id="individualIsAlive">
+                    <input class="form-check-input" type="checkbox" id="individualIsAlive" checked>
                     <label class="form-check-label small" for="individualIsAlive">Vive</label>
                   </div>
                 </div>
                 <div class="col-sm-6">
-                  <label class="form-label small fw-semibold" for="individualPlaceOfBirth">País de nacimiento</label>
+                  <label class="form-label small fw-semibold" for="individualPlaceOfBirth">Lugar de nacimiento</label>
                   <input type="text" class="form-control form-control-sm" id="individualPlaceOfBirth">
                 </div>
                 <div class="col-sm-6">
@@ -116,16 +116,16 @@
                     </div>
                     <div class="col-sm-4">
                       <label class="form-label small fw-semibold" for="spouseYearOfDeath">Año de fallecimiento</label>
-                      <input type="number" class="form-control form-control-sm" id="spouseYearOfDeath" min="1600" max="9999">
+                      <input type="number" class="form-control form-control-sm" id="spouseYearOfDeath" min="1600" max="9999" disabled>
                     </div>
                     <div class="col-sm-4 d-flex align-items-end pb-1">
                       <div class="form-check form-check-inline mb-0">
-                        <input class="form-check-input" type="checkbox" id="spouseIsAlive">
+                        <input class="form-check-input" type="checkbox" id="spouseIsAlive" checked>
                         <label class="form-check-label small" for="spouseIsAlive">Vive</label>
                       </div>
                     </div>
                     <div class="col-sm-6">
-                      <label class="form-label small fw-semibold" for="spousePlaceOfBirth">País de nacimiento</label>
+                      <label class="form-label small fw-semibold" for="spousePlaceOfBirth">Lugar de nacimiento</label>
                       <input type="text" class="form-control form-control-sm" id="spousePlaceOfBirth">
                     </div>
                   </div>
@@ -155,16 +155,16 @@
                 </div>
                 <div class="col-sm-4">
                   <label class="form-label small fw-semibold" for="fatherYearOfDeath">Año de fallecimiento</label>
-                  <input type="number" class="form-control form-control-sm" id="fatherYearOfDeath" min="1600" max="9999">
+                  <input type="number" class="form-control form-control-sm" id="fatherYearOfDeath" min="1600" max="9999" disabled>
                 </div>
                 <div class="col-sm-4 d-flex align-items-end pb-1">
                   <div class="form-check form-check-inline mb-0">
-                    <input class="form-check-input" type="checkbox" id="fatherIsAlive">
+                    <input class="form-check-input" type="checkbox" id="fatherIsAlive" checked>
                     <label class="form-check-label small" for="fatherIsAlive">Vive</label>
                   </div>
                 </div>
                 <div class="col-sm-6">
-                  <label class="form-label small fw-semibold" for="fatherPlaceOfBirth">País de nacimiento</label>
+                  <label class="form-label small fw-semibold" for="fatherPlaceOfBirth">Lugar de nacimiento</label>
                   <input type="text" class="form-control form-control-sm" id="fatherPlaceOfBirth">
                 </div>
               </div>
@@ -192,16 +192,16 @@
                 </div>
                 <div class="col-sm-4">
                   <label class="form-label small fw-semibold" for="motherYearOfDeath">Año de fallecimiento</label>
-                  <input type="number" class="form-control form-control-sm" id="motherYearOfDeath" min="1600" max="9999">
+                  <input type="number" class="form-control form-control-sm" id="motherYearOfDeath" min="1600" max="9999" disabled>
                 </div>
                 <div class="col-sm-4 d-flex align-items-end pb-1">
                   <div class="form-check form-check-inline mb-0">
-                    <input class="form-check-input" type="checkbox" id="motherIsAlive">
+                    <input class="form-check-input" type="checkbox" id="motherIsAlive" checked>
                     <label class="form-check-label small" for="motherIsAlive">Vive</label>
                   </div>
                 </div>
                 <div class="col-sm-6">
-                  <label class="form-label small fw-semibold" for="motherPlaceOfBirth">País de nacimiento</label>
+                  <label class="form-label small fw-semibold" for="motherPlaceOfBirth">Lugar de nacimiento</label>
                   <input type="text" class="form-control form-control-sm" id="motherPlaceOfBirth">
                 </div>
               </div>
@@ -236,16 +236,16 @@
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="paternalGrandfatherYearOfDeath">Año de fallecimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="paternalGrandfatherYearOfDeath" min="1600" max="9999">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandfatherYearOfDeath" min="1600" max="9999" disabled>
                   </div>
                   <div class="col-sm-4 d-flex align-items-end pb-1">
                     <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="checkbox" id="paternalGrandfatherIsAlive">
+                      <input class="form-check-input" type="checkbox" id="paternalGrandfatherIsAlive" checked>
                       <label class="form-check-label small" for="paternalGrandfatherIsAlive">Vive</label>
                     </div>
                   </div>
                   <div class="col-sm-6">
-                    <label class="form-label small fw-semibold" for="paternalGrandfatherPlaceOfBirth">País de nacimiento</label>
+                    <label class="form-label small fw-semibold" for="paternalGrandfatherPlaceOfBirth">Lugar de nacimiento</label>
                     <input type="text" class="form-control form-control-sm" id="paternalGrandfatherPlaceOfBirth">
                   </div>
                 </div>
@@ -273,16 +273,16 @@
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="paternalGrandmotherYearOfDeath">Año de fallecimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="paternalGrandmotherYearOfDeath" min="1600" max="9999">
+                    <input type="number" class="form-control form-control-sm" id="paternalGrandmotherYearOfDeath" min="1600" max="9999" disabled>
                   </div>
                   <div class="col-sm-4 d-flex align-items-end pb-1">
                     <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="checkbox" id="paternalGrandmotherIsAlive">
+                      <input class="form-check-input" type="checkbox" id="paternalGrandmotherIsAlive" checked>
                       <label class="form-check-label small" for="paternalGrandmotherIsAlive">Vive</label>
                     </div>
                   </div>
                   <div class="col-sm-6">
-                    <label class="form-label small fw-semibold" for="paternalGrandmotherPlaceOfBirth">País de nacimiento</label>
+                    <label class="form-label small fw-semibold" for="paternalGrandmotherPlaceOfBirth">Lugar de nacimiento</label>
                     <input type="text" class="form-control form-control-sm" id="paternalGrandmotherPlaceOfBirth">
                   </div>
                 </div>
@@ -310,16 +310,16 @@
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="maternalGrandfatherYearOfDeath">Año de fallecimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="maternalGrandfatherYearOfDeath" min="1600" max="9999">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandfatherYearOfDeath" min="1600" max="9999" disabled>
                   </div>
                   <div class="col-sm-4 d-flex align-items-end pb-1">
                     <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="checkbox" id="maternalGrandfatherIsAlive">
+                      <input class="form-check-input" type="checkbox" id="maternalGrandfatherIsAlive" checked>
                       <label class="form-check-label small" for="maternalGrandfatherIsAlive">Vive</label>
                     </div>
                   </div>
                   <div class="col-sm-6">
-                    <label class="form-label small fw-semibold" for="maternalGrandfatherPlaceOfBirth">País de nacimiento</label>
+                    <label class="form-label small fw-semibold" for="maternalGrandfatherPlaceOfBirth">Lugar de nacimiento</label>
                     <input type="text" class="form-control form-control-sm" id="maternalGrandfatherPlaceOfBirth">
                   </div>
                 </div>
@@ -347,16 +347,16 @@
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label small fw-semibold" for="maternalGrandmotherYearOfDeath">Año de fallecimiento</label>
-                    <input type="number" class="form-control form-control-sm" id="maternalGrandmotherYearOfDeath" min="1600" max="9999">
+                    <input type="number" class="form-control form-control-sm" id="maternalGrandmotherYearOfDeath" min="1600" max="9999" disabled>
                   </div>
                   <div class="col-sm-4 d-flex align-items-end pb-1">
                     <div class="form-check form-check-inline mb-0">
-                      <input class="form-check-input" type="checkbox" id="maternalGrandmotherIsAlive">
+                      <input class="form-check-input" type="checkbox" id="maternalGrandmotherIsAlive" checked>
                       <label class="form-check-label small" for="maternalGrandmotherIsAlive">Vive</label>
                     </div>
                   </div>
                   <div class="col-sm-6">
-                    <label class="form-label small fw-semibold" for="maternalGrandmotherPlaceOfBirth">País de nacimiento</label>
+                    <label class="form-label small fw-semibold" for="maternalGrandmotherPlaceOfBirth">Lugar de nacimiento</label>
                     <input type="text" class="form-control form-control-sm" id="maternalGrandmotherPlaceOfBirth">
                   </div>
                 </div>

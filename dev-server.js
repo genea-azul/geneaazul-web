@@ -78,7 +78,7 @@ var MOCK_SEARCH_FAMILY = {
       dateOfBirth: '15 MAR 1945',
       dateOfDeath: '20 JUN 2010',
       placeOfBirth: 'Azul, Buenos Aires',
-      personsCountInTree: 70,
+      personsCountInTree: 72,
       surnamesCountInTree: 8,
       ancestryGenerations: { ascending: 3, directDescending: 2 },
       maxDistantRelationship: {
@@ -142,19 +142,19 @@ var MOCK_PDF_BASE64 = 'JVBERi0xLjAKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgU
   'MDAwMCBuIAp0cmFpbGVyPDwvU2l6ZSA0L1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKMTkwCiUlRU9G';
 
 // GET /api/search/family-tree/:uuid/graphJson — mock graph for 3D viewer
-// 70 persons, gen+2→gen-2, 8-child family, 3-marriage person, endogamy on two levels
+// 72 persons, gen+2→gen-2, 8-child family, 3-marriage person, endogamy on two levels
 var MOCK_GRAPH = {
   focalPersonId: 1,
   truncated: false,
-  totalPersons: 70,
+  totalPersons: 72,
   persons: [
     // Gen +2 — grandparents (6 people)
-    { id: 51, displayName: 'Salvatore Ferrara',   sex: 'M', isAlive: false, generation:  2, relationship: 'abuelo',          dateOfBirth: '12 MAR 1872', dateOfDeath: '5 NOV 1948' },
+    { id: 51, displayName: 'Salvatore Ferrara',   sex: 'M', isAlive: false, generation:  2, relationship: 'abuelo',          dateOfBirth: null,          dateOfDeath: '5 NOV 1948' },
     { id: 52, displayName: 'Concetta Romano',     sex: 'F', isAlive: false, generation:  2, relationship: 'abuela',          dateOfBirth: '8 JUL 1876',  dateOfDeath: '14 FEB 1952' },
-    { id: 53, displayName: 'Władysław Nowak',     sex: 'M', isAlive: false, generation:  2, relationship: 'abuelo',          dateOfBirth: '3 SEP 1869',  dateOfDeath: '22 OCT 1942' },
-    { id: 54, displayName: 'Zofia Kowalski',      sex: 'F', isAlive: false, generation:  2, relationship: 'abuela',          dateOfBirth: '18 APR 1873', dateOfDeath: '7 JAN 1945' },
-    { id: 55, displayName: 'Carlos García',       sex: 'M', isAlive: false, generation:  2, relationship: 'abuelo',          dateOfBirth: '29 JUN 1878', dateOfDeath: '11 MAR 1955' },
-    { id: 56, displayName: 'Rosa González',       sex: 'F', isAlive: false, generation:  2, relationship: 'abuela',          dateOfBirth: '5 DEC 1880',  dateOfDeath: '30 SEP 1960' },
+    { id: 53, displayName: 'Władysław Nowak',     sex: 'M', isAlive: false, generation:  2, relationship: 'abuelo',          dateOfBirth: '3 SEP 1869',  dateOfDeath: null },
+    { id: 54, displayName: 'Zofia Kowalski',      sex: 'F', isAlive: false, generation:  2, relationship: 'abuela',          dateOfBirth: '18 APR 1873', dateOfDeath: null },
+    { id: 55, displayName: 'Carlos García',       sex: 'M', isAlive: false, generation:  2, relationship: 'abuelo',          dateOfBirth: null,          dateOfDeath: '11 MAR 1955' },
+    { id: 56, displayName: 'Rosa González',       sex: 'F', isAlive: false, generation:  2, relationship: 'abuela',          dateOfBirth: null,          dateOfDeath: null },
 
     // Gen +1 — 8 Ferrara children (F1, >6 ✓), 3 Nowak, 2 García
     { id: 11, displayName: 'Giuseppe Ferrara',    sex: 'M', isAlive: false, generation:  1, relationship: 'padre',           dateOfBirth: '3 FEB 1895',  dateOfDeath: '12 JUL 1972' },
@@ -238,7 +238,11 @@ var MOCK_GRAPH = {
 
     // Gen -2 — children of 2nd-cousin marriage F18: Claudio(90)×Valentina(93) — ENDOGAMY Lv.2
     { id: 96, displayName: 'Luca Ferrara',        sex: 'M', isAlive: true,  generation: -2, relationship: 'nieto',           dateOfBirth: '6 FEB 1978' },
-    { id: 97, displayName: 'Chiara Ferrara',      sex: 'F', isAlive: true,  generation: -2, relationship: 'nieta',           dateOfBirth: '30 AUG 1981' }
+    { id: 97, displayName: 'Chiara Ferrara',      sex: 'F', isAlive: true,  generation: -2, relationship: 'nieta',           dateOfBirth: '30 AUG 1981' },
+
+    // Gen -2 — children of single husband F19: Roberto(94)
+    { id: 100, displayName: 'Mauro Ferrara',       sex: 'M', isAlive: true,  generation: -2, relationship: 'nieto',           dateOfBirth: null },
+    { id: 101, displayName: 'Ailén Ferrara',       sex: 'F', isAlive: true,  generation: -2, relationship: 'nieta',           dateOfBirth: null }
   ],
   families: [
     // Gen+2 → Gen+1
@@ -267,7 +271,10 @@ var MOCK_GRAPH = {
     { id: 'F17', husbandIds: [3],  wifeIds: [85], childIds: [98,99]                   }, // 1st-cousin endogamy (Nowak) ✓
 
     // Gen-1 × Gen-1
-    { id: 'F18', husbandIds: [90], wifeIds: [93], childIds: [96,97]                   }  // 2nd-cousin endogamy ✓
+    { id: 'F18', husbandIds: [90], wifeIds: [93], childIds: [96,97]                   }, // 2nd-cousin endogamy ✓
+
+    // Gen-1 single husband
+    { id: 'F19', husbandIds: [94], wifeIds: [],   childIds: [100,101]                 }
   ]
 };
 
@@ -299,7 +306,7 @@ var server = http.createServer(function(req, res) {
     if (url === '/api/birthday/azul-today')                return sendJson(res, MOCK_AZUL_TODAY);
     if (url === '/api/birthday/ephemerides-this-month')    return sendJson(res, MOCK_EPHEMERIDES);
     if (/^\/api\/search\/family-tree\/[^/]+\/plainPdf$/.test(url)) {
-      return sendJson(res, { pdf: MOCK_PDF_BASE64 });
+      return sendPdf(res, MOCK_PDF_BASE64);
     }
     if (/^\/api\/search\/family-tree\/[^/]+\/graphJson$/.test(url)) {
       return sendJson(res, MOCK_GRAPH);
@@ -366,6 +373,12 @@ function sendJson(res, data) {
   var body = JSON.stringify(data);
   res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
   res.end(body);
+}
+
+function sendPdf(res, base64) {
+  var buf = Buffer.from(base64, 'base64');
+  res.writeHead(200, { 'Content-Type': 'application/pdf', 'Content-Length': buf.length, 'Access-Control-Allow-Origin': '*' });
+  res.end(buf);
 }
 
 function send404(res, url) {

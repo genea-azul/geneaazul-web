@@ -56,6 +56,20 @@ GeneaAzul.connections = (function() {
       });
   }
 
+  function finalizeConn($btn, $resultCard) {
+    $btn.prop('disabled', false);
+    $resultCard.get(0).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function validateYears(rq) {
+    var currentYear = parseInt(new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric' }), 10);
+    var years = [rq.person1.yearOfBirth, rq.person2.yearOfBirth];
+    for (var i = 0; i < years.length; i++) {
+      if (years[i] !== null && (years[i] < 1600 || years[i] > currentYear)) return true;
+    }
+    return false;
+  }
+
   function doSearch() {
     var $btn = $('#searchConnectionsBtn');
     var $resultCard = $('#searchConnectionsResultCard');
@@ -78,10 +92,29 @@ GeneaAzul.connections = (function() {
       }
     };
 
-    if (isRequestEmpty(rq)) {
-      $resultBody.html('<p><b>Error:</b> Tenés que llenar todos los datos.</p>');
-      $btn.prop('disabled', false);
-      $resultCard.get(0).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    var fieldChecks = [
+      { val: rq.person1.givenName,   id: '#person1GivenName',   msg: 'Ingresá el nombre de la Persona 1.' },
+      { val: rq.person1.surname,     id: '#person1Surname',     msg: 'Ingresá el apellido de la Persona 1.' },
+      { val: rq.person1.yearOfBirth, id: '#person1YearOfBirth', msg: 'Ingresá el año de nacimiento de la Persona 1.' },
+      { val: rq.person2.givenName,   id: '#person2GivenName',   msg: 'Ingresá el nombre de la Persona 2.' },
+      { val: rq.person2.surname,     id: '#person2Surname',     msg: 'Ingresá el apellido de la Persona 2.' },
+      { val: rq.person2.yearOfBirth, id: '#person2YearOfBirth', msg: 'Ingresá el año de nacimiento de la Persona 2.' }
+    ];
+
+    for (var i = 0; i < fieldChecks.length; i++) {
+      if (!fieldChecks[i].val) {
+        $resultBody.html('<p><b>Error:</b> ' + fieldChecks[i].msg + '</p>');
+        finalizeConn($btn, $resultCard);
+        var $field = $(fieldChecks[i].id);
+        $field.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        $field.trigger('focus');
+        return;
+      }
+    }
+
+    if (validateYears(rq)) {
+      $resultBody.html('<p><b>Error:</b> Verificá los años ingresados: tienen que estar entre 1600 y el año actual.</p>');
+      finalizeConn($btn, $resultCard);
       return;
     }
 
@@ -110,8 +143,7 @@ GeneaAzul.connections = (function() {
           $resultBody.append(buildConnectionChain(data.connections));
         }
 
-        $btn.prop('disabled', false);
-        $resultCard.get(0).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        finalizeConn($btn, $resultCard);
       },
       function(xhr) {
         var code = xhr.responseJSON && xhr.responseJSON.errorCode ? xhr.responseJSON.errorCode : null;
@@ -124,15 +156,9 @@ GeneaAzul.connections = (function() {
         } else {
           $resultBody.html(i18n.displayErrorCodeInSpanish('ERROR'));
         }
-        $btn.prop('disabled', false);
-        $resultCard.get(0).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        finalizeConn($btn, $resultCard);
       }
     );
-  }
-
-  function isRequestEmpty(rq) {
-    return !rq.person1 || !rq.person1.givenName || !rq.person1.surname || !rq.person1.yearOfBirth ||
-           !rq.person2 || !rq.person2.givenName || !rq.person2.surname || !rq.person2.yearOfBirth;
   }
 
   /* Build a single chain card from the flat connections array.

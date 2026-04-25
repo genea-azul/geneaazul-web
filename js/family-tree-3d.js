@@ -21,6 +21,9 @@ GeneaAzul.familyTree3d = (function() {
   // Focus restoration — stash the element that opened the modal so keyboard/AT
   // users get returned to it on close.
   var _lastFocus = null;
+  // History API — true while the modal's pushState entry is current, so back-button
+  // closes the modal instead of leaving the page.
+  var _historyPushed = false;
 
   function init(uuid) {
     if (_currentUuid) return;
@@ -79,6 +82,13 @@ GeneaAzul.familyTree3d = (function() {
     if (_ctrlInterval) { clearInterval(_ctrlInterval); _ctrlInterval = null; }
   }
 
+  function _handlePopstate() {
+    if (!_currentUuid) return;
+    _historyPushed = false;
+    $(window).off('popstate.ga3d');
+    dispose();
+  }
+
   function _openModal() {
     var $modal = $('#ga-tree3d-modal');
     $('#ga-tree3d-error').hide();
@@ -91,9 +101,22 @@ GeneaAzul.familyTree3d = (function() {
     // Hide background from assistive tech while the modal is open
     var $main = $('#main-content');
     if ($main.length) $main.attr('aria-hidden', 'true');
+    // Push a history entry so the phone back button closes the modal instead of leaving the page.
+    history.pushState({ ga3dModal: true }, '');
+    _historyPushed = true;
+    $(window).on('popstate.ga3d', _handlePopstate);
   }
 
   function _closeModal() {
+    $(window).off('popstate.ga3d');
+    // If we pushed a modal history entry and the user closed via X/Escape/programmatic dispose
+    // (not via the back button), replace the current entry with a plain one so the modal state
+    // doesn't litter the history stack. Using replaceState (not history.back()) avoids
+    // interfering with any router navigation that may have already pushed a new entry.
+    if (_historyPushed) {
+      _historyPushed = false;
+      history.replaceState(null, '', window.location.href);
+    }
     $('#ga-tree3d-modal').hide();
     document.body.style.overflow = '';
     var $main = $('#main-content');

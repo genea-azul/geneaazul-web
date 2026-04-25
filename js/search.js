@@ -186,9 +186,10 @@ GeneaAzul.search = (function() {
     var $section = $('#buscar-section');
     // Clear text and number inputs (preserve contact)
     $section.find('input[type=text]:not(#individualContact), input[type=number]').val('');
-    // Uncheck checkboxes and re-enable year-of-death fields
+    // Reset checkboxes: uncheck all, then restore IsAlive defaults
     $section.find('input[type=checkbox]').prop('checked', false);
-    $section.find('input[type=number][id$="YearOfDeath"]').prop('disabled', false);
+    $section.find('input[type=checkbox][id$="IsAlive"]').prop('checked', true);
+    $section.find('input[type=number][id$="YearOfDeath"]').prop('disabled', true);
     // Deselect radio buttons (sex toggles)
     $section.find('input[type=radio]').prop('checked', false);
     // Reset card sex colors
@@ -220,15 +221,33 @@ GeneaAzul.search = (function() {
     var rq = buildRequest();
     postProcessRequest(rq);
 
-    if (isRequestEmpty(rq)) {
-      $resultBody.html('<p><b>Error:</b> Llená por lo menos un dato.</p>');
+    if (!rq.individual || !rq.individual.givenName) {
+      $resultBody.html('<p><b>Error:</b> Ingresá el nombre de la persona principal.</p>');
+      finalizeSearch($btn, $resultCard);
+      var $name = $('#individualGivenName');
+      $name.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $name.trigger('focus');
+      return;
+    }
+
+    if (getSurnamesInRequest(rq).length === 0) {
+      $resultBody.html('<p><b>Error:</b> Ingresá al menos un apellido para buscar.</p>');
+      finalizeSearch($btn, $resultCard);
+      var $surname = $('#individualSurname');
+      $surname.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $surname.trigger('focus');
+      return;
+    }
+
+    if (validateYears(rq)) {
+      $resultBody.html('<p><b>Error:</b> Verificá los años ingresados: tienen que estar entre 1600 y el año actual, y el año de nacimiento no puede ser mayor que el de fallecimiento.</p>');
       finalizeSearch($btn, $resultCard);
       return;
     }
 
     if (!rq.contact) {
       $resultBody.html('<p><b>Error:</b> Ingresá tu contacto (email, WhatsApp o @instagram) para poder avisarte si encontramos familia.</p>');
-      $btn.prop('disabled', false);
+      finalizeSearch($btn, $resultCard);
       var $contact = $('#individualContact');
       $contact.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
       $contact.trigger('focus');
@@ -255,9 +274,6 @@ GeneaAzul.search = (function() {
             $resultBody.html('<p>⚠ Se produjo un error en la búsqueda. ⚠</p>');
             data.errors.forEach(function(code) { $resultBody.append(i18n.displayErrorCodeInSpanish(code)); });
           } else if (!data.potentialResults) {
-            if (getSurnamesInRequest(rq).length === 0) {
-              $resultBody.html('<p>⚠ No se encontraron resultados. Por favor ingresá un apellido. ⚠</p>');
-            } else {
               $resultBody
                 .html('<p>🔍 No se encontraron resultados. 🔎</p>')
                 .append('<p>Editá la búsqueda agregando <span class="fw-semibold">fechas</span> o completando nombres de <span class="fw-semibold">padres</span> y <span class="fw-semibold">parejas</span>.</p>')
@@ -269,7 +285,6 @@ GeneaAzul.search = (function() {
               if (rq.individual && rq.individual.sex) {
                 $resultBody.append('<p>Verificá que el <span class="text-danger fw-semibold">sexo</span> de la persona esté bien seleccionado.</p>');
               }
-            }
           } else {
             $resultBody
               .html('<p>⚠ La búsqueda es ambigua. ⚠</p>')
@@ -397,13 +412,6 @@ GeneaAzul.search = (function() {
            !person.yearOfDeath && !person.placeOfBirth;
   }
 
-  function isRequestEmpty(rq) {
-    for (var i = 0; i < personsInRequest.length; i++) {
-      if (rq[personsInRequest[i]]) return false;
-    }
-    return true;
-  }
-
   function getSurnamesInRequest(rq) {
     var surnames = [];
     personsInRequest.forEach(function(p) {
@@ -412,6 +420,19 @@ GeneaAzul.search = (function() {
       }
     });
     return surnames;
+  }
+
+  function validateYears(rq) {
+    var currentYear = parseInt(new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric' }), 10);
+    for (var i = 0; i < personsInRequest.length; i++) {
+      var p = rq[personsInRequest[i]];
+      if (!p) continue;
+      var yob = p.yearOfBirth, yod = p.yearOfDeath;
+      if (yob !== null && (yob < 1600 || yob > currentYear)) return true;
+      if (yod !== null && (yod < 1600 || yod > currentYear)) return true;
+      if (yob !== null && yod !== null && yob > yod) return true;
+    }
+    return false;
   }
 
   /* ── Person result card builder ─────────────────────────────────── */
@@ -453,7 +474,7 @@ GeneaAzul.search = (function() {
     $body.append($bd);
 
     if (person.placeOfBirth) {
-      $body.append($('<div>').addClass('mt-1').html('País de nacimiento: ' + utils.escHtml(person.placeOfBirth)));
+      $body.append($('<div>').addClass('mt-1').html('Lugar de nacimiento: ' + utils.escHtml(person.placeOfBirth)));
     }
 
     if (person.parents && person.parents.length > 0) {
@@ -618,76 +639,37 @@ GeneaAzul.search = (function() {
       $btn.prop('disabled', false).removeClass('disabled');
     }
 
-    utils.apiGet(
-      cfg.apiBaseUrl + '/api/search/family-tree/' + data.personUuid + '/plainPdf',
-      function(pdfData) {
-        // Validate shape and guard the whole decode path — a missing/malformed
-        // payload used to throw inside the success handler, which jQuery would
-        // swallow into console.error while the button stayed disabled forever.
-        if (!pdfData || typeof pdfData.pdf !== 'string' || !pdfData.pdf.length) {
-          if (window.console && console.error) console.error('[pdf] empty or malformed payload', pdfData);
-          showPdfError('ERROR');
-          return;
-        }
-        try {
-          var b64 = pdfData.pdf.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
-          // Restore base64 padding stripped by url-safe encoders (iOS Safari's atob is strict)
-          var pad = b64.length % 4;
-          if (pad === 2) b64 += '==';
-          else if (pad === 3) b64 += '=';
-          var binary = atob(b64);
-          var bytes = new Uint8Array(binary.length);
-          for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
-          // PDFs always start with "%PDF"; anything else would download a corrupt file.
-          if (bytes.length < 4 ||
-              bytes[0] !== 0x25 || bytes[1] !== 0x50 || bytes[2] !== 0x44 || bytes[3] !== 0x46) {
-            if (window.console && console.error) console.error('[pdf] decoded payload is not a PDF');
-            showPdfError('ERROR');
-            return;
-          }
-          var blob = new Blob([bytes], { type: 'application/pdf' });
-          var url = URL.createObjectURL(blob);
-          if (iosWin) {
-            // Navigate the pre-opened window to the blob URL. iOS will show the PDF
-            // in its viewer; the user can save it via the Share sheet (⬆).
-            iosWin.location.href = url;
-            setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
-          } else {
-            var link = document.createElement('a');
-            link.href = url;
-            link.download = 'familiares-' + data.personUuid + '.pdf';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
-          }
-          $btn.prop('disabled', false).removeClass('disabled');
-        } catch (err) {
-          if (window.console && console.error) console.error('[pdf] decode failed:', err);
-          showPdfError('ERROR');
-        }
-      },
-      function(xhr) {
-        // Distinguish network loss (xhr.status === 0) from server-side errors so
-        // the user can act on the right problem.
-        // apiGet has no dataType:'json', so on error responses (e.g. Fly.io 502/503
-        // HTML pages during cold-start) jQuery won't auto-parse responseJSON — try
-        // parsing responseText manually as a fallback.
-        var code;
-        var json = (xhr && xhr.responseJSON) ||
-                   (function() { try { return JSON.parse(xhr && xhr.responseText); } catch (e) { return null; } })();
-        if (json && json.errorCode) {
-          code = json.errorCode;
-        } else if (xhr && xhr.status === 0) {
-          code = 'NETWORK';
-        } else if (xhr && xhr.status === 429) {
-          code = 'TOO-MANY-REQUESTS';
-        } else {
-          code = 'ERROR';
-        }
-        showPdfError(code);
+    var req = new XMLHttpRequest();
+    req.open('GET', cfg.apiBaseUrl + '/api/search/family-tree/' + data.personUuid + '/plainPdf', true);
+    req.responseType = 'blob';
+    req.onload = function() {
+      if (req.status !== 200) {
+        showPdfError(req.status === 429 ? 'TOO-MANY-REQUESTS' : 'ERROR');
+        return;
       }
-    );
+      try {
+        var blob = req.response;
+        var url = URL.createObjectURL(blob);
+        if (iosWin) {
+          iosWin.location.href = url;
+          setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
+        } else {
+          var link = document.createElement('a');
+          link.href = url;
+          link.download = 'familiares-' + data.personUuid + '.pdf';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
+        }
+        $btn.prop('disabled', false).removeClass('disabled');
+      } catch (err) {
+        if (window.console && console.error) console.error('[pdf] blob URL failed:', err);
+        showPdfError('ERROR');
+      }
+    };
+    req.onerror = function() { showPdfError('NETWORK'); };
+    req.send();
   }
 
   /* ── Surname search (appended to results) ────────────────────────── */
