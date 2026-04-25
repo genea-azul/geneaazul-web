@@ -59,6 +59,16 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/theme-heritage.css" id="theme-stylesheet">
 
+  <!-- Import map polyfill (Safari < 16.4 compat) + map for Three.js addon transitive imports -->
+  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1/dist/es-module-shims.min.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.min.js"
+    }
+  }
+  </script>
+
 </head>
 <body class="theme-heritage">
 
