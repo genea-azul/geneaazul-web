@@ -304,7 +304,7 @@ GeneaAzul.stats = (function() {
               ? '<span class="ga-tooltip" data-bs-toggle="tooltip" data-bs-title="' + escAttr(p.deathPlace) + '">' + escAttr(p.deathYear) + '</span>'
               : escAttr(p.deathYear))
           : '?');
-    return ' <span class="small text-secondary px-1">(' + birth + '&ndash;' + death + ')</span>';
+    return ' <span class="small text-secondary px-1">(' + birth + '–' + death + ')</span>';
   }
 
   function initTooltips($container) {

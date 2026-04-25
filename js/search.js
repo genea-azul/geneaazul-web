@@ -221,13 +221,13 @@ GeneaAzul.search = (function() {
     postProcessRequest(rq);
 
     if (isRequestEmpty(rq)) {
-      $resultBody.html('<p><b>Error:</b> Llen&aacute; por lo menos un dato.</p>');
+      $resultBody.html('<p><b>Error:</b> Llená por lo menos un dato.</p>');
       finalizeSearch($btn, $resultCard);
       return;
     }
 
     if (!rq.contact) {
-      $resultBody.html('<p><b>Error:</b> Ingres&aacute; tu contacto (email, WhatsApp o @instagram) para poder avisarte si encontramos familia.</p>');
+      $resultBody.html('<p><b>Error:</b> Ingresá tu contacto (email, WhatsApp o @instagram) para poder avisarte si encontramos familia.</p>');
       $btn.prop('disabled', false);
       var $contact = $('#individualContact');
       $contact.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -252,28 +252,28 @@ GeneaAzul.search = (function() {
 
         if (people.length === 0) {
           if (data.errors && data.errors.length > 0) {
-            $resultBody.html('<p>&#9888;&#65039; Se produjo un error en la b&uacute;squeda. &#9888;&#65039;</p>');
+            $resultBody.html('<p>⚠ Se produjo un error en la búsqueda. ⚠</p>');
             data.errors.forEach(function(code) { $resultBody.append(i18n.displayErrorCodeInSpanish(code)); });
           } else if (!data.potentialResults) {
             if (getSurnamesInRequest(rq).length === 0) {
-              $resultBody.html('<p>&#9888;&#65039; No se encontraron resultados. Por favor ingres&aacute; un apellido. &#9888;&#65039;</p>');
+              $resultBody.html('<p>⚠ No se encontraron resultados. Por favor ingresá un apellido. ⚠</p>');
             } else {
               $resultBody
-                .html('<p>&#128270; No se encontraron resultados. &#128269;</p>')
-                .append('<p>Edit&aacute; la b&uacute;squeda agregando <span class="fw-semibold">fechas</span> o completando nombres de <span class="fw-semibold">padres</span> y <span class="fw-semibold">parejas</span>.</p>')
+                .html('<p>🔍 No se encontraron resultados. 🔎</p>')
+                .append('<p>Editá la búsqueda agregando <span class="fw-semibold">fechas</span> o completando nombres de <span class="fw-semibold">padres</span> y <span class="fw-semibold">parejas</span>.</p>')
                 .append($('<p>').addClass('text-center')
-                  .html('&iexcl;Solicit&aacute; acceso al &aacute;rbol y carg&aacute; info!')
+                  .html('¡Solicitá acceso al árbol y cargá info!')
                   .append($('<a>').addClass('link-secondary text-decoration-none ms-2')
                     .attr('href', 'https://instagram.com/_u/genea.azul').attr('target', '_blank').attr('rel', 'noopener')
                     .append($('<i>').addClass('bi bi-instagram'))));
               if (rq.individual && rq.individual.sex) {
-                $resultBody.append('<p>Verific&aacute; que el <span class="text-danger fw-semibold">sexo</span> de la persona est&eacute; bien seleccionado.</p>');
+                $resultBody.append('<p>Verificá que el <span class="text-danger fw-semibold">sexo</span> de la persona esté bien seleccionado.</p>');
               }
             }
           } else {
             $resultBody
-              .html('<p>&#9888;&#65039; La b&uacute;squeda es ambigua. &#9888;&#65039;</p>')
-              .append('<p>Refin&aacute; la b&uacute;squeda agregando <span class="fw-semibold">fechas</span> o completando nombres de <span class="fw-semibold">padres</span> y <span class="fw-semibold">parejas</span>.</p>')
+              .html('<p>⚠ La búsqueda es ambigua. ⚠</p>')
+              .append('<p>Refiná la búsqueda agregando <span class="fw-semibold">fechas</span> o completando nombres de <span class="fw-semibold">padres</span> y <span class="fw-semibold">parejas</span>.</p>')
               .append('<p><b>Potenciales resultados:</b> ' + utils.escHtml(data.potentialResults) + '</p>');
           }
         }
@@ -283,7 +283,7 @@ GeneaAzul.search = (function() {
           $resultBody.append(
             $('<div>').addClass('card border-dark mt-4')
               .attr('id', 'searchSurnamesResultCard')
-              .append($('<div>').addClass('card-header text-bg-dark').html('Informaci&oacute;n de apellidos'))
+              .append($('<div>').addClass('card-header text-bg-dark').html('Información de apellidos'))
               .append($('<div>').addClass('card-body overflow-auto')
                 .html($('<span>').addClass('spinner-border spinner-border-sm').attr('role', 'status')))
           );
@@ -295,7 +295,7 @@ GeneaAzul.search = (function() {
         }
         } catch (err) {
           if (window.console && console.error) console.error('[search] render error:', err);
-          $resultBody.html('<p>&#9888;&#65039; Ocurri&oacute; un error al mostrar los resultados. Por favor intent&aacute; de nuevo. &#9888;&#65039;</p>');
+          $resultBody.html('<p>⚠ Ocurrió un error al mostrar los resultados. Por favor intentá de nuevo. ⚠</p>');
           finalizeSearch($btn, $resultCard);
         }
       },
@@ -445,15 +445,15 @@ GeneaAzul.search = (function() {
       $bd.html('?');
     }
     if (person.dateOfDeath) {
-      $bd.append(' &ndash; f. ' + i18n.displayDateInSpanish(person.dateOfDeath));
+      $bd.append(' – f. ' + i18n.displayDateInSpanish(person.dateOfDeath));
     } else {
-      if (person.dateOfBirth) $bd.append(' &ndash; ');
+      if (person.dateOfBirth) $bd.append(' – ');
       $bd.append(person.isAlive ? 'Vive' : (person.sex === 'F' ? 'Fallecida' : 'Fallecido'));
     }
     $body.append($bd);
 
     if (person.placeOfBirth) {
-      $body.append($('<div>').addClass('mt-1').html('Pa&iacute;s de nacimiento: ' + utils.escHtml(person.placeOfBirth)));
+      $body.append($('<div>').addClass('mt-1').html('País de nacimiento: ' + utils.escHtml(person.placeOfBirth)));
     }
 
     if (person.parents && person.parents.length > 0) {
@@ -490,13 +490,13 @@ GeneaAzul.search = (function() {
     if (hasPC || hasSC || hasAG || hasMD || hasDPT) {
       var $tul = $('<ul>').addClass('mb-0');
       if (hasAG) {
-        $tul.append($('<li>').html('Ascendencia: ' + i18n.getCardinal(person.ancestryGenerations.ascending, 'generaci&oacute;n', 'generaciones')));
-        $tul.append($('<li>').html('Descendencia: ' + i18n.getCardinal(person.ancestryGenerations.directDescending, 'generaci&oacute;n', 'generaciones')));
+        $tul.append($('<li>').html('Ascendencia: ' + i18n.getCardinal(person.ancestryGenerations.ascending, 'generación', 'generaciones')));
+        $tul.append($('<li>').html('Descendencia: ' + i18n.getCardinal(person.ancestryGenerations.directDescending, 'generación', 'generaciones')));
       }
       if (hasPC) $tul.append($('<li>').html('Cantidad de familiares: <b>' + utils.escHtml(String(person.personsCountInTree)) + '</b>'));
       if (hasSC) $tul.append($('<li>').html('Cantidad de apellidos: <b>' + utils.escHtml(String(person.surnamesCountInTree)) + '</b>'));
       if (hasMD) {
-        $tul.append($('<li>').html('Relaci&oacute;n m&aacute;s distante:'));
+        $tul.append($('<li>').html('Relación más distante:'));
         $tul.append($('<ul>').addClass('mb-0')
           .append($('<li>').html(i18n.displayRelationshipInSpanish(person.maxDistantRelationship)))
           .append($('<li>').html(i18n.displayNameInSpanish(person.maxDistantRelationship.personName))));
@@ -517,20 +517,20 @@ GeneaAzul.search = (function() {
         });
         $tul.append($('<li>').html('Personas destacadas relacionadas:')).append($dpDiv);
       }
-      $body.append($('<div>').addClass('mt-1').html('Informaci&oacute;n en el &aacute;rbol: ').append($tul));
+      $body.append($('<div>').addClass('mt-1').html('Información en el árbol: ').append($tul));
     }
 
     if (person.ancestryCountries && person.ancestryCountries.length > 0) {
       var $cul = $('<ul>').addClass('mb-0');
       person.ancestryCountries.forEach(function(c) { $cul.append($('<li>').text(c)); });
-      $body.append($('<div>').addClass('mt-1').html('Pa&iacute;ses en su ascendencia: ').append($cul));
+      $body.append($('<div>').addClass('mt-1').html('Países en su ascendencia: ').append($cul));
     }
 
     var uid = person.uuid;
     $body
       .append($('<div>').addClass('mt-2 text-center').attr('id', 'search-family-tree-wait-sign-' + uid)
         .append($('<span>').addClass('spinner-border spinner-border-sm me-1').attr('role', 'status'))
-        .append('Generando datos de familiares,<br>esper&aacute; unos segundos...'))
+        .append('Generando datos de familiares,<br>esperá unos segundos...'))
       .append($('<div>').addClass('mt-2 text-center')
         .append($('<a>').addClass('btn btn-sm btn-dark search-family-tree-btn disabled')
           .attr('id', 'search-family-tree-btn-' + uid)
@@ -544,7 +544,7 @@ GeneaAzul.search = (function() {
           .attr('href', cfg.apiBaseUrl + '/family-tree/' + uid + (cfg.obfuscateLiving ? '' : '?f=0'))
           .attr('target', '_blank').attr('rel', 'noopener noreferrer')
           .attr('tabindex', '-1')
-          .html('<i class="bi bi-diagram-3-fill me-1"></i>Ver &aacute;rbol geneal&oacute;gico 2D')))
+          .html('<i class="bi bi-diagram-3-fill me-1"></i>Ver árbol genealógico 2D')))
       .append($('<div>').addClass('mt-1 text-center d-flex align-items-center justify-content-center gap-2')
         .append($('<button>').addClass('btn btn-sm btn-dark view-family-tree-3d-btn disabled')
           .attr('id', 'view-family-tree-3d-btn-' + uid)
@@ -552,7 +552,7 @@ GeneaAzul.search = (function() {
           .on('click', { personUuid: uid }, function(e) {
             GeneaAzul.familyTree3d.init(e.data.personUuid);
           })
-          .html('<i class="bi bi-box-fill me-1"></i>Ver &aacute;rbol geneal&oacute;gico 3D'))
+          .html('<i class="bi bi-box-fill me-1"></i>Ver árbol genealógico 3D'))
         .append($('<span>').addClass('ga-tree3d-beta-badge').text('Versión de prueba')))
       .append($('<div>').addClass('d-none text-center mt-2').attr('id', 'search-family-tree-error-' + uid));
 
@@ -726,10 +726,10 @@ GeneaAzul.search = (function() {
     if (r.countries && r.countries.length > 0) {
       var $cul = $('<ul>').addClass('mb-0');
       r.countries.forEach(function(c) { $cul.append($('<li>').text(c)); });
-      $body.append($('<div>').addClass('mt-1').html('Pa&iacute;ses: ').append($cul));
+      $body.append($('<div>').addClass('mt-1').html('Países: ').append($cul));
     }
     if (r.firstSeenYear != null && r.lastSeenYear != null) {
-      $body.append($('<div>').addClass('mt-1').html('Rango de a&ntilde;os: ' + utils.escHtml(String(r.firstSeenYear)) + '&ndash;' + utils.escHtml(String(r.lastSeenYear))));
+      $body.append($('<div>').addClass('mt-1').html('Rango de años: ' + utils.escHtml(String(r.firstSeenYear)) + '–' + utils.escHtml(String(r.lastSeenYear))));
     }
     return $card.append($body);
   }

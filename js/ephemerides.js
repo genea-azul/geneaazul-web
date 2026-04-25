@@ -71,7 +71,7 @@ GeneaAzul.ephemerides = (function() {
     // Event-type badge: small icon at the bottom-right of the photo circle
     var typeBadgeHtml = isBirth
       ? '<span class="ga-ephem-type-badge ga-ephem-birth" title="Cumpleaños"><i class="bi bi-balloon-heart"></i></span>'
-      : '<span class="ga-ephem-type-badge ga-ephem-death" title="Fallecimiento">&dagger;</span>';
+      : '<span class="ga-ephem-type-badge ga-ephem-death" title="Fallecimiento">†</span>';
 
     var yearHtml = year
       ? '<span class="ga-birthday-year">(' + GeneaAzul.utils.escHtml(year) + ')</span>'

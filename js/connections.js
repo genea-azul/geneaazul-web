@@ -63,7 +63,7 @@ GeneaAzul.connections = (function() {
 
     $btn.prop('disabled', true);
     $resultCard.removeClass('d-none');
-    $resultBody.html(utils.spinnerHtml('Buscando conexi&oacute;n...'));
+    $resultBody.html(utils.spinnerHtml('Buscando conexión...'));
 
     var rq = {
       person1: {
@@ -79,7 +79,7 @@ GeneaAzul.connections = (function() {
     };
 
     if (isRequestEmpty(rq)) {
-      $resultBody.html('<p><b>Error:</b> Ten&eacute;s que llenar todos los datos.</p>');
+      $resultBody.html('<p><b>Error:</b> Tenés que llenar todos los datos.</p>');
       $btn.prop('disabled', false);
       $resultCard.get(0).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       return;
@@ -92,13 +92,13 @@ GeneaAzul.connections = (function() {
         $resultBody.empty();
 
         if (data.errors && data.errors.length > 0) {
-          var errHtml = '<p>&#9888;&#65039; Se produjo un error en la b&uacute;squeda. &#9888;&#65039;</p>';
+          var errHtml = '<p>⚠ Se produjo un error en la búsqueda. ⚠</p>';
           data.errors.forEach(function(code) { errHtml += i18n.displayErrorCodeInSpanish(code); });
           $resultBody.html(errHtml);
         } else if (!data.connections || data.connections.length === 0) {
           $resultBody.html(
-            '<p>&#128270; No se encontr&oacute; conexi&oacute;n entre estas personas. &#128269;</p>'
-            + '<p>Puede que no est&eacute;n en el &aacute;rbol, o no haya un camino conocido que las une. '
+            '<p>🔍 No se encontró conexión entre estas personas. 🔎</p>'
+            + '<p>Puede que no estén en el árbol, o no haya un camino conocido que las une. '
             + 'Contactanos para que carguemos la info 😊</p>'
           );
         } else {
@@ -141,7 +141,7 @@ GeneaAzul.connections = (function() {
     var $wrap = $('<div>').addClass('card mb-3');
 
     var $header = $('<div>').addClass('card-header ga-card-header-primary d-flex align-items-center gap-2');
-    $header.html('<i class="bi bi-diagram-3"></i> Camino de conexi&oacute;n');
+    $header.html('<i class="bi bi-diagram-3"></i> Camino de conexión');
     $wrap.append($header);
 
     var $body = $('<div>').addClass('card-body p-2');

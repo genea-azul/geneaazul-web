@@ -122,7 +122,7 @@ GeneaAzul.utils = (function() {
      Matches the contact-button style from #sobre-nosotros. */
   function backendErrorHtml() {
     return '<p class="mb-1">No se pudo conectar con el servidor.</p>'
-      + '<p class="text-muted mb-3">Por favor intent&aacute; de nuevo o contactanos:</p>'
+      + '<p class="text-muted mb-3">Por favor intentá de nuevo o contactanos:</p>'
       + '<div class="d-flex gap-3 justify-content-center flex-wrap">'
       +   '<a href="https://instagram.com/_u/genea.azul" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">'
       +     '<i class="bi bi-instagram me-2"></i>@genea.azul'

@@ -49,7 +49,7 @@ GeneaAzul.map = (function() {
       // MapTiler — Spanish labels (free API key from cloud.maptiler.com)
       L.tileLayer(
         'https://api.maptiler.com/maps/basic-v2/{z}/{x}/{y}.png?key=' + key + '&language=es', {
-          attribution: '&copy; <a href="https://www.maptiler.com/copyright/" target="_blank">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+          attribution: '© <a href="https://www.maptiler.com/copyright/" target="_blank">MapTiler</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
           maxZoom: 19,
           tileSize: 512,
           zoomOffset: -1
@@ -57,7 +57,7 @@ GeneaAzul.map = (function() {
     } else {
       // CartoDB Positron — free, no API key, labels in local/English
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
+        attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
         subdomains: 'abcd',
         maxZoom: 19
       }).addTo(_leafletMap);

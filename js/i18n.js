@@ -36,7 +36,7 @@ GeneaAzul.i18n = (function() {
     date = date.replace(/ABT/g, 'aprox.');
     date = date.replace(/EST/g, 'se estima');
     date = date.replace(/BEF/g, 'antes de');
-    date = date.replace(/AFT/g, 'despu&eacute;s de');
+    date = date.replace(/AFT/g, 'después de');
 
     date = date.replace(/(\d+) JAN/g, '$1 de ene de');
     date = date.replace(/(\d+) FEB/g, '$1 de feb de');
@@ -98,10 +98,10 @@ GeneaAzul.i18n = (function() {
     if (grade === 4) return ' cuart' + sexSuffix;
     if (grade === 5) return ' quint' + sexSuffix;
     if (grade === 6) return ' sext' + sexSuffix;
-    if (grade === 7) return ' s&eacute;ptim' + sexSuffix;
+    if (grade === 7) return ' séptim' + sexSuffix;
     if (grade === 8) return ' octav' + sexSuffix;
     if (grade === 9) return ' noven' + sexSuffix;
-    return ' de ' + grade + '&deg; grado';
+    return ' de ' + grade + '° grado';
   }
 
   function getAdoptionSuffixInSpanish(adoptionType, sexSuffix) {
@@ -165,7 +165,7 @@ GeneaAzul.i18n = (function() {
 
     if (rel.referenceType === 'SIBLING') {
       if (rel.isInLaw && !rel.isHalf) {
-        return rel.personSex === 'M' ? separated + 'cu&ntilde;ado' : separated + 'cu&ntilde;ada';
+        return rel.personSex === 'M' ? separated + 'cuñado' : separated + 'cuñada';
       }
       half = rel.isHalf ? 'medio-' : '';
       sx = getSexSuffixInSpanish(rel);
@@ -182,7 +182,7 @@ GeneaAzul.i18n = (function() {
       half = rel.isHalf ? 'medio-' : '';
       sx = getSexSuffixInSpanish(rel);
       gradeSuffix = getGradeSuffixInSpanish(rel.grade, sx);
-      rName1 = 't&iacute;' + sx + (rel.generation > 1 ? '-' : '');
+      rName1 = 'tí' + sx + (rel.generation > 1 ? '-' : '');
       if (rel.generation === 1) rName2 = '';
       else if (rel.generation === 2) rName2 = 'abuel' + sx;
       else if (rel.generation === 3) rName2 = 'bisabuel' + sx;
@@ -224,31 +224,31 @@ GeneaAzul.i18n = (function() {
   /* User-friendly error messages */
   function displayErrorCodeInSpanish(errorCode) {
     if (errorCode === 'NETWORK') {
-      return '<p>No hay conexi&oacute;n. Verific&aacute; tu internet e intent&aacute; de nuevo.</p>';
+      return '<p>No hay conexión. Verificá tu internet e intentá de nuevo.</p>';
     }
     if (errorCode === 'TOO-MANY-REQUESTS') {
-      return '<p>Realizaste demasiadas consultas en la &uacute;ltima hora, por favor esper&aacute; unos minutos o contactanos en redes sociales: <b>@genea.azul</b></p>'
-        + '<p>Este es un proyecto de investigaci&oacute;n sin fines de lucro, no hay costo de servicio. 😊</p>';
+      return '<p>Realizaste demasiadas consultas en la última hora, por favor esperá unos minutos o contactanos en redes sociales: <b>@genea.azul</b></p>'
+        + '<p>Este es un proyecto de investigación sin fines de lucro, no hay costo de servicio. 😊</p>';
     }
     if (errorCode === 'CONNECTIONS-PERSON-1-NOT-FOUND') {
       return '<p class="fw-semibold">La persona 1 no fue encontrada</p>'
-        + '<p>La persona no se encuentra en el sistema, o quiz&aacute;s falta completar alg&uacute;n dato en el &aacute;rbol. Ponete en contacto con nosotros para que carguemos la info 😊</p>';
+        + '<p>La persona no se encuentra en el sistema, o quizás falta completar algún dato en el árbol. Ponete en contacto con nosotros para que carguemos la info 😊</p>';
     }
     if (errorCode === 'CONNECTIONS-PERSON-1-AMBIGUOUS') {
-      return '<p class="fw-semibold">M&aacute;s de un resultado para la persona 1</p>'
-        + '<p>Hay m&aacute;s de una persona con esos datos. Complet&aacute; el segundo nombre si corresponde.</p>';
+      return '<p class="fw-semibold">Más de un resultado para la persona 1</p>'
+        + '<p>Hay más de una persona con esos datos. Completá el segundo nombre si corresponde.</p>';
     }
     if (errorCode === 'CONNECTIONS-PERSON-2-NOT-FOUND') {
       return '<p class="fw-semibold">La persona 2 no fue encontrada</p>'
         + '<p>La persona no se encuentra en el sistema. Ponete en contacto con nosotros para que carguemos la info 😊</p>';
     }
     if (errorCode === 'CONNECTIONS-PERSON-2-AMBIGUOUS') {
-      return '<p class="fw-semibold">M&aacute;s de un resultado para la persona 2</p>'
-        + '<p>Hay m&aacute;s de una persona con esos datos. Complet&aacute; el segundo nombre si corresponde.</p>';
+      return '<p class="fw-semibold">Más de un resultado para la persona 2</p>'
+        + '<p>Hay más de una persona con esos datos. Completá el segundo nombre si corresponde.</p>';
     }
     if (errorCode === 'CONNECTIONS-SAME-PERSON') {
       return '<p class="fw-semibold">Las personas 1 y 2 son las mismas</p>'
-        + '<p>No se puede calcular la conexi&oacute;n entre mismas personas.</p>';
+        + '<p>No se puede calcular la conexión entre mismas personas.</p>';
     }
     return '<p>Ocurrió un error inesperado. Por favor intentá de nuevo en unos minutos.</p>';
   }
