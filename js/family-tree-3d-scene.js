@@ -465,12 +465,20 @@ function _buildConnectors(families, nodeMap, personCount) {
       const cNodes = fam.childIds.map(id => nodeMap[id]).filter(Boolean);
       if (!cNodes.length) return;
 
-      // Junction: 40% of the way from the closest child toward the couple bar,
-      // clamped below parents so they always appear above the junction even if
-      // a child drifted upward unexpectedly.
+      // Junction: positioned between the couple bar and the highest child.
+      // When children spread wide in XZ the junction rises toward the parents so
+      // all sibling lines stay clearly inclined (distinguishable from couple lines).
+      // Factor ranges from 0.4 (compact families) to 0.75 (very wide spreads).
       const minParentY = Math.min(fp.y, mp.y);
       const maxChildY = Math.max(...cNodes.map(n => n.bust.position.y));
-      const juncY = Math.min(maxChildY + (barY - maxChildY) * 0.4, minParentY - 0.3);
+      let maxChildHoriz = 0;
+      cNodes.forEach(function(cn) {
+        const dx = cn.bust.position.x - midBar.x, dz = cn.bust.position.z - midBar.z;
+        const d = Math.sqrt(dx * dx + dz * dz);
+        if (d > maxChildHoriz) maxChildHoriz = d;
+      });
+      const juncFactor = Math.min(0.75, 0.4 + Math.max(0, maxChildHoriz - 4) * 0.025);
+      const juncY = Math.min(maxChildY + (barY - maxChildY) * juncFactor, minParentY - 0.3);
       const junc  = new THREE.Vector3(midBar.x, juncY, midBar.z);
 
       _seg(midBar, junc, coupleSegs, coupleAllPts);
@@ -494,7 +502,14 @@ function _buildConnectors(families, nodeMap, personCount) {
       const pp   = parentN.bust.position;
       const pBot = new THREE.Vector3(pp.x, pp.y - 0.07, pp.z);
       const maxChildY = Math.max(...cNodes.map(n => n.bust.position.y));
-      const juncY = Math.min(maxChildY + (pBot.y - maxChildY) * 0.4, pBot.y - 0.3);
+      let maxChildHorizSingle = 0;
+      cNodes.forEach(function(cn) {
+        const dx = cn.bust.position.x - pBot.x, dz = cn.bust.position.z - pBot.z;
+        const d = Math.sqrt(dx * dx + dz * dz);
+        if (d > maxChildHorizSingle) maxChildHorizSingle = d;
+      });
+      const juncFactorSingle = Math.min(0.75, 0.4 + Math.max(0, maxChildHorizSingle - 4) * 0.025);
+      const juncY = Math.min(maxChildY + (pBot.y - maxChildY) * juncFactorSingle, pBot.y - 0.3);
       const junc  = new THREE.Vector3(pBot.x, juncY, pBot.z);
 
       _seg(pBot, junc, coupleSegs, coupleAllPts);
