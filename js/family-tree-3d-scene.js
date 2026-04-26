@@ -24,6 +24,9 @@ let _connMats = null;
 let _particleGeo = null;
 // Focal person name used for PNG export filename
 let _focalName = '';
+// Timer ID for the loader fade-out — cancelled on dispose so a rapid close/reopen
+// doesn't hide the loader that the second init just made visible.
+let _loaderHideTimer = null;
 // Pointer-down position — compared against click position to skip drag-end events in onPick
 let _pdX = 0, _pdY = 0;
 // Cinematic flythrough state
@@ -141,10 +144,9 @@ function _buildScene(containerId) {
     if (!_ctrlV) _ctrlV = { dTheta: 0, dPhi: 0, dRadius: 0, pan: new THREE.Vector3() };
     const dist = _camera.position.distanceTo(_controls.target);
     const scale = dist * 0.001;
-    const fwd = new THREE.Vector3();
-    _camera.getWorldDirection(fwd);
-    const right = new THREE.Vector3().crossVectors(fwd, _camera.up).normalize();
-    _ctrlV.pan.addScaledVector(right,  e.deltaX * scale);
+    _camera.getWorldDirection(_tmpVec3A);
+    _tmpBank.crossVectors(_tmpVec3A, _camera.up).normalize();
+    _ctrlV.pan.addScaledVector(_tmpBank,   e.deltaX * scale);
     _ctrlV.pan.addScaledVector(_camera.up, -e.deltaY * scale);
   };
   _renderer.domElement.addEventListener('wheel', _onWheel, { passive: false, capture: true });
@@ -293,11 +295,6 @@ function _runLayout(persons, families) {
 
 // ── Bust builder + sprite ───────────────────────────────────────────────────
 
-function yearFrom(d) {
-  if (!d) return null;
-  const m = String(d).match(/\b(\d{4})\b/);
-  return m ? m[1] : null;
-}
 
 function _buildBust(node) {
   const mat = nodeMat(node);
@@ -342,8 +339,8 @@ function _makeSprite(node) {
   const rawName = node.displayName || '';
   const label = rawName || '?';
 
-  const bYear = yearFrom(node.dateOfBirth);
-  const dYear = yearFrom(node.dateOfDeath);
+  const bYear = (node.yearOfBirth != null) ? String(node.yearOfBirth) : null;
+  const dYear = (node.yearOfDeath != null) ? String(node.yearOfDeath) : null;
   let years = '';
   if (bYear && dYear)       years = bYear + ' – ' + dYear;
   else if (bYear && !node.isAlive) years = bYear + ' – ?';
@@ -480,13 +477,16 @@ function _buildConnectors(families, nodeMap, personCount) {
       if (addDecor) {
         const orb = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), orbMat);
         orb.position.copy(midBar); orb.castShadow = true; _scene.add(orb);
-        _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
-        _flowPart(mBar, midBar, coupleFlow, 0.35, Math.random() * 0.5);
       }
 
       if (!fam.childIds || !fam.childIds.length) return;
       const cNodes = fam.childIds.map(id => nodeMap[id]).filter(Boolean);
       if (!cNodes.length) return;
+
+      if (addDecor) {
+        _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
+        _flowPart(mBar, midBar, coupleFlow, 0.35, Math.random() * 0.5);
+      }
 
       // Junction: positioned between the couple bar and the highest child.
       // When children spread wide in XZ the junction rises toward the parents so
@@ -579,8 +579,8 @@ function _adjustSceneForTree(treeRadius) {
   // making the connectors look like a starburst radiating from inside.
   // Now: at least treeRadius away in Z, plus a Y elevation that scales with size
   // so the generational layers are visible from the opening shot.
-  const initZ = Math.max(treeRadius * 1.1, 15);
-  const initY = Math.max(treeRadius * 0.35, 3);
+  const initZ = Math.max(treeRadius * 0.7, 8);
+  const initY = Math.max(treeRadius * 0.2, 2);
   _camera.position.set(0, initY, initZ);
   _camera.lookAt(0, 0, 0);
   _initCamPos = _camera.position.clone();
@@ -628,8 +628,8 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
   // On portrait the horizontal frustum is ~43° (even at FOV 68°) vs ~77° on landscape,
   // so the camera must orbit closer to clusters and the overview should look more top-down.
   const camR       = portrait ? Math.min(treeRadius * 0.35, 10) : Math.min(treeRadius * 0.65, 18);
-  const orbitRLo   = portrait ? 0.50 : 0.50; // inner orbit radius as fraction of camR — wide enough to avoid clipping
-  const orbitRHi   = portrait ? 0.40 : 0.40; // added on top of orbitRLo
+  const orbitRLo   = 0.50; // inner orbit radius as fraction of camR — wide enough to avoid clipping
+  const orbitRHi   = 0.40; // added on top of orbitRLo
   // Height is capped: no gen multiplier so deep ancestors don't drift off to a top-down extreme.
   const orbitHBase = portrait ? 1.5  : 1.0;  // base height above cluster centroid
   const orbitHCap  = portrait ? 4.0  : 3.0;  // maximum height added above base
@@ -791,8 +791,8 @@ function _showPersonCard(node) {
   }
   if (nameEl) { nameEl.textContent = node.displayName || '?'; nameEl.title = node.displayName || ''; }
   if (yearsEl) {
-    const bYear = yearFrom(node.dateOfBirth);
-    const dYear = yearFrom(node.dateOfDeath);
+    const bYear = node.yearOfBirth ? String(node.yearOfBirth) : null;
+    const dYear = node.yearOfDeath ? String(node.yearOfDeath) : null;
     let years;
     if      (bYear && dYear)          years = bYear + ' – ' + dYear;
     else if (bYear && !node.isAlive)  years = bYear + ' – ?';
@@ -936,13 +936,6 @@ window._ga3dInit = function(graphData) {
   let persons  = graphData.persons.map(n => Object.assign({}, n));
   let families = graphData.families;
   persons.forEach(n => { n.focal = (n.id === graphData.focalPersonId); });
-  // Diagnostic: log first person's field names so we can verify what the API returns.
-  // Safe to ship — no personal data is logged, only the list of keys.
-  if (window.console && console.log && persons.length > 0) {
-    console.log('[3D tree] graphData fields:', Object.keys(persons[0]));
-    const fp = persons.find(function(p) { return p.focal; });
-    if (fp) console.log('[3D tree] focal person:', { dateOfBirth: fp.dateOfBirth, dateOfDeath: fp.dateOfDeath, generation: fp.generation });
-  }
 
   const focalPerson = persons.find(n => n.focal);
   _focalName = focalPerson ? (focalPerson.displayName || '') : '';
@@ -1135,7 +1128,7 @@ window._ga3dInit = function(graphData) {
   let lastTouch    = 0;
   let navTarget    = null;
 
-  function onPick(cx, cy) {
+  function onPick(cx, cy, isTouch) {
     if (!settled) return;
     // Skip if the pointer moved more than 5 px — user was orbiting, not clicking
     const ddx = cx - _pdX, ddy = cy - _pdY;
@@ -1152,21 +1145,23 @@ window._ga3dInit = function(graphData) {
     if (!node) return;
     navTarget = node.pos.clone();
     _controls.autoRotate = false;
-    // Zoom in on click: the farther the node, the closer we end up (down to 20%
-    // of tree radius). A near-click pulls back slightly to avoid clipping.
+    // Touch taps zoom in tighter than mouse clicks — on a small screen getting
+    // close to the bust makes the person card feel anchored to the selection.
     const dist          = _camera.position.distanceTo(node.pos);
-    const comfortRadius = THREE.MathUtils.clamp(dist * 0.30, treeRadius * 0.20, treeRadius * 0.38);
+    const comfortRadius = isTouch
+      ? THREE.MathUtils.clamp(dist * 0.25, Math.max(treeRadius * 0.12, 3), treeRadius * 0.25)
+      : THREE.MathUtils.clamp(dist * 0.30, treeRadius * 0.20, treeRadius * 0.38);
     if (dist > comfortRadius)          _navRadius = comfortRadius;
     else if (dist < treeRadius * 0.15) _navRadius = comfortRadius;
     _showPersonCard(node);
   }
 
-  _onCanvasClick = e => onPick(e.clientX, e.clientY);
+  _onCanvasClick = e => onPick(e.clientX, e.clientY, false);
   _onCanvasTouchEnd = e => {
     const now = Date.now();
     if (now - lastTouch < 400) return;
     lastTouch = now;
-    if (e.changedTouches.length) onPick(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    if (e.changedTouches.length) onPick(e.changedTouches[0].clientX, e.changedTouches[0].clientY, true);
   };
   _renderer.domElement.addEventListener('click', _onCanvasClick);
   _renderer.domElement.addEventListener('touchend', _onCanvasTouchEnd, { passive: true });
@@ -1232,8 +1227,22 @@ window._ga3dInit = function(graphData) {
 
     if (!settled) {
       settleT += dt / SETTLE_DUR;
-      if (settleT >= 1) {
-        settleT = 1; settled = true;
+      const reachedEnd = settleT >= 1;
+      if (reachedEnd) settleT = 1;
+      const et = easeInOut(settleT);
+      // Update bust positions FIRST so _buildConnectors reads finalPos, not the
+      // previous frame's position. Without this, a large first-frame dt (e.g. on
+      // a slow Android device where the initial RAF fires >1.8 s after init) causes
+      // settlement to happen in one frame while busts are still at spherePos, making
+      // all connector lines appear as a compact starburst near the origin.
+      persons.forEach(node => {
+        node.pos.lerpVectors(node.spherePos, node.finalPos, et);
+        const entry = nodeMap[node.id];
+        entry.bust.position.copy(node.pos);
+        entry.sprite.position.set(node.pos.x, node.pos.y - 0.55, node.pos.z);
+      });
+      if (reachedEnd) {
+        settled = true;
         _buildConnectors(families, nodeMap, persons.length);
         // Trigger connector fade-in from transparent
         connFadeT = 0;
@@ -1244,13 +1253,6 @@ window._ga3dInit = function(graphData) {
           _connMats.childPoints.opacity  = 0;
         }
       }
-      const et = easeInOut(settleT);
-      persons.forEach(node => {
-        node.pos.lerpVectors(node.spherePos, node.finalPos, et);
-        const entry = nodeMap[node.id];
-        entry.bust.position.copy(node.pos);
-        entry.sprite.position.set(node.pos.x, node.pos.y - 0.55, node.pos.z);
-      });
     }
 
     // Connector opacity fade-in (0.6 s after settlement)
@@ -1305,7 +1307,8 @@ window._ga3dInit = function(graphData) {
     if (settled) {
       const camX = _camera.position.x, camY = _camera.position.y, camZ = _camera.position.z;
       _edgeParticles.forEach(p => {
-        const dx = camX - p.p1.x, dy = camY - p.p1.y, dz = camZ - p.p1.z;
+        const mx = (p.p1.x + p.p2.x) * 0.5, my = (p.p1.y + p.p2.y) * 0.5, mz = (p.p1.z + p.p2.z) * 0.5;
+        const dx = camX - mx, dy = camY - my, dz = camZ - mz;
         if (dx * dx + dy * dy + dz * dz < PARTICLE_VIS_D2) {
           p.mesh.visible = true;
           p.mesh.position.lerpVectors(p.p1, p.p2, (elapsed * p.speed + p.phase) % 1);
@@ -1410,12 +1413,14 @@ window._ga3dInit = function(graphData) {
   if (loader) {
     loader.style.opacity      = '0';
     loader.style.pointerEvents = 'none';
-    setTimeout(() => loader.style.display = 'none', 800);
+    if (_loaderHideTimer) clearTimeout(_loaderHideTimer);
+    _loaderHideTimer = setTimeout(() => { loader.style.display = 'none'; _loaderHideTimer = null; }, 800);
   }
 };
 
 window._ga3dDispose = function() {
   if (_animId) { cancelAnimationFrame(_animId); _animId = null; }
+  if (_loaderHideTimer) { clearTimeout(_loaderHideTimer); _loaderHideTimer = null; }
   _wallTexGen++; // invalidate any in-flight texture load from the previous scene
   window.removeEventListener('resize', _onResize);
   if (_scene) {
@@ -1496,13 +1501,12 @@ window._ga3dControl = function(action) {
   _navReset = null;
   if (!_ctrlV) _ctrlV = { dTheta: 0, dPhi: 0, dRadius: 0, pan: new THREE.Vector3() };
 
-  const s = new THREE.Spherical().setFromVector3(
-    _camera.position.clone().sub(_controls.target)
-  );
+  _tmpVec3A.subVectors(_camera.position, _controls.target);
+  _tmpSph.setFromVector3(_tmpVec3A);
 
   switch (action) {
-    case 'zoom-in':      _ctrlV.dRadius -= s.radius * 0.003; break;
-    case 'zoom-out':     _ctrlV.dRadius += s.radius * 0.003; break;
+    case 'zoom-in':      _ctrlV.dRadius -= _tmpSph.radius * 0.003; break;
+    case 'zoom-out':     _ctrlV.dRadius += _tmpSph.radius * 0.003; break;
     case 'rotate-left':  _ctrlV.dTheta -= 0.006; _controls.autoRotate = false; break;
     case 'rotate-right': _ctrlV.dTheta += 0.006; _controls.autoRotate = false; break;
     case 'rotate-up':    _ctrlV.dPhi -= 0.006; break;
@@ -1511,15 +1515,13 @@ window._ga3dControl = function(action) {
     case 'pan-down':
     case 'pan-left':
     case 'pan-right': {
-      const right = new THREE.Vector3().crossVectors(
-        _camera.getWorldDirection(new THREE.Vector3()), _camera.up
-      ).normalize();
-      const up   = _camera.up.clone().normalize();
-      const step = s.radius * 0.003;
-      if (action === 'pan-left')  _ctrlV.pan.addScaledVector(right, -step);
-      if (action === 'pan-right') _ctrlV.pan.addScaledVector(right,  step);
-      if (action === 'pan-up')    _ctrlV.pan.addScaledVector(up,     step);
-      if (action === 'pan-down')  _ctrlV.pan.addScaledVector(up,    -step);
+      _camera.getWorldDirection(_tmpVec3A);
+      _tmpBank.crossVectors(_tmpVec3A, _camera.up).normalize();
+      const step = _tmpSph.radius * 0.003;
+      if (action === 'pan-left')  _ctrlV.pan.addScaledVector(_tmpBank,  -step);
+      if (action === 'pan-right') _ctrlV.pan.addScaledVector(_tmpBank,   step);
+      if (action === 'pan-up')    _ctrlV.pan.addScaledVector(_camera.up, step);
+      if (action === 'pan-down')  _ctrlV.pan.addScaledVector(_camera.up,-step);
       break;
     }
   }
