@@ -938,6 +938,32 @@ window._ga3dInit = function(graphData) {
     ySnapped.add(mN.id);
   });
 
+  // Post-layout: snap each couple to the same XZ so the couple bar appears at
+  // the couple's actual position in the tree rather than at the midpoint between
+  // two spouses that the force-directed layout placed far apart. Without this,
+  // all family connector lines converge near the centre regardless of where each
+  // family branch actually sits in the tree.
+  // Same remarriage-safe logic as the Y snap: if one spouse was already placed
+  // by a prior marriage, pull the new spouse to that established XZ position.
+  const xzSnapped = new Set();
+  families.forEach(fam => {
+    const fatherId = fam.husbandIds && fam.husbandIds.length ? fam.husbandIds[0] : null;
+    const motherId = fam.wifeIds    && fam.wifeIds.length    ? fam.wifeIds[0]    : null;
+    const fN = fatherId != null ? personById[fatherId] : null;
+    const mN = motherId != null ? personById[motherId] : null;
+    if (!fN || !mN) return;
+    if ((fN.generation || 0) !== (mN.generation || 0)) return;
+    const fSnapped = xzSnapped.has(fN.id);
+    const mSnapped = xzSnapped.has(mN.id);
+    if (fSnapped && mSnapped) return;
+    const targetX = fSnapped ? fN.finalPos.x : mSnapped ? mN.finalPos.x : (fN.finalPos.x + mN.finalPos.x) / 2;
+    const targetZ = fSnapped ? fN.finalPos.z : mSnapped ? mN.finalPos.z : (fN.finalPos.z + mN.finalPos.z) / 2;
+    fN.finalPos.x = targetX; fN.finalPos.z = targetZ;
+    mN.finalPos.x = targetX; mN.finalPos.z = targetZ;
+    xzSnapped.add(fN.id);
+    xzSnapped.add(mN.id);
+  });
+
   // Enforce generational ordering: every child must sit below its parents in Y.
   // One pass propagates the constraint one generation level; worst-case passes
   // equals the tree depth (max gen − min gen). Stop early when nothing changed.
