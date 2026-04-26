@@ -360,8 +360,8 @@ function _makeSprite(node) {
 
   // Translucent parchment pill — keeps text readable over any scene backdrop
   {
-    const bpx = 10 * S, bpy = 6 * S, br = 16 * S;
-    ctx.fillStyle = 'rgba(245, 234, 208, 0.48)';
+    const bpx = 4 * S, bpy = 3 * S, br = 12 * S;
+    ctx.fillStyle = 'rgba(245, 234, 208, 0.22)';
     ctx.beginPath();
     if (ctx.roundRect) {
       ctx.roundRect(bpx, bpy, CW - bpx * 2, CH - bpy * 2, br);
