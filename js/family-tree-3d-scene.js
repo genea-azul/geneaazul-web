@@ -341,7 +341,7 @@ function _makeSprite(node) {
   if (bYear && dYear)       years = bYear + ' – ' + dYear;
   else if (bYear && !node.isAlive) years = bYear + ' – ?';
   else if (bYear)           years = bYear;
-  else if (dYear)           years = '† ' + dYear;
+  else if (dYear)           years = '? – ' + dYear;
 
   const hasYears = years.length > 0;
   const S = 2; // supersample: 2× canvas resolution → sharper text at same sprite size
@@ -607,7 +607,8 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
   const camPts  = [];
   const lookPts = [];
 
-  // ── 1. Opening overview: high angle showing the whole tree ────────────────
+  // Overview position — computed here, pushed after the cluster flybys so it
+  // becomes a mid-loop "zoom out" beat rather than the boring opener.
   // Portrait: near-vertical top-down (exploits tall screen, avoids narrow horizontal).
   // Landscape: wide elevated side-angle to show the full horizontal spread.
   const overviewAngle = Math.random() * Math.PI * 2;
@@ -622,10 +623,10 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
     overviewH,
     Math.sin(overviewAngle) * overviewR
   );
-  camPts.push(ovPos);
-  lookPts.push(new THREE.Vector3(0, 0, 0)); // always look at tree centre from overview
 
-  // ── 2. Focal person (gen 0) close-up — the most meaningful moment ─────────
+  // ── 1. Focal person (gen 0) close-up — t=0, warmup targets this position ──
+  // Starting close makes the cinematic feel immediate; the overview zoom-out
+  // comes later in the loop as a reveal rather than an opener.
   const focalNodes = byGen[0] || [];
   if (focalNodes.length > 0) {
     const fx = focalNodes.reduce((s, n) => s + n.finalPos.x, 0) / focalNodes.length;
@@ -639,7 +640,7 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
     lookPts.push(_nearestCentroid(fcp, persons, 12));
   }
 
-  // ── 3. Per-generation cluster flybys ──────────────────────────────────────
+  // ── 2. Per-generation cluster flybys ──────────────────────────────────────
   genKeys.forEach(gen => {
     const nodes = byGen[gen];
     const cx = nodes.reduce((s, n) => s + n.finalPos.x, 0) / nodes.length;
@@ -657,6 +658,10 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
       lookPts.push(_nearestCentroid(cp, persons, 12));
     }
   });
+
+  // ── 3. Overview — mid-loop zoom out to see the whole tree ────────────────
+  camPts.push(ovPos);
+  lookPts.push(new THREE.Vector3(0, 0, 0));
 
   // CatmullRomCurve3 needs ≥ 4 points; pad tiny trees
   while (camPts.length < 4) {
@@ -820,7 +825,7 @@ window._ga3dCinematic = function(enable) {
     _ctrlV               = null; // stop any in-flight button-held movement
     _cinematicFogBase    = _scene.fog.density;
     // Fresh random path every activation so each session is different.
-    // t=0 on the new path is always the opening overview shot.
+    // t=0 starts at the focal person; overview is a mid-loop zoom-out beat.
     _cinematicPath = _buildCinematicPath(_cinematicPersons, _cinematicTreeRadius, _camera.aspect);
     _cinematicAspectIsPortrait = _camera.aspect < 0.75;
     _cinematicT    = 0;
@@ -1024,14 +1029,7 @@ window._ga3dInit = function(graphData) {
     // Skip if the pointer moved more than 5 px — user was orbiting, not clicking
     const ddx = cx - _pdX, ddy = cy - _pdY;
     if (ddx * ddx + ddy * ddy > 25) return;
-    if (_cinematic) {
-      window._ga3dCinematic(false);
-      const btn = document.getElementById('ga-tree3d-cinematic');
-      if (btn) btn.classList.remove('ga-active');
-      const modal = document.getElementById('ga-tree3d-modal');
-      if (modal) modal.classList.remove('ga-tree3d-modal--cinematic');
-      return;
-    }
+    if (_cinematic) return; // clicks are ignored during cinematic; use the camera button to stop
     _navReset = null;
     const rect = _renderer.domElement.getBoundingClientRect();
     mouse.x =  ((cx - rect.left) / rect.width)  * 2 - 1;
