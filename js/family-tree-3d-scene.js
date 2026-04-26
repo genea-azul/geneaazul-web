@@ -1256,11 +1256,13 @@ window._ga3dInit = function(graphData) {
 
     // Focal ring slow spin — makes the gold orbital feel alive
     if (addPulse && settled && focalBustEntry && focalBustEntry.bust.userData.ring) {
-      focalBustEntry.bust.userData.ring.rotation.y += dt * 0.5;
+      // rotation.z because ring.rotation.x = PI/2 tilts its local frame 90°:
+      // after that tilt, local Z aligns with world Y and produces the flat orbital spin.
+      focalBustEntry.bust.userData.ring.rotation.z += dt * 0.5;
     }
 
     // Breathing pulse scale (shared for all non-focal nodes on small trees)
-    const _breatheScale = addPulse && settled
+    const breatheScale = addPulse && settled
       ? 1 + 0.025 * Math.sin(elapsed * (Math.PI * 2 / 4.0))
       : 1;
 
@@ -1274,14 +1276,16 @@ window._ga3dInit = function(graphData) {
       if (addPulse && settled) {
         bust.scale.setScalar(node.focal
           ? 1 + 0.04 * Math.sin(elapsed * (Math.PI * 2 / 3.0))
-          : _breatheScale);
+          : breatheScale);
       }
       // Hide labels that are too far to read; keep all visible during settle so
       // the animation looks complete even before nodes reach their final positions.
       const spriteVisible = !settled || d2 < SPRITE_VIS_D2;
       sprite.visible = spriteVisible;
-      // Adaptive label scale: larger when far away (readability), smaller when close (no clutter)
-      if (spriteVisible && sprite.userData.baseSW) {
+      // Adaptive label scale: larger when far away (readability), smaller when close (no clutter).
+      // Only active after settlement — during the settle animation nodes are spread to
+      // their sphere positions far from the camera, which would clamp scale to 2.0×.
+      if (spriteVisible && settled && sprite.userData.baseSW) {
         const sf = THREE.MathUtils.clamp(Math.sqrt(d2) / 14, 0.7, 2.0);
         sprite.scale.set(sprite.userData.baseSW * sf, sprite.userData.baseSH * sf, 1);
       }
