@@ -152,8 +152,9 @@ GeneaAzul.familyTree3d = (function() {
   }
 
   function _fetchGraph(uuid, cb) {
+    var obfSuffix = GeneaAzul.config.obfuscateLiving ? '' : '?obfuscateLiving=false';
     GeneaAzul.utils.apiGet(
-      GeneaAzul.config.apiBaseUrl + '/api/search/family-tree/' + uuid + '/graphJson',
+      GeneaAzul.config.apiBaseUrl + '/api/search/family-tree/' + uuid + '/graphJson' + obfSuffix,
       function(data) { cb(data); },
       function(xhr) {
         if (_cancelled) return;
