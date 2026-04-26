@@ -650,13 +650,18 @@ GeneaAzul.search = (function() {
       try {
         var blob = req.response;
         var url = URL.createObjectURL(blob);
+        var cd = req.getResponseHeader('Content-Disposition');
+        var cdMatch = cd && cd.match(/filename[^;=\n]*=(['"]?)([^'";\n]+)\1/);
+        var filename = (cdMatch && cdMatch[2].trim())
+          || req.getResponseHeader('File-Name')
+          || ('familiares-' + data.personUuid + '.pdf');
         if (iosWin) {
           iosWin.location.href = url;
           setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
         } else {
           var link = document.createElement('a');
           link.href = url;
-          link.download = 'familiares-' + data.personUuid + '.pdf';
+          link.download = filename;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
