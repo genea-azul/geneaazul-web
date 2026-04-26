@@ -574,10 +574,14 @@ function _buildConnectors(families, nodeMap, personCount) {
 // ── Tree-size-dependent scene tuning ─────────────────────────────────────────
 
 function _adjustSceneForTree(treeRadius) {
-  // Camera: start focused on the focal person (origin); cap at 15 so large
-  // trees don't open zoomed way out — users can zoom out to explore.
-  const initZ = Math.min(treeRadius * 1.35, 15);
-  _camera.position.set(0, 3, initZ);
+  // Camera: start outside the tree so the connector network is visible as a
+  // 3D structure. Capping to 15 placed the camera INSIDE large trees (radius 25+)
+  // making the connectors look like a starburst radiating from inside.
+  // Now: at least treeRadius away in Z, plus a Y elevation that scales with size
+  // so the generational layers are visible from the opening shot.
+  const initZ = Math.max(treeRadius * 1.1, 15);
+  const initY = Math.max(treeRadius * 0.35, 3);
+  _camera.position.set(0, initY, initZ);
   _camera.lookAt(0, 0, 0);
   _initCamPos = _camera.position.clone();
 
@@ -932,6 +936,13 @@ window._ga3dInit = function(graphData) {
   let persons  = graphData.persons.map(n => Object.assign({}, n));
   let families = graphData.families;
   persons.forEach(n => { n.focal = (n.id === graphData.focalPersonId); });
+  // Diagnostic: log first person's field names so we can verify what the API returns.
+  // Safe to ship — no personal data is logged, only the list of keys.
+  if (window.console && console.log && persons.length > 0) {
+    console.log('[3D tree] graphData fields:', Object.keys(persons[0]));
+    const fp = persons.find(function(p) { return p.focal; });
+    if (fp) console.log('[3D tree] focal person:', { dateOfBirth: fp.dateOfBirth, dateOfDeath: fp.dateOfDeath, generation: fp.generation });
+  }
 
   const focalPerson = persons.find(n => n.focal);
   _focalName = focalPerson ? (focalPerson.displayName || '') : '';
