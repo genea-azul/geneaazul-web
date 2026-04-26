@@ -54,10 +54,10 @@ function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2)
 
 function _buildMaterials() {
   return {
-    maleLive:   new THREE.MeshStandardMaterial({ color: 0x2c6fa0, roughness: 0.50, metalness: 0.20 }),
-    femaleLive: new THREE.MeshStandardMaterial({ color: 0x9b4c6e, roughness: 0.50, metalness: 0.15 }),
-    focal:      new THREE.MeshStandardMaterial({ color: 0xc89020, roughness: 0.35, metalness: 0.45,
-                  emissive: new THREE.Color(0x3a2000), emissiveIntensity: 0.3 }),
+    maleLive:   new THREE.MeshStandardMaterial({ color: 0x2c6fa0, roughness: 0.45, metalness: 0.25 }),
+    femaleLive: new THREE.MeshStandardMaterial({ color: 0x9b4c6e, roughness: 0.45, metalness: 0.20 }),
+    focal:      new THREE.MeshStandardMaterial({ color: 0xc89020, roughness: 0.25, metalness: 0.55,
+                  emissive: new THREE.Color(0x3a2000), emissiveIntensity: 0.5 }),
     maleDead:   new THREE.MeshStandardMaterial({ color: 0x5a7890, roughness: 0.80, metalness: 0.05, transparent: true, opacity: 0.72 }),
     femaleDead: new THREE.MeshStandardMaterial({ color: 0x806070, roughness: 0.80, metalness: 0.05, transparent: true, opacity: 0.70 }),
     deadCross:  new THREE.MeshStandardMaterial({ color: 0x7a7870, roughness: 0.9 }),
@@ -72,11 +72,11 @@ function _buildConnectorMats() {
     // misbehaves on some Android GPU drivers — the visual difference at 1-1.2 px is negligible.
     coupleLine:   new THREE.LineBasicMaterial({ color: COUPLE, transparent: true, opacity: 0.65, depthWrite: false }),
     childLine:    new THREE.LineBasicMaterial({ color: CHILD,  transparent: true, opacity: 0.55, depthWrite: false }),
-    couplePoints: new THREE.PointsMaterial({ color: COUPLE, size: 0.04, transparent: true, opacity: 0.29, depthWrite: false, sizeAttenuation: true }),
-    childPoints:  new THREE.PointsMaterial({ color: CHILD,  size: 0.04, transparent: true, opacity: 0.25, depthWrite: false, sizeAttenuation: true }),
+    couplePoints: new THREE.PointsMaterial({ color: COUPLE, size: 0.07, transparent: true, opacity: 0.35, depthWrite: false, sizeAttenuation: true }),
+    childPoints:  new THREE.PointsMaterial({ color: CHILD,  size: 0.06, transparent: true, opacity: 0.30, depthWrite: false, sizeAttenuation: true }),
     coupleFlow:   new THREE.MeshBasicMaterial({ color: COUPLE, depthWrite: false }),
     childFlow:    new THREE.MeshBasicMaterial({ color: CHILD,  depthWrite: false }),
-    orbMat:       new THREE.MeshStandardMaterial({ color: 0xb08020, roughness: 0.4, metalness: 0.3 }),
+    orbMat:       new THREE.MeshStandardMaterial({ color: 0xd4a020, roughness: 0.15, metalness: 0.75 }),
   };
 }
 
@@ -312,18 +312,20 @@ function _buildBust(node) {
     g.add(m);
   }
 
-  part(new THREE.SphereGeometry(0.22 * s, 18, 18),             0, 0.52 * s, 0);
-  part(new THREE.CylinderGeometry(0.08*s, 0.10*s, 0.16*s, 12), 0, 0.30 * s, 0);
-  part(new THREE.CylinderGeometry(0.19*s, 0.26*s, 0.34*s, 14), 0, 0.10 * s, 0);
-  part(new THREE.CylinderGeometry(0.28*s, 0.28*s, 0.05*s, 14), 0, 0.28 * s, 0);
+  part(new THREE.SphereGeometry(0.22 * s, 24, 24),             0, 0.52 * s, 0);
+  part(new THREE.CylinderGeometry(0.08*s, 0.10*s, 0.16*s, 18), 0, 0.30 * s, 0);
+  part(new THREE.CylinderGeometry(0.19*s, 0.26*s, 0.34*s, 20), 0, 0.10 * s, 0);
+  part(new THREE.CylinderGeometry(0.28*s, 0.28*s, 0.05*s, 20), 0, 0.28 * s, 0);
 
   if (node.focal) {
     const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(0.38, 0.025, 8, 40),
-      new THREE.MeshBasicMaterial({ color: 0xd4a020, transparent: true, opacity: 0.55 })
+      new THREE.TorusGeometry(0.38, 0.03, 14, 64),
+      new THREE.MeshStandardMaterial({ color: 0xd4a020, roughness: 0.15, metalness: 0.85,
+        transparent: true, opacity: 0.82 })
     );
     ring.rotation.x = Math.PI / 2; ring.position.y = -0.08;
     g.add(ring);
+    g.userData.ring = ring; // stored for render-loop animation
   }
 
   if (!node.isAlive) {
@@ -355,6 +357,20 @@ function _makeSprite(node) {
   const cv  = document.createElement('canvas');
   cv.width = CW; cv.height = CH;
   const ctx = cv.getContext('2d');
+
+  // Translucent parchment pill — keeps text readable over any scene backdrop
+  {
+    const bpx = 10 * S, bpy = 6 * S, br = 16 * S;
+    ctx.fillStyle = 'rgba(245, 234, 208, 0.48)';
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(bpx, bpy, CW - bpx * 2, CH - bpy * 2, br);
+    } else {
+      ctx.rect(bpx, bpy, CW - bpx * 2, CH - bpy * 2);
+    }
+    ctx.fill();
+  }
+
   let fontSize = (node.focal ? 38 : 28) * S;
   const nameY = (hasYears ? Math.round(CH_B * 0.38) : CH_B / 2) * S;
 
@@ -399,6 +415,8 @@ function _makeSprite(node) {
     map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false
   }));
   sprite.scale.set(2.8, 2.8 * (CH_B / CW_B), 1);
+  sprite.userData.baseSW = 2.8;
+  sprite.userData.baseSH = 2.8 * (CH_B / CW_B);
   return sprite;
 }
 
@@ -460,7 +478,7 @@ function _buildConnectors(families, nodeMap, personCount) {
       // Horizontal couple bar
       _seg(fBar, mBar, coupleSegs, coupleAllPts);
       if (addDecor) {
-        const orb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), orbMat);
+        const orb = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), orbMat);
         orb.position.copy(midBar); orb.castShadow = true; _scene.add(orb);
         _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
         _flowPart(mBar, midBar, coupleFlow, 0.35, Math.random() * 0.5);
@@ -1153,6 +1171,11 @@ window._ga3dInit = function(graphData) {
   // particle is < 1.4 px (sub-pixel). Both use the same cutoff for consistency.
   const SPRITE_VIS_D2   = 65 * 65;
   const PARTICLE_VIS_D2 = 40 * 40;
+  // Small trees (≤80 persons) get breathing pulse + ring spin; particles are already
+  // animating on those trees so continuous rendering comes at no extra cost.
+  const addPulse       = persons.length <= 80;
+  let connFadeT        = 1; // reset to 0 when connectors are first built; drives opacity fade-in
+  const focalBustEntry = avatarGroups.find(ag => ag.node.focal) || null;
 
   function loop() {
     _animId = requestAnimationFrame(loop);
@@ -1189,7 +1212,10 @@ window._ga3dInit = function(graphData) {
     _controls.update();
 
     // Skip rendering when nothing has changed (idle scene with no animations)
-    const _hasAnimation = !settled || _ctrlV || navTarget || _navRadius !== null || _navReset || _edgeParticles.length > 0 || _cinematic;
+    const _hasAnimation = !settled || _ctrlV || navTarget || _navRadius !== null || _navReset
+      || _edgeParticles.length > 0 || _cinematic
+      || (addPulse && settled)       // breathing pulse + ring spin run every frame on small trees
+      || (settled && connFadeT < 1); // connector fade-in after settlement
     if (!_hasAnimation && !_needsRender) return;
     _needsRender = false;
 
@@ -1198,6 +1224,14 @@ window._ga3dInit = function(graphData) {
       if (settleT >= 1) {
         settleT = 1; settled = true;
         _buildConnectors(families, nodeMap, persons.length);
+        // Trigger connector fade-in from transparent
+        connFadeT = 0;
+        if (_connMats) {
+          _connMats.coupleLine.opacity   = 0;
+          _connMats.childLine.opacity    = 0;
+          _connMats.couplePoints.opacity = 0;
+          _connMats.childPoints.opacity  = 0;
+        }
       }
       const et = easeInOut(settleT);
       persons.forEach(node => {
@@ -1208,14 +1242,49 @@ window._ga3dInit = function(graphData) {
       });
     }
 
+    // Connector opacity fade-in (0.6 s after settlement)
+    if (settled && connFadeT < 1) {
+      connFadeT = Math.min(1, connFadeT + dt / 0.6);
+      const ef = easeInOut(connFadeT);
+      if (_connMats) {
+        _connMats.coupleLine.opacity   = 0.65 * ef;
+        _connMats.childLine.opacity    = 0.55 * ef;
+        _connMats.couplePoints.opacity = 0.35 * ef;
+        _connMats.childPoints.opacity  = 0.30 * ef;
+      }
+    }
+
+    // Focal ring slow spin — makes the gold orbital feel alive
+    if (addPulse && settled && focalBustEntry && focalBustEntry.bust.userData.ring) {
+      focalBustEntry.bust.userData.ring.rotation.y += dt * 0.5;
+    }
+
+    // Breathing pulse scale (shared for all non-focal nodes on small trees)
+    const _breatheScale = addPulse && settled
+      ? 1 + 0.025 * Math.sin(elapsed * (Math.PI * 2 / 4.0))
+      : 1;
+
     avatarGroups.forEach(({ bust, sprite, node }) => {
       const dx = _camera.position.x - node.pos.x;
       const dy = _camera.position.y - node.pos.y;
       const dz = _camera.position.z - node.pos.z;
+      const d2 = dx * dx + dy * dy + dz * dz;
       bust.rotation.y = Math.atan2(dx, dz);
+      // Subtle breathing: focal person pulses on its own faster rhythm
+      if (addPulse && settled) {
+        bust.scale.setScalar(node.focal
+          ? 1 + 0.04 * Math.sin(elapsed * (Math.PI * 2 / 3.0))
+          : _breatheScale);
+      }
       // Hide labels that are too far to read; keep all visible during settle so
       // the animation looks complete even before nodes reach their final positions.
-      sprite.visible = !settled || (dx * dx + dy * dy + dz * dz < SPRITE_VIS_D2);
+      const spriteVisible = !settled || d2 < SPRITE_VIS_D2;
+      sprite.visible = spriteVisible;
+      // Adaptive label scale: larger when far away (readability), smaller when close (no clutter)
+      if (spriteVisible && sprite.userData.baseSW) {
+        const sf = THREE.MathUtils.clamp(Math.sqrt(d2) / 14, 0.7, 2.0);
+        sprite.scale.set(sprite.userData.baseSW * sf, sprite.userData.baseSH * sf, 1);
+      }
     });
 
     if (settled) {
