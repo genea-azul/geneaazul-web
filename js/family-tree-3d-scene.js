@@ -281,6 +281,11 @@ function _runLayout(persons, families) {
   }
 
   persons.forEach(n => { n.finalPos = n.pos.clone(); });
+  // Override Y with the exact generation target so family size (child count) has
+  // no influence on height. Without this, nodes with many children are pulled down
+  // by parent-child springs more than nodes with few children, causing same-generation
+  // couples to sit at different heights despite having the same generation value.
+  persons.forEach(n => { n.finalPos.y = (n.generation || 0) * GY; });
   persons.forEach(n => { n.pos.copy(n.spherePos); });
 
   return edges;
@@ -639,10 +644,14 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
     Math.sin(overviewAngle) * overviewR
   );
 
-  // ── 1. Focal person (gen 0) close-up — t=0, warmup targets this position ──
+  // ── 1. Focal person close-up — t=0, warmup targets this position ──────────
   // Starting close makes the cinematic feel immediate; the overview zoom-out
   // comes later in the loop as a reveal rather than an opener.
-  const focalNodes = byGen[0] || [];
+  // Use the focal person's actual generation key (not hardcoded 0) so this
+  // works even when the backend numbers generations differently.
+  const focalNode   = persons.find(n => n.focal);
+  const focalGenKey = focalNode ? (focalNode.generation || 0) : 0;
+  const focalNodes  = byGen[focalGenKey] || [];
   if (focalNodes.length > 0) {
     const fx = focalNodes.reduce((s, n) => s + n.finalPos.x, 0) / focalNodes.length;
     const fy = focalNodes.reduce((s, n) => s + n.finalPos.y, 0) / focalNodes.length;
@@ -928,6 +937,9 @@ window._ga3dInit = function(graphData) {
     const mN = motherId != null ? personById[motherId] : null;
     if (!fN || !mN) return;
     if ((fN.generation || 0) !== (mN.generation || 0)) return; // cross-gen: keep natural heights
+    // Focal person is pinned at origin — snap the other spouse to focal's Y, never the reverse.
+    if (fN.focal) { mN.finalPos.y = fN.finalPos.y; ySnapped.add(fN.id); ySnapped.add(mN.id); return; }
+    if (mN.focal) { fN.finalPos.y = mN.finalPos.y; ySnapped.add(fN.id); ySnapped.add(mN.id); return; }
     const fSnapped = ySnapped.has(fN.id);
     const mSnapped = ySnapped.has(mN.id);
     if (fSnapped && mSnapped) return;
@@ -938,13 +950,22 @@ window._ga3dInit = function(graphData) {
     ySnapped.add(mN.id);
   });
 
-  // Post-layout: snap each couple to the same XZ so the couple bar appears at
-  // the couple's actual position in the tree rather than at the midpoint between
-  // two spouses that the force-directed layout placed far apart. Without this,
-  // all family connector lines converge near the centre regardless of where each
-  // family branch actually sits in the tree.
-  // Same remarriage-safe logic as the Y snap: if one spouse was already placed
-  // by a prior marriage, pull the new spouse to that established XZ position.
+  // Post-layout: enforce a target XZ separation for each couple.
+  // Base separation = 2.5; remarried persons get 3.5 so their multiple
+  // marriages are clearly distinguishable. Both too-close and too-far couples
+  // are corrected — this normalises small trees (where the force sim leaves
+  // spouses ~1 unit apart) and large trees (where repulsion pushes them 10+ apart).
+  // Direction from the force-directed layout is preserved.
+  // Remarriage-safe: once a person's XZ is fixed by their first family, subsequent
+  // families pull only the un-fixed spouse to the required distance.
+  // Focal person is pinned at origin — never moved.
+  const COUPLE_D_BASE   = 2.5;
+  const COUPLE_D_REMARR = 3.5;
+  const famCountById = {};
+  families.forEach(fam => {
+    (fam.husbandIds || []).forEach(id => { famCountById[id] = (famCountById[id] || 0) + 1; });
+    (fam.wifeIds    || []).forEach(id => { famCountById[id] = (famCountById[id] || 0) + 1; });
+  });
   const xzSnapped = new Set();
   families.forEach(fam => {
     const fatherId = fam.husbandIds && fam.husbandIds.length ? fam.husbandIds[0] : null;
@@ -953,15 +974,34 @@ window._ga3dInit = function(graphData) {
     const mN = motherId != null ? personById[motherId] : null;
     if (!fN || !mN) return;
     if ((fN.generation || 0) !== (mN.generation || 0)) return;
+    if (fN.focal || mN.focal) return; // focal person stays at origin
     const fSnapped = xzSnapped.has(fN.id);
     const mSnapped = xzSnapped.has(mN.id);
     if (fSnapped && mSnapped) return;
-    const targetX = fSnapped ? fN.finalPos.x : mSnapped ? mN.finalPos.x : (fN.finalPos.x + mN.finalPos.x) / 2;
-    const targetZ = fSnapped ? fN.finalPos.z : mSnapped ? mN.finalPos.z : (fN.finalPos.z + mN.finalPos.z) / 2;
-    fN.finalPos.x = targetX; fN.finalPos.z = targetZ;
-    mN.finalPos.x = targetX; mN.finalPos.z = targetZ;
+    const isRemarriage = (famCountById[fN.id] || 0) > 1 || (famCountById[mN.id] || 0) > 1;
+    const target = isRemarriage ? COUPLE_D_REMARR : COUPLE_D_BASE;
+    const dx = fN.finalPos.x - mN.finalPos.x;
+    const dz = fN.finalPos.z - mN.finalPos.z;
+    const dist = Math.sqrt(dx * dx + dz * dz);
     xzSnapped.add(fN.id);
     xzSnapped.add(mN.id);
+    // Default direction along X when spouses are coincident
+    const dirX = dist > 0.01 ? dx / dist : 1.0;
+    const dirZ = dist > 0.01 ? dz / dist : 0.0;
+    if (!fSnapped && !mSnapped) {
+      const midX = (fN.finalPos.x + mN.finalPos.x) / 2;
+      const midZ = (fN.finalPos.z + mN.finalPos.z) / 2;
+      fN.finalPos.x = midX + dirX * (target / 2);
+      fN.finalPos.z = midZ + dirZ * (target / 2);
+      mN.finalPos.x = midX - dirX * (target / 2);
+      mN.finalPos.z = midZ - dirZ * (target / 2);
+    } else if (fSnapped) {
+      mN.finalPos.x = fN.finalPos.x - dirX * target;
+      mN.finalPos.z = fN.finalPos.z - dirZ * target;
+    } else {
+      fN.finalPos.x = mN.finalPos.x + dirX * target;
+      fN.finalPos.z = mN.finalPos.z + dirZ * target;
+    }
   });
 
   // Enforce generational ordering: every child must sit below its parents in Y.
@@ -977,8 +1017,9 @@ window._ga3dInit = function(graphData) {
       const mId = fam.wifeIds    && fam.wifeIds.length    ? fam.wifeIds[0]    : null;
       const fP = fId != null ? personById[fId] : null;
       const mP = mId != null ? personById[mId] : null;
-      if (!fP || !mP) return;
-      const parentMinY = Math.min(fP.finalPos.y, mP.finalPos.y);
+      const parentP = fP || mP;
+      if (!parentP) return;
+      const parentMinY = fP && mP ? Math.min(fP.finalPos.y, mP.finalPos.y) : parentP.finalPos.y;
       (fam.childIds || []).forEach(cid => {
         const cP = personById[cid];
         if (!cP || cP.focal) return;
