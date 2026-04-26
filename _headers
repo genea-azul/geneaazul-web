@@ -6,9 +6,12 @@
 #
 # Because filenames are not content-hashed, we deliberately avoid long TTLs on
 # CSS/JS to prevent users from getting stale code after a deploy.
+#
+# NOTE (pre-requisite): in Cloudlare it was necessary to set:
+#    caching -> configuration -> Browser Cache TTL -> Respect Existing Headers
 
-# HTML — always revalidate
-/*.html
+# HTML — always revalidate (covers root and subdirectory entry points)
+/**/*.html
   Cache-Control: no-cache
 
 # Page fragments and story sources — short TTL matches data files; noindex so raw
@@ -66,6 +69,12 @@
 /data/*
   Cache-Control: public, max-age=3600, stale-while-revalidate=60
   X-Robots-Tag: noindex
+
+# Crawl metadata — 1 day
+/robots.txt
+  Cache-Control: public, max-age=86400
+/sitemap.xml
+  Cache-Control: public, max-age=86400
 
 # Images — 1 week
 /img/*

@@ -2,9 +2,6 @@
 // browser that supports ES modules but not import maps (Safari 16.0–16.3).
 import * as THREE               from 'https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.min.js';
 import { OrbitControls }        from 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/controls/OrbitControls.js';
-import { LineSegments2 }        from 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/lines/LineSegments2.js';
-import { LineSegmentsGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/lines/LineSegmentsGeometry.js';
-import { LineMaterial }         from 'https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/lines/LineMaterial.js';
 
 let _renderer, _scene, _camera, _controls, _animId, _clock, _sun;
 let _ctrlV    = null; // { dTheta, dPhi, dRadius, pan: Vector3 }
@@ -69,11 +66,12 @@ function _buildMaterials() {
 
 function _buildConnectorMats() {
   const COUPLE = 0x8b6010, CHILD = 0x7a5828;
-  const W = _renderer ? _renderer.domElement.clientWidth  : window.innerWidth;
-  const H = _renderer ? _renderer.domElement.clientHeight : window.innerHeight;
   return {
-    coupleLine:   new LineMaterial({ color: COUPLE, transparent: true, opacity: 0.65, depthWrite: false, linewidth: 1.2, resolution: new THREE.Vector2(W, H) }),
-    childLine:    new LineMaterial({ color: CHILD,  transparent: true, opacity: 0.55, depthWrite: false, linewidth: 1.0, resolution: new THREE.Vector2(W, H) }),
+    // LineBasicMaterial works on all WebGL implementations including Android mobile GPUs.
+    // LineMaterial/LineSegments2 (fat lines) uses instanced rendering that silently
+    // misbehaves on some Android GPU drivers — the visual difference at 1-1.2 px is negligible.
+    coupleLine:   new THREE.LineBasicMaterial({ color: COUPLE, transparent: true, opacity: 0.65, depthWrite: false }),
+    childLine:    new THREE.LineBasicMaterial({ color: CHILD,  transparent: true, opacity: 0.55, depthWrite: false }),
     couplePoints: new THREE.PointsMaterial({ color: COUPLE, size: 0.04, transparent: true, opacity: 0.29, depthWrite: false, sizeAttenuation: true }),
     childPoints:  new THREE.PointsMaterial({ color: CHILD,  size: 0.04, transparent: true, opacity: 0.25, depthWrite: false, sizeAttenuation: true }),
     coupleFlow:   new THREE.MeshBasicMaterial({ color: COUPLE, depthWrite: false }),
@@ -178,10 +176,6 @@ function _onResize() {
   _camera.fov = aspect < 0.75 ? 68 : 48;
   _camera.updateProjectionMatrix();
   _renderer.setSize(W, H);
-  if (_connMats) {
-    _connMats.coupleLine.resolution.set(W, H);
-    _connMats.childLine.resolution.set(W, H);
-  }
   // Rebuild cinematic path only when the portrait/landscape bucket actually
   // changes. Mobile URL-bar show/hide and on-screen keyboards fire resize
   // events constantly within the same bucket — rebuilding on every one would
@@ -407,14 +401,6 @@ function _makeSprite(node) {
 
 const _edgeParticles = [];
 
-function _seg(p1, p2, segs, ptsMat) {
-  segs.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
-  const n = Math.max(3, Math.ceil(p1.distanceTo(p2) * 5));
-  const pts = [];
-  for (let i = 0; i <= n; i++) pts.push(p1.clone().lerp(p2, i / n));
-  _scene.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(pts), ptsMat));
-}
-
 function _flowPart(p1, p2, mat, speed, phase) {
   // Share a single sphere geometry across every flow particle — a large tree
   // can have hundreds of these, so per-particle geometry allocation was
@@ -425,10 +411,25 @@ function _flowPart(p1, p2, mat, speed, phase) {
   _edgeParticles.push({ mesh: m, p1: p1.clone(), p2: p2.clone(), speed, phase });
 }
 
-function _buildConnectors(families, nodeMap) {
+function _buildConnectors(families, nodeMap, personCount) {
   if (!_connMats) _connMats = _buildConnectorMats();
   const { coupleLine, childLine, couplePoints, childPoints, coupleFlow, childFlow, orbMat } = _connMats;
   const coupleSegs = [], childSegs = [];
+  // Accumulate dot-point positions for a single batched draw call each instead of one
+  // THREE.Points object per segment (which was hundreds of draw calls on large trees).
+  const coupleAllPts = [], childAllPts = [];
+  // Skip animated flow particles and junction orbs on large trees — for 500+ persons
+  // those add hundreds of animated mesh objects that overwhelm mobile GPUs.
+  const addDecor = personCount <= 80;
+
+  function _seg(p1, p2, segArr, ptsArr) {
+    segArr.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+    const n = Math.max(3, Math.ceil(p1.distanceTo(p2) * 5));
+    for (let i = 0; i <= n; i++) {
+      const f = i / n;
+      ptsArr.push(p1.x + (p2.x - p1.x) * f, p1.y + (p2.y - p1.y) * f, p1.z + (p2.z - p1.z) * f);
+    }
+  }
 
   families.forEach(fam => {
     const fatherId = (fam.husbandIds && fam.husbandIds.length) ? fam.husbandIds[0] : null;
@@ -449,14 +450,16 @@ function _buildConnectors(families, nodeMap) {
       const midBar = fBar.clone().lerp(mBar, 0.5);
 
       // Vertical legs from each spouse down to the couple bar (only when heights differ)
-      if (fBot.y > barY + 0.05) _seg(fBot, fBar, coupleSegs, couplePoints);
-      if (mBot.y > barY + 0.05) _seg(mBot, mBar, coupleSegs, couplePoints);
+      if (fBot.y > barY + 0.05) _seg(fBot, fBar, coupleSegs, coupleAllPts);
+      if (mBot.y > barY + 0.05) _seg(mBot, mBar, coupleSegs, coupleAllPts);
       // Horizontal couple bar
-      _seg(fBar, mBar, coupleSegs, couplePoints);
-      const orb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), orbMat);
-      orb.position.copy(midBar); orb.castShadow = true; _scene.add(orb);
-      _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
-      _flowPart(mBar, midBar, coupleFlow, 0.35, Math.random() * 0.5);
+      _seg(fBar, mBar, coupleSegs, coupleAllPts);
+      if (addDecor) {
+        const orb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), orbMat);
+        orb.position.copy(midBar); orb.castShadow = true; _scene.add(orb);
+        _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
+        _flowPart(mBar, midBar, coupleFlow, 0.35, Math.random() * 0.5);
+      }
 
       if (!fam.childIds || !fam.childIds.length) return;
       const cNodes = fam.childIds.map(id => nodeMap[id]).filter(Boolean);
@@ -470,15 +473,15 @@ function _buildConnectors(families, nodeMap) {
       const juncY = Math.min(maxChildY + (barY - maxChildY) * 0.4, minParentY - 0.3);
       const junc  = new THREE.Vector3(midBar.x, juncY, midBar.z);
 
-      _seg(midBar, junc, coupleSegs, couplePoints);
-      _flowPart(midBar, junc, coupleFlow, 0.32, Math.random());
+      _seg(midBar, junc, coupleSegs, coupleAllPts);
+      if (addDecor) _flowPart(midBar, junc, coupleFlow, 0.32, Math.random());
 
       // Draw from junction to each child's top (sphere top = closest point toward junction)
       cNodes.forEach(cn => {
         const cp = cn.bust.position;
         const cTop = new THREE.Vector3(cp.x, cp.y + 0.28, cp.z);
-        _seg(junc, cTop, childSegs, childPoints);
-        _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
+        _seg(junc, cTop, childSegs, childAllPts);
+        if (addDecor) _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
       });
     } else {
       // Only one parent is present in the tree (the other was filtered out or never loaded).
@@ -494,24 +497,39 @@ function _buildConnectors(families, nodeMap) {
       const juncY = Math.min(maxChildY + (pBot.y - maxChildY) * 0.4, pBot.y - 0.3);
       const junc  = new THREE.Vector3(pBot.x, juncY, pBot.z);
 
-      _seg(pBot, junc, coupleSegs, couplePoints);
-      _flowPart(pBot, junc, coupleFlow, 0.32, Math.random());
+      _seg(pBot, junc, coupleSegs, coupleAllPts);
+      if (addDecor) _flowPart(pBot, junc, coupleFlow, 0.32, Math.random());
 
       cNodes.forEach(cn => {
         const cp = cn.bust.position;
         const cTop = new THREE.Vector3(cp.x, cp.y + 0.28, cp.z);
-        _seg(junc, cTop, childSegs, childPoints);
-        _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
+        _seg(junc, cTop, childSegs, childAllPts);
+        if (addDecor) _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
       });
     }
   });
 
-  // Flush all segments into two batched LineSegments2 objects (one draw call each)
+  // Flush lines — two draw calls total (one for couple connectors, one for child connectors)
   if (coupleSegs.length) {
-    _scene.add(new LineSegments2(new LineSegmentsGeometry().setPositions(coupleSegs), coupleLine));
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(coupleSegs, 3));
+    _scene.add(new THREE.LineSegments(geo, coupleLine));
   }
   if (childSegs.length) {
-    _scene.add(new LineSegments2(new LineSegmentsGeometry().setPositions(childSegs), childLine));
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(childSegs, 3));
+    _scene.add(new THREE.LineSegments(geo, childLine));
+  }
+  // Flush dot points — two draw calls total instead of one per segment
+  if (coupleAllPts.length) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(coupleAllPts, 3));
+    _scene.add(new THREE.Points(geo, couplePoints));
+  }
+  if (childAllPts.length) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(childAllPts, 3));
+    _scene.add(new THREE.Points(geo, childPoints));
   }
 }
 
@@ -1099,7 +1117,7 @@ window._ga3dInit = function(graphData) {
       settleT += dt / SETTLE_DUR;
       if (settleT >= 1) {
         settleT = 1; settled = true;
-        _buildConnectors(families, nodeMap);
+        _buildConnectors(families, nodeMap, persons.length);
       }
       const et = easeInOut(settleT);
       persons.forEach(node => {
