@@ -23,6 +23,9 @@ body.theme-modern {
   --ga-footer-text:    rgba(255,255,255,.75);
   --ga-font-heading:   'Inter', 'Segoe UI', system-ui, sans-serif;
   --ga-font-body:      'Inter', 'Segoe UI', system-ui, sans-serif;
+  --ga-curiosidades:       #16a34a;
+  --ga-curiosidades-hover: #15803d;
+  --ga-curiosidades-muted: #86efac;
 }
 
 /* Override heading font */

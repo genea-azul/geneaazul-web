@@ -28,9 +28,11 @@
   --ga-footer-text:    rgba(255,255,255,.82);
 
   /* ── Cross-theme semantic colours (same across all themes) ── */
-  --ga-curiosidades: #2e7d32; /* timeline "curiosidades" category */
-  --ga-sex-male:     #2c6fa0; /* teal-blue for male persons */
-  --ga-sex-female:   #9b4c6e; /* wine-rose for female persons */
+  --ga-curiosidades:       #2e7d32; /* timeline "curiosidades" category */
+  --ga-curiosidades-hover: #256427; /* natural darker: same saturation, L 34%→27% */
+  --ga-curiosidades-muted: #52975a; /* lighter variant: L 34%→45%, ~3.5:1 on white */
+  --ga-sex-male:           #2c6fa0; /* teal-blue for male persons */
+  --ga-sex-female:         #9b4c6e; /* wine-rose for female persons */
 }
 
 /* ─── Base ───────────────────────────────────────────────────────── */
@@ -1186,12 +1188,69 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 .ga-bda-icon-pdf { color: #c0392b; } /* PDF red     */
 .ga-bda-icon-img { color: #2471a3; } /* image blue  */
 
+/* ── Family tree action buttons ──────────────────────────────────
+   Three distinct actions: download list (muted), 2D tree (primary
+   navy), 3D tree (accent gold). Shared hover lift animation. */
+.ga-btn-family-tree {
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.ga-btn-family-tree i {
+  line-height: 1;
+}
+.ga-btn-family-tree:not(:disabled):not(.disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.20);
+}
+
+.ga-btn-tree-download {
+  background-color: var(--ga-text-muted);
+  border-color: var(--ga-text-muted);
+  color: #fff;
+}
+.ga-btn-tree-download:not(:disabled):not(.disabled):hover,
+.ga-btn-tree-download:not(:disabled):not(.disabled):focus {
+  background-color: #5a4c42;
+  border-color: #5a4c42;
+  color: #fff;
+}
+
+.ga-btn-tree-2d {
+  background-color: var(--ga-primary);
+  border-color: var(--ga-primary);
+  color: #fff;
+}
+.ga-btn-tree-2d:not(:disabled):not(.disabled):hover,
+.ga-btn-tree-2d:not(:disabled):not(.disabled):focus {
+  background-color: var(--ga-primary-hover);
+  border-color: var(--ga-primary-hover);
+  color: #fff;
+}
+
+.ga-btn-tree-3d {
+  background-color: var(--ga-curiosidades);
+  border-color: var(--ga-curiosidades);
+  color: #fff;
+}
+.ga-btn-tree-3d:not(:disabled):not(.disabled):hover,
+.ga-btn-tree-3d:not(:disabled):not(.disabled):focus {
+  background-color: var(--ga-curiosidades-hover);
+  border-color: var(--ga-curiosidades-hover);
+  color: #fff;
+}
+
 /* ── 3D Family Tree Modal ─────────────────────────────────────── */
 .ga-tree3d-beta-badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
   font-size: 10px;
+  font-weight: 600;
+  background: var(--ga-border);
   color: var(--ga-text-muted);
-  font-style: italic;
+  border-radius: 10rem;
   white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 /* ─── 3D family tree modal ──────────────────────────────────────────

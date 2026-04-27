@@ -553,21 +553,20 @@ GeneaAzul.search = (function() {
         .append($('<span>').addClass('spinner-border spinner-border-sm me-1').attr('role', 'status'))
         .append('Generando datos de familiares,<br>esperá unos segundos...'))
       .append($('<div>').addClass('mt-2 text-center')
-        .append($('<a>').addClass('btn btn-sm btn-dark search-family-tree-btn disabled')
+        .append($('<button>').addClass('btn btn-sm ga-btn-family-tree ga-btn-tree-download search-family-tree-btn disabled')
           .attr('id', 'search-family-tree-btn-' + uid)
-          .attr('role', 'button').attr('href', '#').attr('tabindex', '-1')
+          .attr('type', 'button')
           .on('click', { personUuid: uid, btnLocator: '#search-family-tree-btn-' + uid, errorLocator: '#search-family-tree-error-' + uid }, downloadFamilyTreePdf)
           .html('<i class="bi bi-download me-1"></i>Descargar listado de familiares')))
       .append($('<div>').addClass('mt-1 text-center')
-        .append($('<a>').addClass('btn btn-sm btn-dark view-family-tree-btn disabled')
+        .append($('<a>').addClass('btn btn-sm ga-btn-family-tree ga-btn-tree-2d view-family-tree-btn disabled')
           .attr('id', 'view-family-tree-btn-' + uid)
-          .attr('role', 'button')
           .attr('href', cfg.apiBaseUrl + '/family-tree/' + uid + (cfg.obfuscateLiving ? '' : '?f=0'))
           .attr('target', '_blank').attr('rel', 'noopener noreferrer')
           .attr('tabindex', '-1')
           .html('<i class="bi bi-diagram-3-fill me-1"></i>Ver árbol genealógico 2D')))
       .append($('<div>').addClass('mt-1 text-center d-flex align-items-center justify-content-center gap-2')
-        .append($('<button>').addClass('btn btn-sm btn-dark view-family-tree-3d-btn disabled')
+        .append($('<button>').addClass('btn btn-sm ga-btn-family-tree ga-btn-tree-3d view-family-tree-3d-btn disabled')
           .attr('id', 'view-family-tree-3d-btn-' + uid)
           .attr('type', 'button')
           .on('click', { personUuid: uid }, function(e) {
@@ -613,7 +612,7 @@ GeneaAzul.search = (function() {
   function activateFamilyTreeButtons(uuid) {
     $('#search-family-tree-wait-sign-' + uuid).addClass('d-none');
     $('#search-family-tree-btn-' + uuid).removeClass('disabled');
-    $('#view-family-tree-btn-' + uuid).removeClass('disabled');
+    $('#view-family-tree-btn-' + uuid).removeClass('disabled').removeAttr('tabindex');
     $('#view-family-tree-3d-btn-' + uuid).removeClass('disabled');
   }
 

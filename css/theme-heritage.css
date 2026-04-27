@@ -23,6 +23,9 @@ body.theme-heritage {
   --ga-footer-text:    rgba(255,255,255,.80);
   --ga-font-heading:   'Playfair Display', Georgia, serif;
   --ga-font-body:      'Source Sans 3', 'Segoe UI', sans-serif;
+  --ga-curiosidades:       #2e7d32;
+  --ga-curiosidades-hover: #256427;
+  --ga-curiosidades-muted: #52975a;
 }
 
 /* Hero: subtle parchment texture via CSS gradient */
