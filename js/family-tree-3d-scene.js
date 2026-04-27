@@ -431,16 +431,13 @@ function _flowPart(p1, p2, mat, speed, phase) {
   _edgeParticles.push({ mesh: m, p1: p1.clone(), p2: p2.clone(), speed, phase });
 }
 
-function _buildConnectors(families, nodeMap, personCount) {
+function _buildConnectors(families, nodeMap) {
   if (!_connMats) _connMats = _buildConnectorMats();
   const { coupleLine, childLine, couplePoints, childPoints, coupleFlow, childFlow, orbMat } = _connMats;
   const coupleSegs = [], childSegs = [];
   // Accumulate dot-point positions for a single batched draw call each instead of one
   // THREE.Points object per segment (which was hundreds of draw calls on large trees).
   const coupleAllPts = [], childAllPts = [];
-  // Skip animated flow particles and junction orbs on large trees — for 500+ persons
-  // those add hundreds of animated mesh objects that overwhelm mobile GPUs.
-  const addDecor = personCount <= 80;
 
   function _seg(p1, p2, segArr, ptsArr) {
     segArr.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
@@ -474,19 +471,15 @@ function _buildConnectors(families, nodeMap, personCount) {
       if (mBot.y > barY + 0.05) _seg(mBot, mBar, coupleSegs, coupleAllPts);
       // Horizontal couple bar
       _seg(fBar, mBar, coupleSegs, coupleAllPts);
-      if (addDecor) {
-        const orb = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), orbMat);
-        orb.position.copy(midBar); orb.castShadow = true; _scene.add(orb);
-      }
+      const orb = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), orbMat);
+      orb.position.copy(midBar); orb.castShadow = true; _scene.add(orb);
 
       if (!fam.childIds || !fam.childIds.length) return;
       const cNodes = fam.childIds.map(id => nodeMap[id]).filter(Boolean);
       if (!cNodes.length) return;
 
-      if (addDecor) {
-        _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
-        _flowPart(mBar, midBar, coupleFlow, 0.35, Math.random() * 0.5);
-      }
+      _flowPart(fBar, midBar, coupleFlow, 0.35, Math.random());
+      _flowPart(mBar, midBar, coupleFlow, 0.35, Math.random() * 0.5);
 
       // Junction: positioned between the couple bar and the highest child.
       // When children spread wide in XZ the junction rises toward the parents so
@@ -505,14 +498,14 @@ function _buildConnectors(families, nodeMap, personCount) {
       const junc  = new THREE.Vector3(midBar.x, juncY, midBar.z);
 
       _seg(midBar, junc, coupleSegs, coupleAllPts);
-      if (addDecor) _flowPart(midBar, junc, coupleFlow, 0.32, Math.random());
+      _flowPart(midBar, junc, coupleFlow, 0.32, Math.random());
 
       // Draw from junction to each child's top (sphere top = closest point toward junction)
       cNodes.forEach(cn => {
         const cp = cn.bust.position;
         const cTop = new THREE.Vector3(cp.x, cp.y + 0.28, cp.z);
         _seg(junc, cTop, childSegs, childAllPts);
-        if (addDecor) _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
+        _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
       });
     } else {
       // Only one parent is present in the tree (the other was filtered out or never loaded).
@@ -536,13 +529,13 @@ function _buildConnectors(families, nodeMap, personCount) {
       const junc  = new THREE.Vector3(pBot.x, juncY, pBot.z);
 
       _seg(pBot, junc, coupleSegs, coupleAllPts);
-      if (addDecor) _flowPart(pBot, junc, coupleFlow, 0.32, Math.random());
+      _flowPart(pBot, junc, coupleFlow, 0.32, Math.random());
 
       cNodes.forEach(cn => {
         const cp = cn.bust.position;
         const cTop = new THREE.Vector3(cp.x, cp.y + 0.28, cp.z);
         _seg(junc, cTop, childSegs, childAllPts);
-        if (addDecor) _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
+        _flowPart(junc, cTop, childFlow, 0.25 + Math.random() * 0.12, Math.random());
       });
     }
   });
@@ -595,7 +588,7 @@ function _adjustSceneForTree(treeRadius) {
   _camera.far = Math.max(200, maxDist + treeRadius * 2.5 + 20);
   _camera.updateProjectionMatrix();
 
-  // Fog: 50% fogged at ~2× tree radius (density scales inversely with size)
+  // Fog: 50% fogged at ~2.4× tree radius (FogExp2: d = √ln2 / density ≈ 0.833 / density)
   _scene.fog.density = 0.35 / treeRadius;
 
   // Shadow volume: cover the whole tree extent
@@ -720,12 +713,14 @@ function _buildCinematicPath(persons, treeRadius, aspect) {
   // Duration scales with waypoint count (5 s each) so large trees aren't rushed,
   // capped at 90 s. Minimum 15 s for very small trees.
   const duration = Math.min(90, Math.max(15, camPts.length * 5));
+  const maxCamY  = camPts.reduce(function(m, p) { return Math.max(m, p.y); }, -Infinity);
   return {
     // 'centripetal' parameterisation avoids cusps and self-intersections on
     // unevenly-spaced control points — exactly what camera flythrough paths need.
     camCurve:  new THREE.CatmullRomCurve3(camPts,  true, 'centripetal'),
     lookCurve: new THREE.CatmullRomCurve3(lookPts, true, 'centripetal'),
-    speed: 1 / duration
+    speed: 1 / duration,
+    maxCamY: maxCamY
   };
 }
 
@@ -1177,9 +1172,6 @@ window._ga3dInit = function(graphData) {
   // particle is < 1.4 px (sub-pixel). Both use the same cutoff for consistency.
   const SPRITE_VIS_D2   = 65 * 65;
   const PARTICLE_VIS_D2 = 40 * 40;
-  // Small trees (≤80 persons) get breathing pulse + ring spin; particles are already
-  // animating on those trees so continuous rendering comes at no extra cost.
-  const addPulse       = persons.length <= 80;
   let connFadeT        = 1; // reset to 0 when connectors are first built; drives opacity fade-in
   const focalBustEntry = avatarGroups.find(ag => ag.node.focal) || null;
 
@@ -1220,8 +1212,7 @@ window._ga3dInit = function(graphData) {
     // Skip rendering when nothing has changed (idle scene with no animations)
     const _hasAnimation = !settled || _ctrlV || navTarget || _navRadius !== null || _navReset
       || _edgeParticles.length > 0 || _cinematic
-      || (addPulse && settled)       // breathing pulse + ring spin run every frame on small trees
-      || (settled && connFadeT < 1); // connector fade-in after settlement
+      || settled; // breathing pulse, ring spin, and connector fade always run post-settlement
     if (!_hasAnimation && !_needsRender) return;
     _needsRender = false;
 
@@ -1243,7 +1234,7 @@ window._ga3dInit = function(graphData) {
       });
       if (reachedEnd) {
         settled = true;
-        _buildConnectors(families, nodeMap, persons.length);
+        _buildConnectors(families, nodeMap);
         // Trigger connector fade-in from transparent
         connFadeT = 0;
         if (_connMats) {
@@ -1268,14 +1259,14 @@ window._ga3dInit = function(graphData) {
     }
 
     // Focal ring slow spin — makes the gold orbital feel alive
-    if (addPulse && settled && focalBustEntry && focalBustEntry.bust.userData.ring) {
+    if (settled && focalBustEntry && focalBustEntry.bust.userData.ring) {
       // rotation.z because ring.rotation.x = PI/2 tilts its local frame 90°:
       // after that tilt, local Z aligns with world Y and produces the flat orbital spin.
       focalBustEntry.bust.userData.ring.rotation.z += dt * 0.5;
     }
 
-    // Breathing pulse scale (shared for all non-focal nodes on small trees)
-    const breatheScale = addPulse && settled
+    // Breathing pulse scale
+    const breatheScale = settled
       ? 1 + 0.025 * Math.sin(elapsed * (Math.PI * 2 / 4.0))
       : 1;
 
@@ -1286,7 +1277,7 @@ window._ga3dInit = function(graphData) {
       const d2 = dx * dx + dy * dy + dz * dz;
       bust.rotation.y = Math.atan2(dx, dz);
       // Subtle breathing: focal person pulses on its own faster rhythm
-      if (addPulse && settled) {
+      if (settled) {
         bust.scale.setScalar(node.focal
           ? 1 + 0.04 * Math.sin(elapsed * (Math.PI * 2 / 3.0))
           : breatheScale);
@@ -1399,7 +1390,11 @@ window._ga3dInit = function(graphData) {
         _camera.lookAt(_controls.target);
         // Fog density driven by camera height: higher shots get more atmospheric haze,
         // low close-ups clear out — reinforces depth at dramatic moments.
-        const normH = THREE.MathUtils.clamp((_camera.position.y - (_cinematicTreeMinY || 0)) / Math.max(1, (_cinematicTreeMaxY || 1) - (_cinematicTreeMinY || 0)), 0, 1);
+        // Normalise over [lowest node Y → highest path waypoint Y] so the gradient
+        // spans the full camera travel range, not just the (much narrower) node Y span.
+        const fogBotY = _cinematicTreeMinY || 0;
+        const fogTopY = _cinematicPath.maxCamY;
+        const normH   = THREE.MathUtils.clamp((_camera.position.y - fogBotY) / Math.max(1, fogTopY - fogBotY), 0, 1);
         _scene.fog.density = _cinematicFogBase * (1 + 0.35 * normH);
       }
     }
