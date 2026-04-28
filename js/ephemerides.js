@@ -81,7 +81,7 @@ GeneaAzul.ephemerides = (function() {
     if (p.aka) displayName += ' «' + p.aka + '»';
 
     var photoInner = p.profilePicture
-      ? '<img src="' + GeneaAzul.utils.escHtml(p.profilePicture) + '" alt="' + GeneaAzul.utils.escHtml(p.name) + '" class="ga-birthday-photo">'
+      ? '<img src="' + GeneaAzul.utils.escHtml(p.profilePicture) + '" alt="' + GeneaAzul.utils.escHtml(p.name) + '" class="ga-birthday-photo" loading="lazy">'
       : '<div class="ga-birthday-photo-placeholder"><i class="bi bi-person"></i></div>';
 
     var $col  = $('<div>').addClass('col-6 col-sm-4 col-md-3 col-lg-2');

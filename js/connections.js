@@ -16,6 +16,11 @@ GeneaAzul.connections = (function() {
     var currentYear = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric' }); // en-CA → guaranteed ASCII year
     $('#person1YearOfBirth, #person2YearOfBirth').attr('max', currentYear);
 
+    $(document).off('input.connections-year', '#conexiones-section input[type=number]')
+      .on('input.connections-year', '#conexiones-section input[type=number]', function() {
+        utils.maxLengthCheck(this);
+      });
+
     initBackend();
     wireButton();
     wireEnter();

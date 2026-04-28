@@ -53,6 +53,11 @@ GeneaAzul.cronologia = (function() {
       $list.append(buildEntry(entry));
     });
     $container.append($list);
+    $container.append(
+      $('<div>').addClass('ga-tl-empty d-none').html(
+        'Sin resultados. <button type="button" class="btn btn-link btn-sm ga-tl-empty-reset p-0">Limpiar filtros</button>'
+      )
+    );
     initFilterTabs($list);
     scrollToHashIfAny();
   }
@@ -167,6 +172,8 @@ GeneaAzul.cronologia = (function() {
       $e.toggleClass('d-none', !(typeOk && titleOk));
     });
     updateYearHeaders($list);
+    var hasVisible = $list.find('.ga-tl-entry:not(.d-none)').length > 0;
+    $list.siblings('.ga-tl-empty').toggleClass('d-none', hasVisible);
   }
 
   function updateYearHeaders($list) {
@@ -189,6 +196,11 @@ GeneaAzul.cronologia = (function() {
     $(document).off('input.cronologia', '#cronologia-search')
       .on('input.cronologia', '#cronologia-search', function() {
         applyFilters($list);
+      });
+    $(document).off('click.cronologia-reset', '#cronologia-section .ga-tl-empty-reset')
+      .on('click.cronologia-reset', '#cronologia-section .ga-tl-empty-reset', function() {
+        $section.find('.ga-tl-filter-btn[data-filter="all"]').trigger('click');
+        $('#cronologia-search').val('').trigger('input');
       });
   }
 

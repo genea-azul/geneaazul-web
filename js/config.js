@@ -24,6 +24,8 @@ GeneaAzul.config = {
 */
 GeneaAzul.app = (function() {
 
+  var _heroAnimated = false;
+
   function init() {
     // Early wake-up ping so the backend is ready before the user navigates to a feature page
     GeneaAzul.utils.apiGetCached(GeneaAzul.config.apiBaseUrl + '/api/gedcom-analyzer/metadata', function() {});
@@ -37,7 +39,24 @@ GeneaAzul.app = (function() {
   }
 
   function animateHeroStats() {
-    GeneaAzul.utils.animateCounters($('#hero-stats'));
+    var $stats = $('#hero-stats');
+    if (!$stats.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+      _heroAnimated = true;
+      GeneaAzul.utils.animateCounters($stats);
+      return;
+    }
+
+    var observer = new IntersectionObserver(function(entries, obs) {
+      if (entries[0].isIntersecting) {
+        _heroAnimated = true;
+        GeneaAzul.utils.animateCounters($stats);
+        obs.disconnect();
+      }
+    }, { threshold: 0.2 });
+
+    observer.observe($stats[0]);
   }
 
   function fetchLiveStats() {
@@ -67,7 +86,7 @@ GeneaAzul.app = (function() {
     var $el = $(selector);
     if (!$el.length) return;
     $el.attr('data-target', value);
-    GeneaAzul.utils.animateCounter($el, value);
+    if (_heroAnimated) GeneaAzul.utils.animateCounter($el, value);
   }
 
   function initNavbarScroll() {

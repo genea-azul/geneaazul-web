@@ -432,15 +432,21 @@ GeneaAzul.stats = (function() {
     });
 
     $el.append($('<div>').addClass('table-responsive').append($table));
+    $el.append($('<p>').addClass('text-muted mt-3 d-none').attr('id', 'surnames-no-results').text('No hay apellidos con este filtro.'));
   }
 
   function filterSurnameRows(q) {
     var nq = utils.normalize(q);
+    var visible = 0;
     $('#surnames-tbody tr').each(function() {
       var s = $(this).attr('data-surname') || '';
       var v = $(this).attr('data-variants') || '';
-      $(this).toggleClass('d-none', nq.length > 0 && s.indexOf(nq) === -1 && v.indexOf(nq) === -1);
+      var show = nq.length === 0 || s.indexOf(nq) !== -1 || v.indexOf(nq) !== -1;
+      $(this).toggleClass('d-none', !show);
+      if (show) visible++;
     });
+    $('#surn-total').text(visible);
+    $('#surnames-no-results').toggleClass('d-none', visible > 0);
   }
 
   return { init: init, initImmigration: initImmigration, initPersonalities: initPersonalities, initSurnames: initSurnames };

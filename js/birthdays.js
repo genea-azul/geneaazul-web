@@ -42,19 +42,22 @@ GeneaAzul.birthdays = (function() {
     people.forEach(function(p) {
       var birthYear = extractYear(p.dateOfBirth);
       var imgHtml = p.profilePicture
-        ? '<img src="' + GeneaAzul.utils.escHtml(p.profilePicture) + '" alt="' + GeneaAzul.utils.escHtml(p.name) + '" class="ga-birthday-photo">'
+        ? '<img src="' + GeneaAzul.utils.escHtml(p.profilePicture) + '" alt="' + GeneaAzul.utils.escHtml(p.name) + '" class="ga-birthday-photo" loading="lazy">'
         : '<div class="ga-birthday-photo-placeholder"><i class="bi bi-person"></i></div>';
 
       var yearHtml = birthYear
         ? '<span class="ga-birthday-year">(' + GeneaAzul.utils.escHtml(birthYear) + ')</span>'
         : '';
 
+      var displayName = p.name;
+      if (p.aka) displayName += ' «' + p.aka + '»';
+
       var $col = $('<div>').addClass('col-6 col-sm-4 col-md-3 col-lg-2');
       var $item = $('<div>').addClass('ga-birthday-item text-center');
 
       $item.html(
         imgHtml
-        + '<div class="ga-birthday-name">' + GeneaAzul.utils.escHtml(p.name) + ' ' + yearHtml + '</div>'
+        + '<div class="ga-birthday-name">' + GeneaAzul.utils.escHtml(displayName) + ' ' + yearHtml + '</div>'
       );
 
       $col.append($item);
