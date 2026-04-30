@@ -18,6 +18,7 @@ Thumbs.db
 .worktrees/
 
 # Claude Code — local settings and runtime state (agents/ and skills/ are committed)
+.claude/worktrees/
 .claude/settings.local.json
 .claude/scheduled_tasks.json
 .claude/scheduled_tasks.lock
