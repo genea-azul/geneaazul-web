@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Completá los datos de tu familia y envianos la información para incorporarla al árbol genealógico de Azul.">
+  <title>Aportá tu árbol — Genea Azul</title>
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://geneaazul.com.ar/agregar-familia">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/img/logo-simple-2500x2500-no-bg.png">
+  <link rel="apple-touch-icon" href="/img/logo-simple-2500x2500-no-bg.png">
+
+  <!-- Open Graph / social sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://geneaazul.com.ar/agregar-familia">
+  <meta property="og:site_name" content="Genea Azul">
+  <meta property="og:title" content="Aportá tu árbol — Genea Azul">
+  <meta property="og:description" content="Completá los datos de tu familia y envianos la información para incorporarla al árbol genealógico de Azul.">
+  <meta property="og:image" content="https://geneaazul.com.ar/img/logo-slogan-2200x1200-white-bg.png">
+  <meta property="og:image:width" content="2200">
+  <meta property="og:image:height" content="1200">
+  <meta property="og:locale" content="es_AR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@geneaazul">
+  <meta name="twitter:title" content="Aportá tu árbol — Genea Azul">
+  <meta name="twitter:description" content="Completá los datos de tu familia y envianos la información para incorporarla al árbol genealógico de Azul.">
+  <meta name="twitter:image" content="https://geneaazul.com.ar/img/logo-slogan-2200x1200-white-bg.png">
+
+  <!-- Robots -->
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+
+  <!-- Google Analytics -->
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYF0EYWMH5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-HYF0EYWMH5', { send_page_view: false });
+  </script>
+
+  <!-- Preconnect hints -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" integrity="sha384-CK2SzKma4jA5H/MXDUU7i1TqZlCFaD4T01vtyDFvPlD97JQyS+IsSh1nI2EFbpyk" crossorigin="anonymous">
+  <!-- Leaflet (interactive map) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" integrity="sha384-b8ANgTJvdlAnWM5YGMpKn7Kodm+1k7NYNG9zdjTCcZcKatzYHwZ0RLdWarbJJVzU" crossorigin="anonymous">
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/theme-heritage.css" id="theme-stylesheet">
+
+  <!-- Import map polyfill (Safari < 16.4 compat) + map for Three.js addon transitive imports -->
+  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1/dist/es-module-shims.min.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.min.js"
+    }
+  }
+  </script>
+
+</head>
+<body class="theme-heritage">
+
+  <!-- ═══════════════════════════════════════════════════════ NAVBAR -->
+  <nav class="navbar navbar-expand-xl sticky-top ga-navbar" id="main-navbar">
+    <div class="container-xl">
+      <a class="navbar-brand ga-brand" href="/" data-route="inicio">
+        <img src="/img/logo-simple-2500x2500-no-bg.png" alt="Genea Azul" class="ga-logo-nav">
+      </a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+        <span class="ga-navbar-menu-label">Menú</span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav me-auto mb-2 mb-xl-0">
+          <li class="nav-item">
+            <a class="nav-link" href="/" data-route="inicio"><i class="bi bi-house me-2"></i>Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/buscar" data-route="buscar"><i class="bi bi-search me-2"></i><span class="d-none d-xl-inline">Buscar</span><span class="d-xl-none">Buscar personas</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/agregar-familia" data-route="agregar-familia"><i class="bi bi-tree me-2"></i><span class="d-none d-xl-inline">Agregar familia</span><span class="d-xl-none">Agregá tu familia</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/conexiones" data-route="conexiones"><i class="bi bi-diagram-3 me-2"></i><span class="d-none d-xl-inline">Conexiones</span><span class="d-xl-none">Conexiones entre personas</span></a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="/estadisticas" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-route="estadisticas">
+              <i class="bi bi-bar-chart me-2"></i><span class="d-none d-xl-inline">Estadísticas</span><span class="d-xl-none">Estadísticas del árbol</span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/estadisticas" data-route="estadisticas"><i class="bi bi-grid me-2"></i>Resumen</a></li>
+              <li><a class="dropdown-item" href="/estadisticas/inmigracion" data-route="estadisticas/inmigracion"><i class="bi bi-globe-americas me-2"></i>Inmigración en Azul</a></li>
+              <li><a class="dropdown-item" href="/estadisticas/personalidades" data-route="estadisticas/personalidades"><i class="bi bi-star me-2"></i>Personalidades destacadas</a></li>
+              <li><a class="dropdown-item" href="/estadisticas/apellidos" data-route="estadisticas/apellidos"><i class="bi bi-fonts me-2"></i>Apellidos frecuentes</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/mapa" data-route="mapa"><i class="bi bi-map me-2"></i><span class="d-none d-xl-inline">Mapa</span><span class="d-xl-none">Mapa migratorio</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/historias" data-route="historias"><i class="bi bi-book me-2"></i><span class="d-none d-xl-inline">Historias</span><span class="d-xl-none">Historias de familia</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/cronologia" data-route="cronologia"><i class="bi bi-clock-history me-2"></i><span class="d-none d-xl-inline">Cronología</span><span class="d-xl-none">Cronología de Azul</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/recursos" data-route="recursos"><i class="bi bi-link-45deg me-2"></i><span class="d-none d-xl-inline">Recursos</span><span class="d-xl-none">Recursos genealógicos</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/sobre-nosotros" data-route="sobre-nosotros"><i class="bi bi-info-circle me-2"></i>Sobre nosotros</a>
+          </li>
+        </ul>
+        <!-- Social icons -->
+        <div class="d-flex gap-2 align-items-center">
+          <a class="ga-social-link" href="https://instagram.com/_u/genea.azul" target="_blank" rel="noopener" title="@genea.azul en Instagram" aria-label="Instagram">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a class="ga-social-link" href="https://facebook.com/genea.azul" target="_blank" rel="noopener" title="genea.azul en Facebook" aria-label="Facebook">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a class="ga-social-link" href="mailto:genea.azul@gmail.com" title="genea.azul@gmail.com" aria-label="Email">
+            <i class="bi bi-envelope"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════ MAIN CONTENT -->
+  <main id="main-content">
+
+    <!-- ─── PAGE CONTENT (all routes, including inicio) ──────────────── -->
+    <section id="page-content" class="ga-page-content" aria-live="polite">
+      <!-- Content injected here by router.js -->
+    </section>
+
+  </main>
+
+
+  <!-- ═══════════════════════════════════════════════════════ FOOTER -->
+  <footer class="ga-footer" role="contentinfo">
+    <div class="container-xl">
+      <div class="row g-4 align-items-start">
+
+        <!-- Brand -->
+        <div class="col-md-4">
+          <img src="/img/logo-simple-2500x2500-no-bg.png" alt="Genea Azul" class="ga-logo-footer mb-2">
+          <p class="ga-footer-desc"><strong>Genea Azul</strong> es una iniciativa comunitaria sin fines de lucro con el fin de investigar, documentar y preservar la historia genealógica del partido de Azul.</p>
+          <p class="ga-footer-declaration small">
+            <i class="bi bi-award me-1"></i>
+            Declarado de <strong>Interés Comunitario, Histórico y Cultural</strong> por el Concejo Deliberante de Azul.
+          </p>
+          <p class="ga-footer-cta small">
+            <i class="bi bi-tree me-1"></i>
+            ¡Solicitá acceso al árbol y cargá info!
+          </p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="col-md-4">
+          <h6 class="ga-footer-heading">Navegación</h6>
+          <ul class="list-unstyled ga-footer-nav">
+            <li><a href="/" data-route="inicio">Inicio</a></li>
+            <li><a href="/buscar" data-route="buscar">Buscar personas</a></li>
+            <li><a href="/conexiones" data-route="conexiones">Conexiones entre personas</a></li>
+            <li><a href="/estadisticas" data-route="estadisticas">Estadísticas del árbol</a></li>
+            <li><a href="/mapa" data-route="mapa">Mapa migratorio</a></li>
+            <li><a href="/historias" data-route="historias">Historias de familia</a></li>
+            <li><a href="/cronologia" data-route="cronologia">Cronología de Azul</a></li>
+            <li><a href="/recursos" data-route="recursos">Recursos genealógicos</a></li>
+            <li><a href="/testimonios" data-route="testimonios">Testimonios</a></li>
+            <li><a href="/colabora" data-route="colabora">Colaborá</a></li>
+            <li><a href="/sobre-nosotros" data-route="sobre-nosotros">Sobre nosotros</a></li>
+            <li><a href="/agregar-familia" data-route="agregar-familia">Agregá tu familia al árbol</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact + social -->
+        <div class="col-md-4">
+          <h6 class="ga-footer-heading">Contacto</h6>
+          <div class="ga-footer-social">
+            <a href="https://instagram.com/_u/genea.azul" target="_blank" rel="noopener" class="ga-footer-social-link">
+              <i class="bi bi-instagram me-2"></i>@genea.azul
+            </a>
+            <a href="https://facebook.com/genea.azul" target="_blank" rel="noopener" class="ga-footer-social-link">
+              <i class="bi bi-facebook me-2"></i>genea.azul
+            </a>
+            <a href="mailto:genea.azul@gmail.com" class="ga-footer-social-link">
+              <i class="bi bi-envelope me-2"></i>genea.azul@gmail.com
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <hr class="ga-footer-divider">
+      <div class="row align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+          <small class="ga-footer-copy">Hecho con <i class="bi bi-heart-fill text-danger"></i> en Azul, Argentina — © 2024–2026 Genea Azul</small>
+        </div>
+        <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
+          <!-- Theme toggle (dev only) -->
+          <div class="ga-theme-toggle" id="theme-toggle" title="Cambiar tema visual">
+            <span class="small me-2 text-muted">Tema:</span>
+            <button class="btn btn-sm ga-theme-btn active" id="btn-theme-heritage" onclick="GeneaAzul.toggleTheme('heritage')" title="Tema clásico">
+              <i class="bi bi-palette me-1"></i>Clásico
+            </button>
+            <button class="btn btn-sm ga-theme-btn" id="btn-theme-modern" onclick="GeneaAzul.toggleTheme('modern')" title="Tema moderno">
+              <i class="bi bi-lightning me-1"></i>Moderno
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════ SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js" integrity="sha384-948ahk4ZmxYVYOc+rxN1H2gM1EJ2Duhp7uHtZ4WSLkV4Vtx5MUqnV+l7u9B+jFv+" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.1/dist/purify.min.js" integrity="sha384-ikETfzsmSTEkyr7smbhW6mdO8o44Zro09Sk1uC9pbG6ZTJA0wK6v37pwx8h+3VRC" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js" integrity="sha384-u5N8qJeJOO2iqNjIKTdl6KeKsEikMAmCUBPc6sC6uGpgL34aPJ4VgNhuhumedpEk" crossorigin="anonymous"></script>
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://geneaazul.com.ar/#organization",
+        "name": "Genea Azul",
+        "url": "https://geneaazul.com.ar/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://geneaazul.com.ar/img/logo-simple-2500x2500-no-bg.png"
+        },
+        "description": "Iniciativa comunitaria sin fines de lucro dedicada a investigar, documentar y preservar la genealogía del partido de Azul, Buenos Aires, Argentina.",
+        "foundingLocation": {
+          "@type": "Place",
+          "name": "Azul, Buenos Aires, Argentina"
+        },
+        "areaServed": {
+          "@type": "AdministrativeArea",
+          "name": "Partido de Azul, Buenos Aires, Argentina"
+        },
+        "sameAs": [
+          "https://instagram.com/genea.azul",
+          "https://facebook.com/genea.azul"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "email": "genea.azul@gmail.com"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://geneaazul.com.ar/#website",
+        "url": "https://geneaazul.com.ar/",
+        "name": "Genea Azul",
+        "description": "Investigación genealógica comunitaria del partido de Azul, Argentina.",
+        "inLanguage": "es-AR",
+        "publisher": { "@id": "https://geneaazul.com.ar/#organization" },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://geneaazul.com.ar/buscar?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://geneaazul.com.ar/agregar-familia#webpage",
+        "url": "https://geneaazul.com.ar/agregar-familia",
+        "name": "Aportá tu árbol — Genea Azul",
+        "description": "Completá los datos de tu familia y envianos la información para incorporarla al árbol genealógico de Azul.",
+        "isPartOf": { "@id": "https://geneaazul.com.ar/#website" },
+        "about": { "@id": "https://geneaazul.com.ar/#organization" },
+        "inLanguage": "es-AR",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://geneaazul.com.ar/" },
+            { "@type": "ListItem", "position": 2, "name": "Aportá tu árbol", "item": "https://geneaazul.com.ar/agregar-familia" }
+          ]
+        }
+      }
+    ]
+  }
+  </script>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/router.js"></script>
+  <script src="/js/search.js"></script>
+  <script src="/js/connections.js"></script>
+  <script src="/js/stats.js"></script>
+  <script src="/js/stories.js"></script>
+  <script src="/js/map.js"></script>
+  <script src="/js/birthdays.js"></script>
+  <script src="/js/ephemerides.js"></script>
+  <script src="/js/cronologia.js"></script>
+  <script src="/js/family-tree-3d.js"></script>
+  <script src="/js/tree-builder.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      GeneaAzul.router.init();
+      GeneaAzul.app.init();
+    });
+  </script>
+</body>
+</html>
