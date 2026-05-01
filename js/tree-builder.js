@@ -60,7 +60,15 @@ GeneaAzul.treeBuilder = (function() {
       try { _modal.hide(); _modal.dispose(); } catch (e) {}
       _modal = null;
     }
-    _modal = new bootstrap.Modal(document.getElementById('ga-tree-person-modal'));
+
+    // Move modal to <body> so Bootstrap's backdrop (also on body) doesn't render
+    // above it — the gaFadeIn animation on #page-content creates a stacking context
+    // that would otherwise trap the modal behind the backdrop.
+    var modalEl = document.getElementById('ga-tree-person-modal');
+    if (modalEl && modalEl.parentNode !== document.body) {
+      document.body.appendChild(modalEl);
+    }
+    _modal = new bootstrap.Modal(modalEl);
 
     // Set dynamic year ceiling on birth/death year inputs
     var currentYear = new Date().getFullYear();
@@ -579,6 +587,12 @@ GeneaAzul.treeBuilder = (function() {
     if (_modal) {
       try { _modal.hide(); _modal.dispose(); } catch (e) {}
       _modal = null;
+    }
+
+    // Remove the teleported modal from body so the next fragment load starts clean
+    var modalEl = document.getElementById('ga-tree-person-modal');
+    if (modalEl && modalEl.parentNode === document.body) {
+      document.body.removeChild(modalEl);
     }
 
     _openerEl = null;
