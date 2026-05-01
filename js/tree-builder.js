@@ -9,6 +9,11 @@ GeneaAzul.treeBuilder = (function() {
   var cfg, i18n, utils;
   var _activeTimers = [];
   var _modal = null;
+  var _searchSeq = 0;
+  var _pendingSearchTimer = null;
+  var _openerEl = null;
+
+  var _STORAGE_KEY = 'geneaazul_tree_state';
 
   /* ── Initial state ──────────────────────────────────────────────── */
   var _state = {};
@@ -50,16 +55,72 @@ GeneaAzul.treeBuilder = (function() {
     i18n  = GeneaAzul.i18n;
     utils = GeneaAzul.utils;
 
-    _state = _freshState();
+    // Defensively dispose any previous modal instance
+    if (_modal) {
+      try { _modal.hide(); _modal.dispose(); } catch (e) {}
+      _modal = null;
+    }
     _modal = new bootstrap.Modal(document.getElementById('ga-tree-person-modal'));
+
+    // Set dynamic year ceiling on birth/death year inputs
+    var currentYear = new Date().getFullYear();
+    $('#ga-modal-birth-year, #ga-modal-death-year').attr('max', currentYear);
+
+    // Load persisted state — user's tree survives navigation and page refresh
+    var saved = _loadFromLocalStorage();
+    _state = saved || _freshState();
+
+    if (saved) { _showRestoredBanner(); }
+
+    // Wake backend + read obfuscateLiving (same form-gate pattern as search.js)
+    utils.apiGetCached(
+      cfg.apiBaseUrl + '/api/gedcom-analyzer',
+      function(data) {
+        if (data && data.disableObfuscateLiving) {
+          cfg.obfuscateLiving = false;
+        }
+      }
+    );
 
     wireEvents();
     renderTree();
     updateSearchHint();
   }
 
+  /* ── localStorage ───────────────────────────────────────────────── */
+  function _saveToLocalStorage() {
+    try { localStorage.setItem(_STORAGE_KEY, JSON.stringify(_state)); } catch (e) {}
+  }
+
+  function _loadFromLocalStorage() {
+    try {
+      var raw = localStorage.getItem(_STORAGE_KEY);
+      if (!raw) { return null; }
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.children)) {
+        return parsed;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function _showRestoredBanner() {
+    var $banner = $(
+      '<div class="alert alert-info alert-dismissible d-flex align-items-center gap-2 py-2 small mb-3" id="ga-tree-restored-banner">' +
+      '<i class="bi bi-cloud-check-fill"></i>' +
+      '<span>Tus datos fueron restaurados de la sesión anterior.</span>' +
+      '<button type="button" class="btn-close btn-sm ms-auto" data-bs-dismiss="alert" aria-label="Cerrar"></button>' +
+      '</div>'
+    );
+    $('#ga-tree-canvas').before($banner);
+    // Auto-dismiss after 6 s
+    var t = setTimeout(function() { $banner.alert('close'); }, 6000);
+    _activeTimers.push(t);
+  }
+
   /* ── Event wiring ───────────────────────────────────────────────── */
   function wireEvents() {
+    // Node clicks — fixed roles and dynamic children
     $(document)
       .off('click.tree-builder', '[data-role]')
       .on('click.tree-builder', '[data-role]', function() {
@@ -68,21 +129,46 @@ GeneaAzul.treeBuilder = (function() {
         var childIndexStr = $el.attr('data-child-index');
         var childIndex = (childIndexStr !== undefined && childIndexStr !== '')
           ? parseInt(childIndexStr, 10) : null;
+        _openerEl = this;
         openModal(role, childIndex);
       });
 
+    // Add-child button
     $(document)
       .off('click.tree-builder', '#ga-node-add-child')
       .on('click.tree-builder', '#ga-node-add-child', function() {
+        _openerEl = this;
         openModal('child', _state.children.length);
       });
 
+    // Keyboard: Enter / Space activate nodes like clicks
+    $(document)
+      .off('keydown.tree-builder', '[data-role], #ga-node-add-child')
+      .on('keydown.tree-builder', '[data-role], #ga-node-add-child', function(e) {
+        if (e.which === 13 || e.which === 32) {
+          e.preventDefault();
+          $(this).trigger('click');
+        }
+      });
+
+    // Return focus to opener node when modal closes
+    $('#ga-tree-person-modal')
+      .off('hidden.bs.modal.tree-builder')
+      .on('hidden.bs.modal.tree-builder', function() {
+        if (_openerEl) {
+          try { _openerEl.focus(); } catch (e) {}
+          _openerEl = null;
+        }
+      });
+
+    // Deceased toggle reveals / hides death fields
     $(document)
       .off('change.tree-builder', '#ga-modal-deceased')
       .on('change.tree-builder', '#ga-modal-deceased', function() {
         $('#ga-modal-death-section').toggleClass('d-none', !$(this).prop('checked'));
       });
 
+    // Save / delete / submit
     $(document)
       .off('click.tree-builder', '#ga-modal-save-btn')
       .on('click.tree-builder', '#ga-modal-save-btn', function() {
@@ -141,12 +227,13 @@ GeneaAzul.treeBuilder = (function() {
   }
 
   function _buildEmptyNode(role, childIndex) {
-    var id = (role === 'child') ? 'ga-node-child-' + childIndex : 'ga-node-' + role;
+    var id    = (role === 'child') ? 'ga-node-child-' + childIndex : 'ga-node-' + role;
     var isEgo = (role === 'ego');
+    var label = _roleLabels[role] || 'Hijo/a';
     var $node = $('<div>')
       .addClass('ga-tree-node ga-tree-node-empty' + (isEgo ? ' ga-tree-node-ego' : ''))
-      .attr('id', id)
-      .attr('data-role', role);
+      .attr({ id: id, 'data-role': role, tabindex: '0', role: 'button',
+              'aria-label': 'Agregar: ' + label });
     if (childIndex !== null) $node.attr('data-child-index', childIndex);
     $node
       .append($('<div>').addClass('ga-tree-node-plus').text('＋'))
@@ -155,22 +242,24 @@ GeneaAzul.treeBuilder = (function() {
   }
 
   function _buildFilledNode(role, childIndex, data) {
-    var id = (role === 'child') ? 'ga-node-child-' + childIndex : 'ga-node-' + role;
+    var id      = (role === 'child') ? 'ga-node-child-' + childIndex : 'ga-node-' + role;
     var isEgo   = (role === 'ego');
     var isChild = (role === 'child');
+    var label   = _roleLabels[role] || 'Hijo/a';
+    var displayName = [(data.givenName || ''), (data.surname || '')].join(' ').trim() || '—';
+
     var $node = $('<div>')
       .addClass('ga-tree-node ga-tree-node-filled'
         + (isEgo   ? ' ga-tree-node-ego'   : '')
         + (isChild ? ' ga-tree-node-child' : ''))
-      .attr('id', id)
-      .attr('data-role', role);
+      .attr({ id: id, 'data-role': role, tabindex: '0', role: 'button',
+              'aria-label': 'Editar: ' + label + ' — ' + displayName });
     if (childIndex !== null) $node.attr('data-child-index', childIndex);
 
-    var displayName = [(data.givenName || ''), (data.surname || '')].join(' ').trim() || '—';
     $node.append($('<div>').addClass('ga-tree-node-name').text(displayName));
 
     var birthParts = [];
-    if (data.birthYear) birthParts.push(_formatPartialDate(data.birthDay, data.birthMonth, data.birthYear));
+    if (data.birthYear)  birthParts.push(_formatPartialDate(data.birthDay, data.birthMonth, data.birthYear));
     if (data.birthPlace) birthParts.push(data.birthPlace);
     if (birthParts.length) {
       $node.append($('<div>').addClass('ga-tree-node-birth').text(birthParts.join(' · ')));
@@ -185,7 +274,7 @@ GeneaAzul.treeBuilder = (function() {
   }
 
   function _formatPartialDate(day, month, year) {
-    if (!year) return '';
+    if (!year)  return '';
     if (!month) return String(year);
     if (!day)   return month + '/' + year;
     return day + '/' + month + '/' + year;
@@ -246,7 +335,7 @@ GeneaAzul.treeBuilder = (function() {
 
   function _readModalForm() {
     var deceased = $('#ga-modal-deceased').prop('checked');
-    var nodeData = {
+    return {
       givenName:  utils.trimToNull($('#ga-modal-given-name').val()),
       surname:    utils.trimToNull($('#ga-modal-surname').val()),
       sex:        $('input[name="ga-modal-sex"]:checked').val() || null,
@@ -255,12 +344,11 @@ GeneaAzul.treeBuilder = (function() {
       birthYear:  utils.toNumber($('#ga-modal-birth-year').val()),
       birthPlace: utils.trimToNull($('#ga-modal-birth-place').val()),
       isDeceased: deceased,
-      deathDay:   deceased ? utils.toNumber($('#ga-modal-death-day').val())   : null,
-      deathMonth: deceased ? utils.toNumber($('#ga-modal-death-month').val()) : null,
-      deathYear:  deceased ? utils.toNumber($('#ga-modal-death-year').val())  : null,
+      deathDay:   deceased ? utils.toNumber($('#ga-modal-death-day').val())     : null,
+      deathMonth: deceased ? utils.toNumber($('#ga-modal-death-month').val())   : null,
+      deathYear:  deceased ? utils.toNumber($('#ga-modal-death-year').val())    : null,
       deathPlace: deceased ? utils.trimToNull($('#ga-modal-death-place').val()) : null
     };
-    return nodeData;
   }
 
   function saveFromModal() {
@@ -295,6 +383,7 @@ GeneaAzul.treeBuilder = (function() {
     }
 
     _modal.hide();
+    _saveToLocalStorage();
 
     if (!isEmpty) { triggerSearchIfReady(); }
   }
@@ -313,19 +402,36 @@ GeneaAzul.treeBuilder = (function() {
     }
     updateSearchHint();
     _modal.hide();
+    _saveToLocalStorage();
   }
 
   /* ── Auto-search ────────────────────────────────────────────────── */
   function updateSearchHint() {
-    var hasEgo = _state.ego && _state.ego.givenName;
-    $('#ga-tree-search-hint').toggleClass('d-none', !!hasEgo);
+    var ready = _state.ego && _state.ego.givenName && _state.ego.surname;
+    $('#ga-tree-search-hint').toggleClass('d-none', !!ready);
   }
 
   function triggerSearchIfReady() {
     updateSearchHint();
-    if (!_state.ego || !_state.ego.givenName) { return; }
+    if (!_state.ego || !_state.ego.givenName || !_state.ego.surname) { return; }
 
-    var rq = _buildSearchRequest();
+    // Debounce: cancel any previous pending call
+    if (_pendingSearchTimer !== null) {
+      clearTimeout(_pendingSearchTimer);
+      _pendingSearchTimer = null;
+    }
+
+    var seq = ++_searchSeq;
+    _pendingSearchTimer = setTimeout(function() {
+      _pendingSearchTimer = null;
+      _executeSearch(seq);
+    }, 400);
+    _activeTimers.push(_pendingSearchTimer);
+  }
+
+  function _executeSearch(seq) {
+    if (seq !== _searchSeq) { return; } // superseded by a newer trigger
+
     var $card = $('#ga-tree-results-card');
     var $body = $('#ga-tree-results-body');
 
@@ -334,15 +440,17 @@ GeneaAzul.treeBuilder = (function() {
 
     utils.apiPost(
       cfg.apiBaseUrl + '/api/search/family',
-      rq,
+      _buildSearchRequest(),
       function(data) {
+        if (seq !== _searchSeq) { return; } // stale response — a newer search is in flight
+
         $body.empty();
         var people = (data && Array.isArray(data.people)) ? data.people : [];
         var timeoutMs = 0;
 
         people.forEach(function(person, idx) {
-          var $card2 = GeneaAzul.search.buildPersonComponent(person, idx);
-          $body.append($card2);
+          var $pc = GeneaAzul.search.buildPersonComponent(person, idx);
+          $body.append($pc);
           timeoutMs += GeneaAzul.search.enableFamilyTreeButtons(person.uuid, person.personsCountInTree, timeoutMs);
         });
 
@@ -357,6 +465,7 @@ GeneaAzul.treeBuilder = (function() {
         }
       },
       function(xhr) {
+        if (seq !== _searchSeq) { return; }
         if (xhr && xhr.status === 429) {
           $body.html(i18n.displayErrorCodeInSpanish('TOO-MANY-REQUESTS'));
         } else {
@@ -389,8 +498,7 @@ GeneaAzul.treeBuilder = (function() {
       maternalGrandfather: toSearchPerson(_state.maternalGrandfather),
       maternalGrandmother: toSearchPerson(_state.maternalGrandmother),
       contact:             utils.trimToNull($('#ga-tree-contact').val()),
-      obfuscateLiving:     cfg.obfuscateLiving,
-      onlySecondaryDescription: true
+      obfuscateLiving:     cfg.obfuscateLiving
     };
   }
 
@@ -437,9 +545,15 @@ GeneaAzul.treeBuilder = (function() {
           '</div>'
         );
         $btn.prop('disabled', false);
+        // Clear saved draft after successful submission
+        try { localStorage.removeItem(_STORAGE_KEY); } catch (e) {}
       },
-      function() {
-        $err.removeClass('d-none').text('No se pudo enviar. Intentá de nuevo o contactános por Instagram @genea.azul');
+      function(xhr) {
+        if (xhr && xhr.status === 429) {
+          $err.removeClass('d-none').html(i18n.displayErrorCodeInSpanish('TOO-MANY-REQUESTS'));
+        } else {
+          $err.removeClass('d-none').text('No se pudo enviar. Intentá de nuevo o contactános por Instagram @genea.azul');
+        }
         $btn.prop('disabled', false);
       }
     );
@@ -447,6 +561,11 @@ GeneaAzul.treeBuilder = (function() {
 
   /* ── Cleanup ────────────────────────────────────────────────────── */
   function cleanup() {
+    if (_pendingSearchTimer !== null) {
+      clearTimeout(_pendingSearchTimer);
+      _pendingSearchTimer = null;
+    }
+
     _activeTimers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
     _activeTimers = [];
 
@@ -455,11 +574,14 @@ GeneaAzul.treeBuilder = (function() {
     }
 
     $(document).off('.tree-builder');
+    $('#ga-tree-person-modal').off('hidden.bs.modal.tree-builder');
 
     if (_modal) {
       try { _modal.hide(); _modal.dispose(); } catch (e) {}
       _modal = null;
     }
+
+    _openerEl = null;
   }
 
   return { init: init, cleanup: cleanup };

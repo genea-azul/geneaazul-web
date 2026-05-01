@@ -1833,6 +1833,11 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+.ga-tree-node:focus-visible {
+  outline: 2px solid var(--ga-primary);
+  outline-offset: 2px;
+}
+
 .ga-tree-node-empty {
   border: 1.5px dashed var(--ga-border);
   color: var(--ga-text-muted);
