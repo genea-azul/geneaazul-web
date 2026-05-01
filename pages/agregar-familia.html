@@ -1,0 +1,305 @@
+<section class="ga-section container-xl" id="agregar-familia-section" aria-label="Agregá tu familia">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+
+      <!-- Page header -->
+      <div class="mb-4">
+        <h2 class="ga-section-title">Agregá tu familia al árbol de Azul</h2>
+        <p class="ga-section-subtitle">Completá los datos que conozcas. Genea Azul buscará coincidencias automáticamente y podrás enviarnos tu información para incorporarla al árbol genealógico.</p>
+      </div>
+
+      <!-- ═══ TREE CANVAS ═══ -->
+      <div class="ga-tree-canvas mb-3" id="ga-tree-canvas">
+        <div class="ga-tree-grid mx-auto">
+
+          <!-- ROW: Grandparents -->
+          <div class="ga-tree-row" id="ga-tree-row-grandparents">
+            <!-- Paternal group -->
+            <div class="d-flex gap-2">
+              <div class="ga-tree-node-wrap" id="ga-node-wrap-paternalGrandfather">
+                <span class="ga-tree-node-label">Abuelo paterno</span>
+                <div class="ga-tree-node ga-tree-node-empty" id="ga-node-paternalGrandfather" data-role="paternalGrandfather">
+                  <div class="ga-tree-node-plus">＋</div>
+                  <div class="ga-tree-node-hint">Agregar</div>
+                </div>
+              </div>
+              <div class="ga-tree-node-wrap" id="ga-node-wrap-paternalGrandmother">
+                <span class="ga-tree-node-label">Abuela paterna</span>
+                <div class="ga-tree-node ga-tree-node-empty" id="ga-node-paternalGrandmother" data-role="paternalGrandmother">
+                  <div class="ga-tree-node-plus">＋</div>
+                  <div class="ga-tree-node-hint">Agregar</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ga-tree-spacer-lg"></div>
+
+            <!-- Maternal group -->
+            <div class="d-flex gap-2">
+              <div class="ga-tree-node-wrap" id="ga-node-wrap-maternalGrandfather">
+                <span class="ga-tree-node-label">Abuelo materno</span>
+                <div class="ga-tree-node ga-tree-node-empty" id="ga-node-maternalGrandfather" data-role="maternalGrandfather">
+                  <div class="ga-tree-node-plus">＋</div>
+                  <div class="ga-tree-node-hint">Agregar</div>
+                </div>
+              </div>
+              <div class="ga-tree-node-wrap" id="ga-node-wrap-maternalGrandmother">
+                <span class="ga-tree-node-label">Abuela materna</span>
+                <div class="ga-tree-node ga-tree-node-empty" id="ga-node-maternalGrandmother" data-role="maternalGrandmother">
+                  <div class="ga-tree-node-plus">＋</div>
+                  <div class="ga-tree-node-hint">Agregar</div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /grandparents row -->
+
+          <!-- CONNECTOR: grandparents → parents -->
+          <div class="ga-tree-connector-bracket-wrap my-0">
+            <div class="ga-tree-connector-bracket"></div>
+            <div class="ga-tree-spacer-lg"></div>
+            <div class="ga-tree-connector-bracket"></div>
+          </div>
+
+          <!-- ROW: Parents -->
+          <div class="ga-tree-row" id="ga-tree-row-parents">
+            <div class="ga-tree-node-wrap" id="ga-node-wrap-father">
+              <span class="ga-tree-node-label">Padre</span>
+              <div class="ga-tree-node ga-tree-node-empty" id="ga-node-father" data-role="father">
+                <div class="ga-tree-node-plus">＋</div>
+                <div class="ga-tree-node-hint">Agregar</div>
+              </div>
+            </div>
+
+            <div style="width:80px"></div>
+
+            <div class="ga-tree-node-wrap" id="ga-node-wrap-mother">
+              <span class="ga-tree-node-label">Madre</span>
+              <div class="ga-tree-node ga-tree-node-empty" id="ga-node-mother" data-role="mother">
+                <div class="ga-tree-node-plus">＋</div>
+                <div class="ga-tree-node-hint">Agregar</div>
+              </div>
+            </div>
+          </div><!-- /parents row -->
+
+          <!-- CONNECTOR: parents → ego -->
+          <div class="d-flex justify-content-center">
+            <div class="ga-tree-connector-v"></div>
+          </div>
+
+          <!-- ROW: Ego + Partner -->
+          <div class="ga-tree-row" id="ga-tree-row-ego">
+            <div class="ga-tree-node-wrap" id="ga-node-wrap-ego">
+              <span class="ga-tree-node-label ga-tree-node-label-ego">Vos</span>
+              <div class="ga-tree-node ga-tree-node-empty ga-tree-node-ego" id="ga-node-ego" data-role="ego">
+                <div class="ga-tree-node-plus">＋</div>
+                <div class="ga-tree-node-hint">Agregar</div>
+              </div>
+            </div>
+
+            <div class="ga-tree-partner-sep">
+              <i class="bi bi-people"></i>
+            </div>
+
+            <div class="ga-tree-node-wrap" id="ga-node-wrap-partner">
+              <span class="ga-tree-node-label">(Ex) Pareja</span>
+              <div class="ga-tree-node ga-tree-node-empty" id="ga-node-partner" data-role="partner">
+                <div class="ga-tree-node-plus">＋</div>
+                <div class="ga-tree-node-hint">Agregar</div>
+              </div>
+            </div>
+          </div><!-- /ego row -->
+
+          <!-- CONNECTOR: ego → children -->
+          <div class="d-flex justify-content-center">
+            <div class="ga-tree-connector-v"></div>
+          </div>
+
+          <!-- ROW: Children (rendered dynamically; add-child button always present) -->
+          <div class="ga-tree-row" id="ga-tree-row-children">
+            <div class="ga-tree-node-wrap">
+              <div class="ga-tree-node ga-tree-node-empty ga-tree-add-child-node" id="ga-node-add-child">
+                <div class="ga-tree-node-plus">＋</div>
+                <div class="ga-tree-node-hint">Agregar hijo/a</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /ga-tree-grid -->
+      </div><!-- /ga-tree-canvas -->
+
+      <!-- Search hint (shown until ego has a name) -->
+      <div class="text-center text-muted small mb-3" id="ga-tree-search-hint">
+        <i class="bi bi-info-circle me-1"></i>Completá tu nombre y apellido para buscar coincidencias en el árbol de Genea Azul.
+      </div>
+
+      <!-- Contact + submit -->
+      <div class="row g-2 align-items-end mb-3">
+        <div class="col-sm-7">
+          <label class="form-label small fw-semibold" for="ga-tree-contact">
+            Tu contacto <span class="text-muted fw-normal">(requerido para enviar)</span>
+          </label>
+          <input type="text" class="form-control form-control-sm" id="ga-tree-contact"
+            placeholder="Email, WhatsApp o @instagram">
+        </div>
+        <div class="col-sm-5">
+          <button class="btn ga-btn-primary btn-sm w-100" id="ga-tree-submit-btn" type="button">
+            <i class="bi bi-send me-1"></i>Enviar mi árbol a Genea Azul
+          </button>
+        </div>
+      </div>
+      <div class="d-none text-danger small mb-2" id="ga-tree-submit-error"></div>
+      <div class="d-none mb-3" id="ga-tree-submit-result"></div>
+
+      <!-- Search results -->
+      <div class="card ga-tree-results-card d-none" id="ga-tree-results-card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-search me-1"></i>
+          <span>Coincidencias en el árbol de Genea Azul</span>
+        </div>
+        <div class="card-body overflow-auto" id="ga-tree-results-body" aria-live="polite" aria-atomic="true"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ PERSON EDIT MODAL ═══ -->
+  <div class="modal fade" id="ga-tree-person-modal" tabindex="-1"
+    aria-labelledby="ga-tree-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="ga-tree-modal-title">Agregar persona</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+
+          <input type="hidden" id="ga-modal-role">
+          <input type="hidden" id="ga-modal-child-index">
+
+          <!-- Name -->
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-semibold" for="ga-modal-given-name">Nombre</label>
+              <input type="text" class="form-control form-control-sm" id="ga-modal-given-name" autocomplete="given-name">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold" for="ga-modal-surname">Apellido</label>
+              <input type="text" class="form-control form-control-sm" id="ga-modal-surname" autocomplete="family-name">
+            </div>
+          </div>
+
+          <!-- Sex -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">
+              Sexo <span class="text-muted fw-normal">(opcional — se puede inferir del nombre)</span>
+            </label>
+            <div class="d-flex flex-wrap gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="ga-modal-sex" id="ga-modal-sex-m" value="M">
+                <label class="form-check-label small" for="ga-modal-sex-m">Masculino</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="ga-modal-sex" id="ga-modal-sex-f" value="F">
+                <label class="form-check-label small" for="ga-modal-sex-f">Femenino</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="ga-modal-sex" id="ga-modal-sex-u" value="" checked>
+                <label class="form-check-label small" for="ga-modal-sex-u">Sin especificar</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Birth -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Nacimiento</label>
+            <div class="row g-2">
+              <div class="col-3">
+                <input type="number" class="form-control form-control-sm text-center"
+                  id="ga-modal-birth-day" min="1" max="31" placeholder="DD">
+              </div>
+              <div class="col-3">
+                <input type="number" class="form-control form-control-sm text-center"
+                  id="ga-modal-birth-month" min="1" max="12" placeholder="MM">
+              </div>
+              <div class="col-6">
+                <input type="number" class="form-control form-control-sm"
+                  id="ga-modal-birth-year" min="1600" max="2026" placeholder="AAAA">
+              </div>
+              <div class="col-12">
+                <input type="text" class="form-control form-control-sm"
+                  id="ga-modal-birth-place" placeholder="Ciudad de nacimiento">
+              </div>
+            </div>
+            <div class="form-text">Podés dejar vacío lo que no sabés</div>
+          </div>
+
+          <!-- Deceased toggle -->
+          <div class="mb-2 form-check">
+            <input type="checkbox" class="form-check-input" id="ga-modal-deceased">
+            <label class="form-check-label small fw-semibold" for="ga-modal-deceased">Está fallecida/o</label>
+          </div>
+
+          <!-- Death date (hidden until checkbox checked) -->
+          <div class="mb-3 d-none" id="ga-modal-death-section">
+            <label class="form-label small fw-semibold text-danger">Fallecimiento</label>
+            <div class="row g-2">
+              <div class="col-3">
+                <input type="number" class="form-control form-control-sm text-center"
+                  id="ga-modal-death-day" min="1" max="31" placeholder="DD">
+              </div>
+              <div class="col-3">
+                <input type="number" class="form-control form-control-sm text-center"
+                  id="ga-modal-death-month" min="1" max="12" placeholder="MM">
+              </div>
+              <div class="col-6">
+                <input type="number" class="form-control form-control-sm"
+                  id="ga-modal-death-year" min="1600" max="2026" placeholder="AAAA">
+              </div>
+              <div class="col-12">
+                <input type="text" class="form-control form-control-sm"
+                  id="ga-modal-death-place" placeholder="Ciudad de fallecimiento">
+              </div>
+            </div>
+          </div>
+
+          <!-- Relationship type (partner only) -->
+          <div class="mb-3 d-none" id="ga-modal-relationship-section">
+            <label class="form-label small fw-semibold">Tipo de vínculo</label>
+            <div class="d-flex flex-wrap gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="ga-modal-rel-type"
+                  id="ga-modal-rel-current" value="CURRENT_PARTNER" checked>
+                <label class="form-check-label small" for="ga-modal-rel-current">Pareja actual</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="ga-modal-rel-type"
+                  id="ga-modal-rel-former" value="FORMER_PARTNER">
+                <label class="form-check-label small" for="ga-modal-rel-former">Ex pareja</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="ga-modal-rel-type"
+                  id="ga-modal-rel-married" value="MARRIED">
+                <label class="form-check-label small" for="ga-modal-rel-married">Matrimonio</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="ga-modal-rel-type"
+                  id="ga-modal-rel-divorced" value="DIVORCED">
+                <label class="form-check-label small" for="ga-modal-rel-divorced">Matrimonio disuelto</label>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /modal-body -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger btn-sm d-none" id="ga-modal-delete-btn">
+            <i class="bi bi-trash me-1"></i>Eliminar
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn ga-btn-primary btn-sm" id="ga-modal-save-btn">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
