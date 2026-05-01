@@ -311,6 +311,7 @@ GeneaAzul.treeBuilder = (function() {
       _state[role] = null;
       renderNode(role, null);
     }
+    updateSearchHint();
     _modal.hide();
   }
 
@@ -456,7 +457,7 @@ GeneaAzul.treeBuilder = (function() {
     $(document).off('.tree-builder');
 
     if (_modal) {
-      try { _modal.hide(); } catch (e) {}
+      try { _modal.hide(); _modal.dispose(); } catch (e) {}
       _modal = null;
     }
   }
