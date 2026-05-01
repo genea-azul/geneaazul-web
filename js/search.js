@@ -285,6 +285,12 @@ GeneaAzul.search = (function() {
               if (rq.individual && rq.individual.sex) {
                 $resultBody.append('<p>Verificá que el <span class="text-danger fw-semibold">sexo</span> de la persona esté bien seleccionado.</p>');
               }
+              $resultBody.append(
+                $('<p>').addClass('text-center mt-3')
+                  .append($('<a>').addClass('btn btn-outline-secondary btn-sm')
+                    .attr('href', '/agregar-familia').attr('data-route', 'agregar-familia')
+                    .html('<i class="bi bi-tree me-2"></i>¿No aparecés? Agregá tu familia al árbol'))
+              );
           } else {
             $resultBody
               .html('<p>⚠ La búsqueda es ambigua. ⚠</p>')
