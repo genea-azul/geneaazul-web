@@ -322,6 +322,9 @@ var server = http.createServer(function(req, res) {
         var surnames = (body && body.surnames) ? body.surnames : [];
         return sendJson(res, mockSurnamesResponse(surnames));
       }
+      if (url === '/api/tree-builder/submit') {
+        return sendJson(res, { submissionId: 'mock-' + Date.now() });
+      }
       send404(res, url);
     });
   }
