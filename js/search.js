@@ -752,6 +752,11 @@ GeneaAzul.search = (function() {
     }
   }
 
-  return { init: init, cleanup: cleanup };
+  function clearTimers() {
+    _activeTimers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
+    _activeTimers = [];
+  }
+
+  return { init: init, cleanup: cleanup, buildPersonComponent: buildPersonComponent, enableFamilyTreeButtons: enableFamilyTreeButtons, clearTimers: clearTimers };
 
 })();
