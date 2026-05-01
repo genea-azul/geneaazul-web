@@ -1776,7 +1776,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
    ═══════════════════════════════════════════════════════════════════ */
 
 .ga-tree-canvas {
-  background: var(--ga-bg-card);
+  background: var(--ga-card-bg);
   border: 1px solid var(--ga-border);
   border-radius: 8px;
   padding: 1rem;
@@ -1846,7 +1846,7 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 
 .ga-tree-node-filled {
   border: 1.5px solid var(--ga-primary);
-  background: var(--ga-bg-card);
+  background: var(--ga-card-bg);
   color: var(--ga-text);
 }
 
@@ -1858,12 +1858,12 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 
 .ga-tree-node-ego.ga-tree-node-filled {
   border-width: 2.5px;
-  box-shadow: 0 0 0 3px rgba(var(--ga-primary-rgb, 37, 99, 235), 0.1);
+  box-shadow: 0 0 0 3px var(--ga-primary-muted);
 }
 
 .ga-tree-node-child.ga-tree-node-filled {
-  border-color: #16a34a;
-  background: #f0fdf4;
+  border-color: var(--ga-curiosidades);
+  background: #f0fdf4; /* light green bg, decorative */
 }
 
 .ga-tree-node-plus {
@@ -1931,12 +1931,12 @@ abbr[title], abbr[data-bs-title] { text-decoration: none; }
 }
 
 .ga-tree-add-child-node {
-  border-color: #86efac;
-  color: #16a34a;
+  border-color: var(--ga-curiosidades-muted);
+  color: var(--ga-curiosidades);
 }
 
 .ga-tree-add-child-node:hover {
-  border-color: #16a34a;
+  border-color: var(--ga-curiosidades);
 }
 
 /* Results panel */
