@@ -435,8 +435,16 @@ GeneaAzul.search = (function() {
     return false;
   }
 
+  /* ── Lazy-resolve shared refs (needed when called from other modules) */
+  function _ensureRefs() {
+    if (!cfg)   cfg   = GeneaAzul.config;
+    if (!i18n)  i18n  = GeneaAzul.i18n;
+    if (!utils) utils = GeneaAzul.utils;
+  }
+
   /* ── Person result card builder ─────────────────────────────────── */
   function buildPersonComponent(person, idx) {
+    _ensureRefs();
     var $card = $('<div>').addClass('card ga-result-card');
     if (idx > 0) $card.addClass('mt-2');
 
@@ -581,6 +589,7 @@ GeneaAzul.search = (function() {
 
   /* ── Family tree button enable logic ────────────────────────────── */
   function enableFamilyTreeButtons(uuid, personsCount, currentTimeoutMs) {
+    _ensureRefs();
     var delayMs;
     if (!personsCount) {
       delayMs = 0;
