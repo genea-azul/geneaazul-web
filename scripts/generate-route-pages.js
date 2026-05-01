@@ -82,6 +82,11 @@ var ROUTES = {
     title:  'Sobre nosotros — Genea Azul',
     desc:   'Conocé al equipo detrás de Genea Azul, el proyecto genealógico comunitario de Azul.',
     crumbs: [{ name: 'Sobre nosotros', path: '/sobre-nosotros' }]
+  },
+  'agregar-familia': {
+    title:  'Aportá tu árbol — Genea Azul',
+    desc:   'Completá los datos de tu familia y envianos la información para incorporarla al árbol genealógico de Azul.',
+    crumbs: [{ name: 'Aportá tu árbol', path: '/agregar-familia' }]
   }
 };
 
