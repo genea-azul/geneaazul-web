@@ -1,4 +1,4 @@
-<section class="ga-section container-xl" id="agregar-familia-section" aria-label="Agregá tu familia">
+<section class="ga-section container-xl" id="agregar-familia-section" aria-label="Aportá tu árbol">
 
   <div class="row justify-content-center">
     <div class="col-lg-10 col-xl-9">
@@ -71,7 +71,7 @@
               </div>
             </div>
 
-            <div style="width:80px"></div>
+            <div class="ga-tree-parents-spacer"></div>
 
             <div class="ga-tree-node-wrap" id="ga-node-wrap-mother">
               <span class="ga-tree-node-label">Madre</span>
@@ -102,7 +102,7 @@
             </div>
 
             <div class="ga-tree-node-wrap" id="ga-node-wrap-partner">
-              <span class="ga-tree-node-label">(Ex) Pareja</span>
+              <span class="ga-tree-node-label">Pareja</span>
               <div class="ga-tree-node ga-tree-node-empty" id="ga-node-partner" data-role="partner">
                 <div class="ga-tree-node-plus">＋</div>
                 <div class="ga-tree-node-hint">Agregar</div>
@@ -130,8 +130,27 @@
       </div><!-- /ga-tree-canvas -->
 
       <!-- Search hint (shown until ego has a name) -->
-      <div class="text-center text-muted small mb-3" id="ga-tree-search-hint">
-        <i class="bi bi-info-circle me-1"></i>Completá tu nombre y apellido para buscar coincidencias en el árbol de Genea Azul.
+      <div class="text-center text-muted small mb-2" id="ga-tree-search-hint">
+        <i class="bi bi-info-circle me-1"></i>Empezá haciendo clic en el nodo <strong>Vos</strong> y completá tu nombre y apellido.
+      </div>
+
+      <!-- Reset button (shown when tree has any data) -->
+      <div class="text-center mb-3 d-none" id="ga-tree-reset-wrap">
+        <button type="button" class="btn btn-link btn-sm text-muted p-0 small" id="ga-tree-reset-btn">
+          <i class="bi bi-arrow-counterclockwise me-1"></i>Empezar de nuevo
+        </button>
+      </div>
+
+      <!-- Search results -->
+      <div class="card ga-tree-results-card d-none mb-3" id="ga-tree-results-card">
+        <div class="card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-search me-1"></i>
+            <span>Coincidencias en el árbol de Genea Azul</span>
+          </div>
+          <div class="small text-muted mt-1">¿Te reconocés o reconocés a algún familiar? Igual envianos tu árbol — cada dato ayuda a confirmar y ampliar la información.</div>
+        </div>
+        <div class="card-body overflow-auto" id="ga-tree-results-body" aria-live="polite" aria-atomic="true"></div>
       </div>
 
       <!-- Contact + submit -->
@@ -151,15 +170,6 @@
       </div>
       <div class="d-none text-danger small mb-2" id="ga-tree-submit-error"></div>
       <div class="d-none mb-3" id="ga-tree-submit-result"></div>
-
-      <!-- Search results -->
-      <div class="card ga-tree-results-card d-none" id="ga-tree-results-card">
-        <div class="card-header d-flex align-items-center gap-2">
-          <i class="bi bi-search me-1"></i>
-          <span>Coincidencias en el árbol de Genea Azul</span>
-        </div>
-        <div class="card-body overflow-auto" id="ga-tree-results-body" aria-live="polite" aria-atomic="true"></div>
-      </div>
 
     </div>
   </div>
@@ -181,19 +191,22 @@
           <!-- Name -->
           <div class="row g-2 mb-3">
             <div class="col-6">
-              <label class="form-label small fw-semibold" for="ga-modal-given-name">Nombre</label>
+              <label class="form-label small fw-semibold" for="ga-modal-given-name">Nombre <span class="text-danger">*</span></label>
               <input type="text" class="form-control form-control-sm" id="ga-modal-given-name" autocomplete="given-name">
             </div>
             <div class="col-6">
-              <label class="form-label small fw-semibold" for="ga-modal-surname">Apellido</label>
+              <label class="form-label small fw-semibold" for="ga-modal-surname">Apellido <span class="text-danger">*</span></label>
               <input type="text" class="form-control form-control-sm" id="ga-modal-surname" autocomplete="family-name">
+            </div>
+            <div class="col-12">
+              <div class="form-text mt-0">* requerido junto con al menos un año (nacimiento o fallecimiento)</div>
             </div>
           </div>
 
           <!-- Sex -->
           <div class="mb-3">
             <label class="form-label small fw-semibold">
-              Sexo <span class="text-muted fw-normal">(opcional — se puede inferir del nombre)</span>
+              Sexo
             </label>
             <div class="d-flex flex-wrap gap-3">
               <div class="form-check">
@@ -229,10 +242,9 @@
               </div>
               <div class="col-12">
                 <input type="text" class="form-control form-control-sm"
-                  id="ga-modal-birth-place" placeholder="Ciudad de nacimiento">
+                  id="ga-modal-birth-place" placeholder="Lugar de nacimiento">
               </div>
             </div>
-            <div class="form-text">Podés dejar vacío lo que no sabés</div>
           </div>
 
           <!-- Deceased toggle -->
@@ -259,7 +271,7 @@
               </div>
               <div class="col-12">
                 <input type="text" class="form-control form-control-sm"
-                  id="ga-modal-death-place" placeholder="Ciudad de fallecimiento">
+                  id="ga-modal-death-place" placeholder="Lugar de fallecimiento">
               </div>
             </div>
           </div>
@@ -286,10 +298,12 @@
               <div class="form-check">
                 <input class="form-check-input" type="radio" name="ga-modal-rel-type"
                   id="ga-modal-rel-divorced" value="DIVORCED">
-                <label class="form-check-label small" for="ga-modal-rel-divorced">Matrimonio disuelto</label>
+                <label class="form-check-label small" for="ga-modal-rel-divorced">Divorcio</label>
               </div>
             </div>
           </div>
+
+          <div class="text-danger small d-none" id="ga-modal-validation-msg"></div>
 
         </div><!-- /modal-body -->
         <div class="modal-footer">
@@ -298,6 +312,28 @@
           </button>
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
           <button type="button" class="btn ga-btn-primary btn-sm" id="ga-modal-save-btn">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ LEAVE CONFIRMATION MODAL ═══ -->
+  <div class="modal fade" id="ga-tree-leave-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-body pt-4 pb-2 px-4 text-center">
+          <i class="bi bi-send-exclamation fs-2 text-primary mb-3 d-block"></i>
+          <p class="fw-semibold mb-1">¿Salís sin enviar tu árbol?</p>
+          <p class="small text-muted mb-0">Incluso si ya te encontramos, tu información nos ayuda a confirmar y ampliar los datos del árbol de Genea Azul.</p>
+        </div>
+        <div class="modal-footer flex-column gap-2 border-0 pt-2 pb-4 px-4">
+          <button type="button" class="btn ga-btn-primary btn-sm w-100" id="ga-leave-send-btn">
+            <i class="bi bi-send me-1"></i>Enviar y salir
+          </button>
+          <button type="button" class="btn btn-link btn-sm text-muted p-0 small" id="ga-leave-exit-btn">
+            Salir sin enviar
+          </button>
         </div>
       </div>
     </div>

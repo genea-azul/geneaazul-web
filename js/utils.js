@@ -195,7 +195,7 @@ GeneaAzul.toggleTheme = function(theme) {
   themes.forEach(function(t) { $body.removeClass('theme-' + t); });
   $body.addClass('theme-' + theme);
 
-  $('#theme-stylesheet').attr('href', 'css/theme-' + theme + '.css');
+  $('#theme-stylesheet').attr('href', '/css/theme-' + theme + '.css');
 
   // Toggle active button state
   $('.ga-theme-btn').removeClass('active');

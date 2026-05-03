@@ -9,9 +9,12 @@ GeneaAzul.treeBuilder = (function() {
   var cfg, i18n, utils;
   var _activeTimers = [];
   var _modal = null;
+  var _leaveModal = null;
   var _searchSeq = 0;
   var _pendingSearchTimer = null;
   var _openerEl = null;
+  var _submitted = false;
+  var _pendingNavRoute = null;
 
   var _STORAGE_KEY = 'geneaazul_tree_state';
 
@@ -34,7 +37,7 @@ GeneaAzul.treeBuilder = (function() {
 
   var _roleLabels = {
     ego:                 'Vos',
-    partner:             '(Ex) Pareja',
+    partner:             'Pareja',
     father:              'Padre',
     mother:              'Madre',
     paternalGrandfather: 'Abuelo paterno',
@@ -54,24 +57,46 @@ GeneaAzul.treeBuilder = (function() {
     cfg   = GeneaAzul.config;
     i18n  = GeneaAzul.i18n;
     utils = GeneaAzul.utils;
+    _activeTimers = [];
 
-    // Defensively dispose any previous modal instance
+    // Defensively dispose any previous modal instances
     if (_modal) {
       try { _modal.hide(); _modal.dispose(); } catch (e) {}
       _modal = null;
     }
+    if (_leaveModal) {
+      try { _leaveModal.hide(); _leaveModal.dispose(); } catch (e) {}
+      _leaveModal = null;
+    }
 
-    // Move modal to <body> so Bootstrap's backdrop (also on body) doesn't render
-    // above it — the gaFadeIn animation on #page-content creates a stacking context
-    // that would otherwise trap the modal behind the backdrop.
+    // Move modals to <body> so Bootstrap's backdrop (also on body) doesn't render
+    // above them — the gaFadeIn animation on #page-content creates a stacking context
+    // that would otherwise trap modals behind the backdrop.
     var modalEl = document.getElementById('ga-tree-person-modal');
     if (modalEl && modalEl.parentNode !== document.body) {
       document.body.appendChild(modalEl);
     }
     _modal = new bootstrap.Modal(modalEl);
 
+    var leaveModalEl = document.getElementById('ga-tree-leave-modal');
+    if (leaveModalEl && leaveModalEl.parentNode !== document.body) {
+      document.body.appendChild(leaveModalEl);
+    }
+    _leaveModal = new bootstrap.Modal(leaveModalEl, { backdrop: 'static', keyboard: false });
+
+    _submitted = false;
+    _pendingNavRoute = null;
+
+    // Navigation guard — capture phase intercepts data-route clicks before the router
+    document.removeEventListener('click', _navGuardHandler, true);
+    document.addEventListener('click', _navGuardHandler, true);
+    window.removeEventListener('beforeunload', _onBeforeUnload);
+    window.addEventListener('beforeunload', _onBeforeUnload);
+
     // Set dynamic year ceiling on birth/death year inputs
-    var currentYear = new Date().getFullYear();
+    var currentYear = parseInt(new Date().toLocaleDateString('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric'
+    }), 10);
     $('#ga-modal-birth-year, #ga-modal-death-year').attr('max', currentYear);
 
     // Load persisted state — user's tree survives navigation and page refresh
@@ -80,19 +105,25 @@ GeneaAzul.treeBuilder = (function() {
 
     if (saved) { _showRestoredBanner(); }
 
-    // Wake backend + read obfuscateLiving (same form-gate pattern as search.js)
+    // Wake backend + read obfuscateLiving before firing first auto-search
+    // (same form-gate pattern as search.js — must complete before triggerSearchIfReady
+    // so obfuscateLiving is set correctly on the first request from restored state)
     utils.apiGetCached(
       cfg.apiBaseUrl + '/api/gedcom-analyzer',
       function(data) {
         if (data && data.disableObfuscateLiving) {
           cfg.obfuscateLiving = false;
         }
+        triggerSearchIfReady();
+      },
+      function() {
+        triggerSearchIfReady(); // update hint + attempt search even when backend is unreachable
       }
     );
 
     wireEvents();
     renderTree();
-    updateSearchHint();
+    _updateResetVisibility();
   }
 
   /* ── localStorage ───────────────────────────────────────────────── */
@@ -114,15 +145,16 @@ GeneaAzul.treeBuilder = (function() {
 
   function _showRestoredBanner() {
     var $banner = $(
-      '<div class="alert alert-info alert-dismissible d-flex align-items-center gap-2 py-2 small mb-3" id="ga-tree-restored-banner">' +
-      '<i class="bi bi-cloud-check-fill"></i>' +
+      '<div class="alert alert-info d-flex align-items-center gap-2 py-2 small mb-3" id="ga-tree-restored-banner">' +
+      '<i class="bi bi-cloud-check-fill flex-shrink-0"></i>' +
       '<span>Tus datos fueron restaurados de la sesión anterior.</span>' +
-      '<button type="button" class="btn-close btn-sm ms-auto" data-bs-dismiss="alert" aria-label="Cerrar"></button>' +
+      '<button type="button" class="btn-close btn-sm flex-shrink-0 ms-auto" aria-label="Cerrar"></button>' +
       '</div>'
     );
     $('#ga-tree-canvas').before($banner);
+    $banner.find('.btn-close').on('click', function() { $banner.remove(); });
     // Auto-dismiss after 6 s
-    var t = setTimeout(function() { $banner.alert('close'); }, 6000);
+    var t = setTimeout(function() { $banner.remove(); }, 6000);
     _activeTimers.push(t);
   }
 
@@ -193,6 +225,27 @@ GeneaAzul.treeBuilder = (function() {
       .off('click.tree-builder', '#ga-tree-submit-btn')
       .on('click.tree-builder', '#ga-tree-submit-btn', function() {
         submitTree();
+      })
+      .off('click.tree-builder', '#ga-tree-reset-btn')
+      .on('click.tree-builder', '#ga-tree-reset-btn', function() {
+        _resetTree();
+      })
+      .off('click.tree-builder', '#ga-leave-send-btn')
+      .on('click.tree-builder', '#ga-leave-send-btn', function() {
+        _doSubmit(function() {
+          _removeNavGuard();
+          if (_pendingNavRoute) {
+            GeneaAzul.router.navigate(_pendingNavRoute);
+          }
+        });
+      })
+      .off('click.tree-builder', '#ga-leave-exit-btn')
+      .on('click.tree-builder', '#ga-leave-exit-btn', function() {
+        _removeNavGuard();
+        _leaveModal.hide();
+        if (_pendingNavRoute) {
+          GeneaAzul.router.navigate(_pendingNavRoute);
+        }
       });
   }
 
@@ -316,6 +369,7 @@ GeneaAzul.treeBuilder = (function() {
     $('#ga-modal-death-section').addClass('d-none');
     $('#ga-modal-death-day, #ga-modal-death-month, #ga-modal-death-year, #ga-modal-death-place').val('');
     $('input[name="ga-modal-rel-type"][value="CURRENT_PARTNER"]').prop('checked', true);
+    $('#ga-modal-validation-msg').addClass('d-none').text('');
   }
 
   function _prefillModalForm(data, role) {
@@ -372,6 +426,18 @@ GeneaAzul.treeBuilder = (function() {
 
     var isEmpty = _isNodeEmpty(nodeData);
 
+    if (!isEmpty) {
+      var missing = [];
+      if (!nodeData.givenName) { missing.push('nombre'); }
+      if (!nodeData.surname)   { missing.push('apellido'); }
+      if (!nodeData.birthYear && !nodeData.deathYear) { missing.push('al menos un año'); }
+      if (missing.length) {
+        $('#ga-modal-validation-msg').text('Completá: ' + missing.join(', ') + '.').removeClass('d-none');
+        return;
+      }
+    }
+    $('#ga-modal-validation-msg').addClass('d-none').text('');
+
     if (role === 'child') {
       if (isEmpty) {
         if (childIndex !== null && childIndex < _state.children.length) {
@@ -392,11 +458,16 @@ GeneaAzul.treeBuilder = (function() {
 
     _modal.hide();
     _saveToLocalStorage();
-
-    if (!isEmpty) { triggerSearchIfReady(); }
+    triggerSearchIfReady();
+    _updateResetVisibility();
   }
 
   function deleteFromModal() {
+    if (_pendingSearchTimer !== null) {
+      clearTimeout(_pendingSearchTimer);
+      _pendingSearchTimer = null;
+    }
+
     var role          = $('#ga-modal-role').val();
     var childIndexStr = $('#ga-modal-child-index').val();
     var childIndex    = childIndexStr !== '' ? parseInt(childIndexStr, 10) : null;
@@ -408,15 +479,70 @@ GeneaAzul.treeBuilder = (function() {
       _state[role] = null;
       renderNode(role, null);
     }
-    updateSearchHint();
     _modal.hide();
     _saveToLocalStorage();
+    triggerSearchIfReady();
+    _updateResetVisibility();
   }
 
   /* ── Auto-search ────────────────────────────────────────────────── */
   function updateSearchHint() {
     var ready = _state.ego && _state.ego.givenName && _state.ego.surname;
     $('#ga-tree-search-hint').toggleClass('d-none', !!ready);
+    if (!ready) {
+      $('#ga-tree-results-card').addClass('d-none');
+      $('#ga-tree-results-body').empty();
+    }
+  }
+
+  function _hasAnyData() {
+    if (_state.children.length > 0) { return true; }
+    for (var i = 0; i < _fixedRoles.length; i++) {
+      if (_state[_fixedRoles[i]]) { return true; }
+    }
+    return false;
+  }
+
+  function _updateResetVisibility() {
+    $('#ga-tree-reset-wrap').toggleClass('d-none', !_hasAnyData());
+  }
+
+  function _resetTree() {
+    if (!window.confirm('¿Querés empezar de nuevo? Se borrarán todos los datos ingresados.')) { return; }
+    _state = _freshState();
+    _submitted = false;
+    try { localStorage.removeItem(_STORAGE_KEY); } catch (e) {}
+    renderTree();
+    triggerSearchIfReady();
+    _updateResetVisibility();
+  }
+
+  /* ── Navigation guard ───────────────────────────────────────────────── */
+  function _onBeforeUnload(e) {
+    if (!_hasAnyData() || _submitted) { return; }
+    e.preventDefault();
+    e.returnValue = '';
+  }
+
+  function _navGuardHandler(e) {
+    var target = e.target;
+    while (target && target !== document.body) {
+      if (target.getAttribute && target.getAttribute('data-route') !== null) { break; }
+      target = target.parentNode;
+    }
+    if (!target || !target.getAttribute || target.getAttribute('data-route') === null) { return; }
+    if (!_hasAnyData() || _submitted) { return; }
+
+    e.stopPropagation();
+    e.preventDefault();
+
+    _pendingNavRoute = target.getAttribute('data-route');
+    _leaveModal.show();
+  }
+
+  function _removeNavGuard() {
+    document.removeEventListener('click', _navGuardHandler, true);
+    window.removeEventListener('beforeunload', _onBeforeUnload);
   }
 
   function triggerSearchIfReady() {
@@ -434,7 +560,6 @@ GeneaAzul.treeBuilder = (function() {
       _pendingSearchTimer = null;
       _executeSearch(seq);
     }, 400);
-    _activeTimers.push(_pendingSearchTimer);
   }
 
   function _executeSearch(seq) {
@@ -457,7 +582,7 @@ GeneaAzul.treeBuilder = (function() {
         var timeoutMs = 0;
 
         people.forEach(function(person, idx) {
-          var $pc = GeneaAzul.search.buildPersonComponent(person, idx);
+          var $pc = GeneaAzul.search.buildPersonComponent(person, idx, { compact: true });
           $body.append($pc);
           timeoutMs += GeneaAzul.search.enableFamilyTreeButtons(person.uuid, person.personsCountInTree, timeoutMs);
         });
@@ -506,12 +631,17 @@ GeneaAzul.treeBuilder = (function() {
       maternalGrandfather: toSearchPerson(_state.maternalGrandfather),
       maternalGrandmother: toSearchPerson(_state.maternalGrandmother),
       contact:             utils.trimToNull($('#ga-tree-contact').val()),
-      obfuscateLiving:     cfg.obfuscateLiving
+      obfuscateLiving:     cfg.obfuscateLiving,
+      persist:             false
     };
   }
 
   /* ── Submit ─────────────────────────────────────────────────────── */
   function submitTree() {
+    _doSubmit(null);
+  }
+
+  function _doSubmit(onSuccessFn) {
     var contact = utils.trimToNull($('#ga-tree-contact').val());
     var $err    = $('#ga-tree-submit-error');
     var $result = $('#ga-tree-submit-result');
@@ -525,9 +655,12 @@ GeneaAzul.treeBuilder = (function() {
     }
     if (!contact) {
       $err.removeClass('d-none').text('Ingresá tu contacto (email, WhatsApp o @instagram) para enviar.');
+      $('#ga-tree-contact').focus();
       return;
     }
 
+    // Hide leave modal now that validation passed — only reaches here if POST will fire
+    if (_leaveModal) { try { _leaveModal.hide(); } catch (e) {} }
     $btn.prop('disabled', true);
 
     utils.apiPost(
@@ -545,6 +678,8 @@ GeneaAzul.treeBuilder = (function() {
         contact:             contact
       },
       function(data) {
+        _submitted = true;
+        _removeNavGuard();
         var refId = data && data.submissionId ? data.submissionId : '';
         $result.removeClass('d-none').html(
           '<div class="alert alert-success small">' +
@@ -553,8 +688,8 @@ GeneaAzul.treeBuilder = (function() {
           '</div>'
         );
         $btn.prop('disabled', false);
-        // Clear saved draft after successful submission
         try { localStorage.removeItem(_STORAGE_KEY); } catch (e) {}
+        if (onSuccessFn) { onSuccessFn(); }
       },
       function(xhr) {
         if (xhr && xhr.status === 429) {
@@ -569,6 +704,9 @@ GeneaAzul.treeBuilder = (function() {
 
   /* ── Cleanup ────────────────────────────────────────────────────── */
   function cleanup() {
+    _searchSeq++; // stale any in-flight POST so its callback won't register new timers
+    _removeNavGuard();
+
     if (_pendingSearchTimer !== null) {
       clearTimeout(_pendingSearchTimer);
       _pendingSearchTimer = null;
@@ -588,12 +726,30 @@ GeneaAzul.treeBuilder = (function() {
       try { _modal.hide(); _modal.dispose(); } catch (e) {}
       _modal = null;
     }
+    if (_leaveModal) {
+      try { _leaveModal.dispose(); } catch (e) {}
+      _leaveModal = null;
+    }
 
-    // Remove the teleported modal from body so the next fragment load starts clean
+    // Remove teleported modals from body so the next fragment load starts clean
     var modalEl = document.getElementById('ga-tree-person-modal');
     if (modalEl && modalEl.parentNode === document.body) {
       document.body.removeChild(modalEl);
     }
+    var leaveModalEl = document.getElementById('ga-tree-leave-modal');
+    if (leaveModalEl && leaveModalEl.parentNode === document.body) {
+      document.body.removeChild(leaveModalEl);
+    }
+
+    // Bootstrap 5 modal.hide() is async (CSS transition) — dispose() may run before
+    // the backdrop is removed, orphaning it. Force-clean any stranded backdrops.
+    var backdrops = document.querySelectorAll('.modal-backdrop');
+    for (var i = 0; i < backdrops.length; i++) {
+      if (backdrops[i].parentNode) { backdrops[i].parentNode.removeChild(backdrops[i]); }
+    }
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
 
     _openerEl = null;
   }

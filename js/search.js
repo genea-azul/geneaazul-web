@@ -449,7 +449,8 @@ GeneaAzul.search = (function() {
   }
 
   /* ── Person result card builder ─────────────────────────────────── */
-  function buildPersonComponent(person, idx) {
+  function buildPersonComponent(person, idx, options) {
+    var compact = options && options.compact;
     _ensureRefs();
     var $card = $('<div>').addClass('card ga-result-card');
     if (idx > 0) $card.addClass('mt-2');
@@ -480,7 +481,7 @@ GeneaAzul.search = (function() {
       $bd.html('?');
     }
     if (person.dateOfDeath) {
-      $bd.append(' – f. ' + i18n.displayDateInSpanish(person.dateOfDeath));
+      $bd.append($('<span>').html(' – f. ' + i18n.displayDateInSpanish(person.dateOfDeath)));
     } else {
       if (person.dateOfBirth) $bd.append(' – ');
       $bd.append(person.isAlive ? 'Vive' : (person.sex === 'F' ? 'Fallecida' : 'Fallecido'));
@@ -522,7 +523,7 @@ GeneaAzul.search = (function() {
     var hasMD  = person.maxDistantRelationship != null;
     var hasDPT = person.distinguishedPersonsInTree && person.distinguishedPersonsInTree.length > 0;
 
-    if (hasPC || hasSC || hasAG || hasMD || hasDPT) {
+    if (!compact && (hasPC || hasSC || hasAG || hasMD || hasDPT)) {
       var $tul = $('<ul>').addClass('mb-0');
       if (hasAG) {
         $tul.append($('<li>').html('Ascendencia: ' + i18n.getCardinal(person.ancestryGenerations.ascending, 'generación', 'generaciones')));
@@ -555,7 +556,7 @@ GeneaAzul.search = (function() {
       $body.append($('<div>').addClass('mt-1').html('Información en el árbol: ').append($tul));
     }
 
-    if (person.ancestryCountries && person.ancestryCountries.length > 0) {
+    if (!compact && person.ancestryCountries && person.ancestryCountries.length > 0) {
       var $cul = $('<ul>').addClass('mb-0');
       person.ancestryCountries.forEach(function(c) { $cul.append($('<li>').text(c)); });
       $body.append($('<div>').addClass('mt-1').html('Países en su ascendencia: ').append($cul));

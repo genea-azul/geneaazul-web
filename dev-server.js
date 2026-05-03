@@ -82,8 +82,11 @@ var MOCK_SEARCH_FAMILY = {
       surnamesCountInTree: 8,
       ancestryGenerations: { ascending: 3, directDescending: 2 },
       maxDistantRelationship: {
-        personName: 'LEJANO Mock, Prima',
-        relationship: 'prima segunda'
+        personName: 'LEJANO Mock, Prima', personSex: 'F', personIsAlive: false,
+        referenceType: 'COUSIN', generation: 1, grade: 2,
+        isInLaw: false, isHalf: false, isSeparated: false,
+        adoptionType: null, spouseSex: null, treeSides: ['FATHER'],
+        isObfuscated: false
       },
       distinguishedPersonsInTree: [],
       ancestryCountries: ['Argentina', 'España', 'Italia'],
