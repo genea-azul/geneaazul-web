@@ -787,8 +787,22 @@ GeneaAzul.search = (function() {
     $container.html($feedbackAlert('danger', 'x-circle-fill', html));
   }
 
+  function _initScrollFade($card) {
+    var el = $card.find('.card-body')[0];
+    if (!el) return;
+    function check() {
+      var hasScroll = el.scrollHeight > el.clientHeight + 2;
+      var atBottom  = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+      $card.toggleClass('ga-scroll-fade', hasScroll);
+      $card.toggleClass('ga-scroll-at-bottom', !hasScroll || atBottom);
+    }
+    $card.find('.card-body').off('scroll.scrollfade').on('scroll.scrollfade', check);
+    check();
+  }
+
   function finalizeSearch($btn, $resultCard, callback) {
     $btn.prop('disabled', false);
+    _initScrollFade($resultCard);
     $resultCard.get(0) && $resultCard.get(0).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     if (callback) callback();
   }
@@ -810,6 +824,6 @@ GeneaAzul.search = (function() {
     _activeTimers = [];
   }
 
-  return { init: init, cleanup: cleanup, buildPersonComponent: buildPersonComponent, enableFamilyTreeButtons: enableFamilyTreeButtons, clearTimers: clearTimers };
+  return { init: init, cleanup: cleanup, buildPersonComponent: buildPersonComponent, enableFamilyTreeButtons: enableFamilyTreeButtons, clearTimers: clearTimers, feedbackAlert: $feedbackAlert };
 
 })();

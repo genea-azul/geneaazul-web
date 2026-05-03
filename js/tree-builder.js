@@ -613,18 +613,20 @@ GeneaAzul.treeBuilder = (function() {
           if (data.errors && data.errors.length > 0) {
             var errHtml = '';
             data.errors.forEach(function(code) { errHtml += i18n.displayErrorCodeInSpanish(code); });
-            $body.html($feedbackAlert('danger', 'x-circle-fill', errHtml));
+            $body.html(GeneaAzul.search.feedbackAlert('danger', 'x-circle-fill', errHtml));
           } else if (data.potentialResults) {
-            $body.html($feedbackAlert('warning', 'exclamation-triangle-fill', 'La búsqueda es ambigua. Completá más datos para refinar.'));
+            $body.html(GeneaAzul.search.feedbackAlert('warning', 'exclamation-triangle-fill', 'La búsqueda es ambigua. Completá más datos para refinar.'));
           } else {
-            $body.html($feedbackAlert('info', 'search', 'Sin coincidencias todavía. Seguí agregando datos de familia.'));
+            $body.html(GeneaAzul.search.feedbackAlert('info', 'search', 'Sin coincidencias todavía. Seguí agregando datos de familia.'));
           }
         }
+        _initScrollFade($card);
       },
       function(xhr) {
         if (seq !== _searchSeq) { return; }
         var errCode = xhr && xhr.status === 429 ? 'TOO-MANY-REQUESTS' : 'ERROR';
-        $body.html($feedbackAlert('danger', 'x-circle-fill', i18n.displayErrorCodeInSpanish(errCode)));
+        $body.html(GeneaAzul.search.feedbackAlert('danger', 'x-circle-fill', i18n.displayErrorCodeInSpanish(errCode)));
+        _initScrollFade($card);
       }
     );
   }
@@ -773,6 +775,19 @@ GeneaAzul.treeBuilder = (function() {
     document.body.style.removeProperty('padding-right');
 
     _openerEl = null;
+  }
+
+  function _initScrollFade($card) {
+    var el = $card.find('.card-body')[0];
+    if (!el) return;
+    function check() {
+      var hasScroll = el.scrollHeight > el.clientHeight + 2;
+      var atBottom  = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+      $card.toggleClass('ga-scroll-fade', hasScroll);
+      $card.toggleClass('ga-scroll-at-bottom', !hasScroll || atBottom);
+    }
+    $card.find('.card-body').off('scroll.scrollfade').on('scroll.scrollfade', check);
+    check();
   }
 
   function prefillFromSearch(state) {
