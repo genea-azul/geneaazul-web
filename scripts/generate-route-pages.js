@@ -14,6 +14,11 @@ var ROUTES = {
     desc:   'Buscá personas en la base genealógica azuleña. Encontrá familiares y antepasados del partido de Azul.',
     crumbs: [{ name: 'Buscar personas', path: '/buscar' }]
   },
+  'agregar-familia': {
+    title:  'Agregá tu familia — Genea Azul',
+    desc:   'Completá los datos de tu familia y envianos la información para incorporarla al árbol genealógico de Azul.',
+    crumbs: [{ name: 'Agregá tu familia', path: '/agregar-familia' }]
+  },
   'conexiones': {
     title:  'Conexiones entre personas — Genea Azul',
     desc:   'Descubrí cómo dos personas están emparentadas en el árbol genealógico de Azul.',
@@ -83,11 +88,6 @@ var ROUTES = {
     desc:   'Conocé al equipo detrás de Genea Azul, el proyecto genealógico comunitario de Azul.',
     crumbs: [{ name: 'Sobre nosotros', path: '/sobre-nosotros' }]
   },
-  'agregar-familia': {
-    title:  'Aportá tu árbol — Genea Azul',
-    desc:   'Completá los datos de tu familia y envianos la información para incorporarla al árbol genealógico de Azul.',
-    crumbs: [{ name: 'Aportá tu árbol', path: '/agregar-familia' }]
-  }
 };
 
 // Exact breadcrumb block as it appears in index.html (whitespace must match)
