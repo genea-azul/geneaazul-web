@@ -248,10 +248,7 @@ GeneaAzul.search = (function() {
       $btn.on('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        try {
-          localStorage.setItem('geneaazul_tree_state', JSON.stringify(_searchRqToTreeState(rq)));
-          sessionStorage.setItem('geneaazul_tree_from_search', '1');
-        } catch (ex) {}
+        GeneaAzul.treeBuilder.prefillFromSearch(_searchRqToTreeState(rq));
         GeneaAzul.router.navigate('agregar-familia');
       });
     }
@@ -324,9 +321,9 @@ GeneaAzul.search = (function() {
 
         if (people.length === 0) {
           if (data.errors && data.errors.length > 0) {
-            var $errBody = $('<div>').html('<p class="mb-1 fw-semibold">Se produjo un error en la búsqueda.</p>');
-            data.errors.forEach(function(code) { $errBody.append(i18n.displayErrorCodeInSpanish(code)); });
-            $resultBody.html($feedbackAlert('danger', 'x-circle-fill', $errBody.html()));
+            var errHtml = '<p class="mb-1 fw-semibold">Se produjo un error en la búsqueda.</p>';
+            data.errors.forEach(function(code) { errHtml += i18n.displayErrorCodeInSpanish(code); });
+            $resultBody.html($feedbackAlert('danger', 'x-circle-fill', errHtml));
           } else if (!data.potentialResults) {
             var noResultBody = '<p class="mb-1 fw-semibold">No se encontraron resultados.</p>'
               + '<p class="mb-0">Refiná la búsqueda agregando <strong>fechas</strong> o completando nombres de <strong>padres</strong> y <strong>parejas</strong>.</p>';
@@ -335,7 +332,8 @@ GeneaAzul.search = (function() {
             }
             $resultBody.append($feedbackAlert('info', 'search', noResultBody)).append($treeBuilderCta(rq));
           } else {
-            var ambigBody = '<p class="mb-1 fw-semibold">La búsqueda es ambigua &mdash; ' + utils.escHtml(data.potentialResults) + ' posible' + (data.potentialResults === 1 ? '' : 's') + ' resultado' + (data.potentialResults === 1 ? '' : 's') + '.</p>'
+            var potCount = parseInt(data.potentialResults, 10) || 0;
+            var ambigBody = '<p class="mb-1 fw-semibold">La búsqueda es ambigua &mdash; ' + utils.escHtml(potCount) + ' posible' + (potCount === 1 ? '' : 's') + ' resultado' + (potCount === 1 ? '' : 's') + '.</p>'
               + '<p class="mb-0">Refiná la búsqueda agregando <strong>fechas</strong> o completando nombres de <strong>padres</strong> y <strong>parejas</strong>.</p>';
             $resultBody.append($feedbackAlert('warning', 'exclamation-triangle-fill', ambigBody)).append($treeBuilderCta(rq));
           }

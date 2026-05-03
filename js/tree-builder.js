@@ -109,6 +109,7 @@ GeneaAzul.treeBuilder = (function() {
       if (fromSearch) sessionStorage.removeItem('geneaazul_tree_from_search');
     } catch (e) {}
 
+    $('#ga-tree-prefill-banner, #ga-tree-restored-banner').remove();
     if (fromSearch)     { _showPrefillBanner(); }
     else if (saved)     { _showRestoredBanner(); }
 
@@ -775,6 +776,13 @@ GeneaAzul.treeBuilder = (function() {
     _openerEl = null;
   }
 
-  return { init: init, cleanup: cleanup };
+  function prefillFromSearch(state) {
+    try {
+      localStorage.setItem(_STORAGE_KEY, JSON.stringify(state));
+      sessionStorage.setItem('geneaazul_tree_from_search', '1');
+    } catch (e) {}
+  }
+
+  return { init: init, cleanup: cleanup, prefillFromSearch: prefillFromSearch };
 
 })();
