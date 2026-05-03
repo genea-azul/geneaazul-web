@@ -82,8 +82,11 @@ var MOCK_SEARCH_FAMILY = {
       surnamesCountInTree: 8,
       ancestryGenerations: { ascending: 3, directDescending: 2 },
       maxDistantRelationship: {
-        personName: 'LEJANO Mock, Prima',
-        relationship: 'prima segunda'
+        personName: 'LEJANO Mock, Prima', personSex: 'F', personIsAlive: false,
+        referenceType: 'COUSIN', generation: 1, grade: 2,
+        isInLaw: false, isHalf: false, isSeparated: false,
+        adoptionType: null, spouseSex: null, treeSides: ['FATHER'],
+        isObfuscated: false
       },
       distinguishedPersonsInTree: [],
       ancestryCountries: ['Argentina', 'España', 'Italia'],
@@ -321,6 +324,9 @@ var server = http.createServer(function(req, res) {
       if (url === '/api/search/surnames') {
         var surnames = (body && body.surnames) ? body.surnames : [];
         return sendJson(res, mockSurnamesResponse(surnames));
+      }
+      if (url === '/api/tree-builder/submit') {
+        return sendJson(res, { submissionId: 'mock-' + Date.now() });
       }
       send404(res, url);
     });

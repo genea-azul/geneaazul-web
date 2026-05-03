@@ -24,7 +24,8 @@ GeneaAzul.router = (function() {
     'colabora':                    'colabora',
     'recursos':                    'recursos',
     'cronologia':                  'cronologia',
-    'sobre-nosotros':              'sobre-nosotros'
+    'sobre-nosotros':              'sobre-nosotros',
+    'agregar-familia':             'agregar-familia'
   };
 
   /* Per-route title + description for SEO */
@@ -42,7 +43,8 @@ GeneaAzul.router = (function() {
     'colabora':                    { title: 'Colabor\u00e1 \u2014 Genea Azul',                    desc: 'C\u00f3mo colaborar con el proyecto geneal\u00f3gico comunitario Genea Azul.' },
     'recursos':                    { title: 'Recursos geneal\u00f3gicos \u2014 Genea Azul',       desc: 'Recursos geneal\u00f3gicos \u00fatiles para investigar familias del partido de Azul.' },
     'cronologia':                  { title: 'Cronolog\u00eda de Azul \u2014 Genea Azul',          desc: 'L\u00ednea de tiempo hist\u00f3rica del partido de Azul: eventos, genealog\u00eda y curiosidades.' },
-    'sobre-nosotros':              { title: 'Sobre nosotros \u2014 Genea Azul',                   desc: 'Conoc\u00e9 al equipo detr\u00e1s de Genea Azul, el proyecto geneal\u00f3gico comunitario de Azul.' }
+    'sobre-nosotros':              { title: 'Sobre nosotros \u2014 Genea Azul',                   desc: 'Conoc\u00e9 al equipo detr\u00e1s de Genea Azul, el proyecto geneal\u00f3gico comunitario de Azul.' },
+    'agregar-familia':             { title: 'Aport\u00e1 tu \u00e1rbol \u2014 Genea Azul', desc: 'Complet\u00e1 los datos de tu familia y envianos la informaci\u00f3n para incorporarla al \u00e1rbol geneal\u00f3gico de Azul.' }
   };
 
   /* Page initializers — called after HTML fragment is injected */
@@ -60,7 +62,8 @@ GeneaAzul.router = (function() {
     'estadisticas-apellidos':      function() { if (GeneaAzul.stats)       GeneaAzul.stats.initSurnames(); },
     'mapa':                        function() { if (GeneaAzul.map)         GeneaAzul.map.init(); },
     'historias':                   function() { if (GeneaAzul.stories)     GeneaAzul.stories.init(); },
-    'cronologia':                  function() { if (GeneaAzul.cronologia)  GeneaAzul.cronologia.init(); }
+    'cronologia':                  function() { if (GeneaAzul.cronologia)  GeneaAzul.cronologia.init(); },
+    'agregar-familia':             function() { if (GeneaAzul.treeBuilder) GeneaAzul.treeBuilder.init(); }
   };
 
   /* Fire a GA4 page_view event for the current route */
@@ -156,6 +159,7 @@ GeneaAzul.router = (function() {
     var reRunRoutes = ['estadisticas'];
     if (routeKey === currentRoute && reRunRoutes.indexOf(routeKey) === -1 && routeKey.indexOf('historias/') !== 0) return;
     if (currentRoute === 'buscar' && GeneaAzul.search && GeneaAzul.search.cleanup) GeneaAzul.search.cleanup();
+    if (currentRoute === 'agregar-familia' && GeneaAzul.treeBuilder && GeneaAzul.treeBuilder.cleanup) GeneaAzul.treeBuilder.cleanup();
     currentRoute = routeKey;
 
     updatePageMeta(routeKey);

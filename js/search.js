@@ -285,6 +285,12 @@ GeneaAzul.search = (function() {
               if (rq.individual && rq.individual.sex) {
                 $resultBody.append('<p>Verificá que el <span class="text-danger fw-semibold">sexo</span> de la persona esté bien seleccionado.</p>');
               }
+              $resultBody.append(
+                $('<p>').addClass('text-center mt-3')
+                  .append($('<a>').addClass('btn btn-outline-secondary btn-sm')
+                    .attr('href', '/agregar-familia').attr('data-route', 'agregar-familia')
+                    .html('<i class="bi bi-tree me-2"></i>¿No aparecés? Agregá tu familia al árbol'))
+              );
           } else {
             $resultBody
               .html('<p>⚠ La búsqueda es ambigua. ⚠</p>')
@@ -435,8 +441,17 @@ GeneaAzul.search = (function() {
     return false;
   }
 
+  /* ── Lazy-resolve shared refs (needed when called from other modules) */
+  function _ensureRefs() {
+    if (!cfg)   cfg   = GeneaAzul.config;
+    if (!i18n)  i18n  = GeneaAzul.i18n;
+    if (!utils) utils = GeneaAzul.utils;
+  }
+
   /* ── Person result card builder ─────────────────────────────────── */
-  function buildPersonComponent(person, idx) {
+  function buildPersonComponent(person, idx, options) {
+    var compact = options && options.compact;
+    _ensureRefs();
     var $card = $('<div>').addClass('card ga-result-card');
     if (idx > 0) $card.addClass('mt-2');
 
@@ -466,7 +481,7 @@ GeneaAzul.search = (function() {
       $bd.html('?');
     }
     if (person.dateOfDeath) {
-      $bd.append(' – f. ' + i18n.displayDateInSpanish(person.dateOfDeath));
+      $bd.append($('<span>').html(' – f. ' + i18n.displayDateInSpanish(person.dateOfDeath)));
     } else {
       if (person.dateOfBirth) $bd.append(' – ');
       $bd.append(person.isAlive ? 'Vive' : (person.sex === 'F' ? 'Fallecida' : 'Fallecido'));
@@ -508,7 +523,7 @@ GeneaAzul.search = (function() {
     var hasMD  = person.maxDistantRelationship != null;
     var hasDPT = person.distinguishedPersonsInTree && person.distinguishedPersonsInTree.length > 0;
 
-    if (hasPC || hasSC || hasAG || hasMD || hasDPT) {
+    if (!compact && (hasPC || hasSC || hasAG || hasMD || hasDPT)) {
       var $tul = $('<ul>').addClass('mb-0');
       if (hasAG) {
         $tul.append($('<li>').html('Ascendencia: ' + i18n.getCardinal(person.ancestryGenerations.ascending, 'generación', 'generaciones')));
@@ -541,7 +556,7 @@ GeneaAzul.search = (function() {
       $body.append($('<div>').addClass('mt-1').html('Información en el árbol: ').append($tul));
     }
 
-    if (person.ancestryCountries && person.ancestryCountries.length > 0) {
+    if (!compact && person.ancestryCountries && person.ancestryCountries.length > 0) {
       var $cul = $('<ul>').addClass('mb-0');
       person.ancestryCountries.forEach(function(c) { $cul.append($('<li>').text(c)); });
       $body.append($('<div>').addClass('mt-1').html('Países en su ascendencia: ').append($cul));
@@ -581,6 +596,7 @@ GeneaAzul.search = (function() {
 
   /* ── Family tree button enable logic ────────────────────────────── */
   function enableFamilyTreeButtons(uuid, personsCount, currentTimeoutMs) {
+    _ensureRefs();
     var delayMs;
     if (!personsCount) {
       delayMs = 0;
@@ -752,6 +768,11 @@ GeneaAzul.search = (function() {
     }
   }
 
-  return { init: init, cleanup: cleanup };
+  function clearTimers() {
+    _activeTimers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
+    _activeTimers = [];
+  }
+
+  return { init: init, cleanup: cleanup, buildPersonComponent: buildPersonComponent, enableFamilyTreeButtons: enableFamilyTreeButtons, clearTimers: clearTimers };
 
 })();

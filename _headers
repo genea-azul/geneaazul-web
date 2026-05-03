@@ -57,6 +57,8 @@
   Cache-Control: no-cache
 /sobre-nosotros
   Cache-Control: no-cache
+/agregar-familia
+  Cache-Control: no-cache
 
 # CSS and JavaScript — 1 hour
 /css/*
