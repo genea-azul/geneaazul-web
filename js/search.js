@@ -206,6 +206,20 @@ GeneaAzul.search = (function() {
     $('#searchResultCard').addClass('d-none').find('div.card-body').empty();
   }
 
+  /* ── Result feedback helpers ────────────────────────────────────── */
+  function $feedbackAlert(type, icon, bodyHtml) {
+    return $('<div>').addClass('alert alert-' + type + ' ga-result-alert d-flex align-items-start gap-3 mb-0')
+      .append($('<i>').addClass('bi bi-' + icon + ' flex-shrink-0 fs-5 mt-1'))
+      .append($('<div>').addClass('flex-grow-1').html(bodyHtml));
+  }
+
+  function $treeBuilderCta() {
+    return $('<div>').addClass('text-center mt-4')
+      .append($('<a>').addClass('btn ga-btn-tree')
+        .attr('href', '/agregar-familia').attr('data-route', 'agregar-familia')
+        .html('<i class="bi bi-tree-fill me-2"></i>¿No aparecés? Construí tu árbol familiar'));
+  }
+
   function doSearch() {
     _activeTimers.forEach(function(id) { clearTimeout(id); clearInterval(id); });
     _activeTimers = [];
@@ -222,7 +236,7 @@ GeneaAzul.search = (function() {
     postProcessRequest(rq);
 
     if (!rq.individual || !rq.individual.givenName) {
-      $resultBody.html('<p><b>Error:</b> Ingresá el nombre de la persona principal.</p>');
+      $resultBody.html($feedbackAlert('warning', 'exclamation-triangle-fill', 'Ingresá el <strong>nombre</strong> de la persona principal.'));
       finalizeSearch($btn, $resultCard);
       var $name = $('#individualGivenName');
       $name.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -231,7 +245,7 @@ GeneaAzul.search = (function() {
     }
 
     if (getSurnamesInRequest(rq).length === 0) {
-      $resultBody.html('<p><b>Error:</b> Ingresá al menos un apellido para buscar.</p>');
+      $resultBody.html($feedbackAlert('warning', 'exclamation-triangle-fill', 'Ingresá al menos un <strong>apellido</strong> para buscar.'));
       finalizeSearch($btn, $resultCard);
       var $surname = $('#individualSurname');
       $surname.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -240,13 +254,13 @@ GeneaAzul.search = (function() {
     }
 
     if (validateYears(rq)) {
-      $resultBody.html('<p><b>Error:</b> Verificá los años ingresados: tienen que estar entre 1600 y el año actual, y el año de nacimiento no puede ser mayor que el de fallecimiento.</p>');
+      $resultBody.html($feedbackAlert('warning', 'exclamation-triangle-fill', 'Verificá los <strong>años</strong> ingresados: deben estar entre 1600 y el año actual, y el año de nacimiento no puede superar el de fallecimiento.'));
       finalizeSearch($btn, $resultCard);
       return;
     }
 
     if (!rq.contact) {
-      $resultBody.html('<p><b>Error:</b> Ingresá tu contacto (email, WhatsApp o @instagram) para poder avisarte si encontramos familia.</p>');
+      $resultBody.html($feedbackAlert('warning', 'exclamation-triangle-fill', 'Ingresá tu <strong>contacto</strong> (email, WhatsApp o @instagram) para poder avisarte si encontramos familia.'));
       finalizeSearch($btn, $resultCard);
       var $contact = $('#individualContact');
       $contact.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -271,31 +285,20 @@ GeneaAzul.search = (function() {
 
         if (people.length === 0) {
           if (data.errors && data.errors.length > 0) {
-            $resultBody.html('<p>⚠ Se produjo un error en la búsqueda. ⚠</p>');
-            data.errors.forEach(function(code) { $resultBody.append(i18n.displayErrorCodeInSpanish(code)); });
+            var $errBody = $('<div>').html('<p class="mb-1 fw-semibold">Se produjo un error en la búsqueda.</p>');
+            data.errors.forEach(function(code) { $errBody.append(i18n.displayErrorCodeInSpanish(code)); });
+            $resultBody.html($feedbackAlert('danger', 'x-circle-fill', $errBody.html()));
           } else if (!data.potentialResults) {
-              $resultBody
-                .html('<p>🔍 No se encontraron resultados. 🔎</p>')
-                .append('<p>Editá la búsqueda agregando <span class="fw-semibold">fechas</span> o completando nombres de <span class="fw-semibold">padres</span> y <span class="fw-semibold">parejas</span>.</p>')
-                .append($('<p>').addClass('text-center')
-                  .html('¡Solicitá acceso al árbol y cargá info!')
-                  .append($('<a>').addClass('link-secondary text-decoration-none ms-2')
-                    .attr('href', 'https://instagram.com/_u/genea.azul').attr('target', '_blank').attr('rel', 'noopener')
-                    .append($('<i>').addClass('bi bi-instagram'))));
-              if (rq.individual && rq.individual.sex) {
-                $resultBody.append('<p>Verificá que el <span class="text-danger fw-semibold">sexo</span> de la persona esté bien seleccionado.</p>');
-              }
-              $resultBody.append(
-                $('<p>').addClass('text-center mt-3')
-                  .append($('<a>').addClass('btn btn-outline-secondary btn-sm')
-                    .attr('href', '/agregar-familia').attr('data-route', 'agregar-familia')
-                    .html('<i class="bi bi-tree me-2"></i>¿No aparecés? Agregá tu familia al árbol'))
-              );
+            var noResultBody = '<p class="mb-1 fw-semibold">No se encontraron resultados.</p>'
+              + '<p class="mb-0">Refiná la búsqueda agregando <strong>fechas</strong> o completando nombres de <strong>padres</strong> y <strong>parejas</strong>.</p>';
+            if (rq.individual && rq.individual.sex) {
+              noResultBody += '<p class="mb-0 mt-1">Verificá también que el <span class="text-danger fw-semibold">sexo</span> seleccionado sea correcto.</p>';
+            }
+            $resultBody.append($feedbackAlert('info', 'search', noResultBody)).append($treeBuilderCta());
           } else {
-            $resultBody
-              .html('<p>⚠ La búsqueda es ambigua. ⚠</p>')
-              .append('<p>Refiná la búsqueda agregando <span class="fw-semibold">fechas</span> o completando nombres de <span class="fw-semibold">padres</span> y <span class="fw-semibold">parejas</span>.</p>')
-              .append('<p><b>Potenciales resultados:</b> ' + utils.escHtml(data.potentialResults) + '</p>');
+            var ambigBody = '<p class="mb-1 fw-semibold">La búsqueda es ambigua &mdash; ' + utils.escHtml(data.potentialResults) + ' posible' + (data.potentialResults === 1 ? '' : 's') + ' resultado' + (data.potentialResults === 1 ? '' : 's') + '.</p>'
+              + '<p class="mb-0">Refiná la búsqueda agregando <strong>fechas</strong> o completando nombres de <strong>padres</strong> y <strong>parejas</strong>.</p>';
+            $resultBody.append($feedbackAlert('warning', 'exclamation-triangle-fill', ambigBody)).append($treeBuilderCta());
           }
         }
 
@@ -316,7 +319,7 @@ GeneaAzul.search = (function() {
         }
         } catch (err) {
           if (window.console && console.error) console.error('[search] render error:', err);
-          $resultBody.html('<p>⚠ Ocurrió un error al mostrar los resultados. Por favor intentá de nuevo. ⚠</p>');
+          $resultBody.html($feedbackAlert('danger', 'x-circle-fill', 'Ocurrió un error al mostrar los resultados. Por favor intentá de nuevo.'));
           finalizeSearch($btn, $resultCard);
         }
       },
@@ -739,15 +742,12 @@ GeneaAzul.search = (function() {
   /* ── Error handler ──────────────────────────────────────────────── */
   function handleAjaxError(xhr, $container) {
     var code = xhr && xhr.responseJSON && xhr.responseJSON.errorCode ? xhr.responseJSON.errorCode : null;
-    if (code) {
-      $container.html(i18n.displayErrorCodeInSpanish(code));
-    } else if (xhr && xhr.status === 429) {
-      $container.html(i18n.displayErrorCodeInSpanish('TOO-MANY-REQUESTS'));
-    } else if (xhr && xhr.status === 0) {
-      $container.html(i18n.displayErrorCodeInSpanish('NETWORK'));
-    } else {
-      $container.html(i18n.displayErrorCodeInSpanish('ERROR'));
-    }
+    var html;
+    if (code)                      html = i18n.displayErrorCodeInSpanish(code);
+    else if (xhr && xhr.status === 429) html = i18n.displayErrorCodeInSpanish('TOO-MANY-REQUESTS');
+    else if (xhr && xhr.status === 0)   html = i18n.displayErrorCodeInSpanish('NETWORK');
+    else                               html = i18n.displayErrorCodeInSpanish('ERROR');
+    $container.html($feedbackAlert('danger', 'x-circle-fill', html));
   }
 
   function finalizeSearch($btn, $resultCard, callback) {

@@ -437,6 +437,25 @@ h3:hover .ga-anchor-link,
 .ga-result-card-male   { border-color: var(--ga-sex-male) !important; }
 .ga-result-card-female { border-color: var(--ga-sex-female) !important; }
 
+/* Result feedback alerts */
+.ga-result-alert { border-radius: var(--ga-radius); font-size: .93rem; }
+.ga-result-alert p:last-child { margin-bottom: 0; }
+
+/* Tree builder CTA */
+.ga-btn-tree {
+  color: var(--ga-primary);
+  border: 2px solid var(--ga-primary);
+  border-radius: 50px;
+  padding: .5rem 1.75rem;
+  font-weight: 600;
+  font-size: .92rem;
+  transition: background-color var(--ga-transition), color var(--ga-transition);
+}
+.ga-btn-tree:hover, .ga-btn-tree:focus {
+  background-color: var(--ga-primary);
+  color: #fff;
+}
+
 /* Sex toggle buttons inside card header */
 .ga-switch-lg {
   padding-left: 3.25rem;
