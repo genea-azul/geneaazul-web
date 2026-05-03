@@ -103,7 +103,14 @@ GeneaAzul.treeBuilder = (function() {
     var saved = _loadFromLocalStorage();
     _state = saved || _freshState();
 
-    if (saved) { _showRestoredBanner(); }
+    var fromSearch = false;
+    try {
+      fromSearch = sessionStorage.getItem('geneaazul_tree_from_search') === '1';
+      if (fromSearch) sessionStorage.removeItem('geneaazul_tree_from_search');
+    } catch (e) {}
+
+    if (fromSearch)     { _showPrefillBanner(); }
+    else if (saved)     { _showRestoredBanner(); }
 
     // Wake backend + read obfuscateLiving before firing first auto-search
     // (same form-gate pattern as search.js — must complete before triggerSearchIfReady
@@ -141,6 +148,20 @@ GeneaAzul.treeBuilder = (function() {
       }
     } catch (e) {}
     return null;
+  }
+
+  function _showPrefillBanner() {
+    var $banner = $(
+      '<div class="alert alert-success d-flex align-items-center gap-2 py-2 small mb-3" id="ga-tree-prefill-banner">' +
+      '<i class="bi bi-magic flex-shrink-0"></i>' +
+      '<span>Completamos el formulario con los datos de tu búsqueda. Revisá y completá lo que falte.</span>' +
+      '<button type="button" class="btn-close btn-sm flex-shrink-0 ms-auto" aria-label="Cerrar"></button>' +
+      '</div>'
+    );
+    $('#ga-tree-canvas').before($banner);
+    $banner.find('.btn-close').on('click', function() { $banner.remove(); });
+    var t = setTimeout(function() { $banner.remove(); }, 8000);
+    _activeTimers.push(t);
   }
 
   function _showRestoredBanner() {

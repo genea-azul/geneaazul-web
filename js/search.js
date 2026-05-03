@@ -213,11 +213,50 @@ GeneaAzul.search = (function() {
       .append($('<div>').addClass('flex-grow-1').html(bodyHtml));
   }
 
-  function $treeBuilderCta() {
-    return $('<div>').addClass('text-center mt-4')
-      .append($('<a>').addClass('btn ga-btn-tree')
-        .attr('href', '/agregar-familia').attr('data-route', 'agregar-familia')
-        .html('<i class="bi bi-tree-fill me-2"></i>¿No aparecés? Construí tu árbol familiar'));
+  function _searchRqToTreeState(rq) {
+    function toNode(p) {
+      if (!p || (!p.givenName && !p.surname)) return null;
+      return {
+        givenName:  p.givenName   || null,
+        surname:    p.surname     || null,
+        sex:        p.sex         || null,
+        birthYear:  p.yearOfBirth || null,
+        birthPlace: p.placeOfBirth || null,
+        isDeceased: !p.isAlive,
+        deathYear:  !p.isAlive ? (p.yearOfDeath || null) : null
+      };
+    }
+    return {
+      ego:                 toNode(rq.individual),
+      partner:             toNode(rq.spouse),
+      father:              toNode(rq.father),
+      mother:              toNode(rq.mother),
+      paternalGrandfather: toNode(rq.paternalGrandfather),
+      paternalGrandmother: toNode(rq.paternalGrandmother),
+      maternalGrandfather: toNode(rq.maternalGrandfather),
+      maternalGrandmother: toNode(rq.maternalGrandmother),
+      children:            []
+    };
+  }
+
+  function $treeBuilderCta(rq) {
+    var $btn = $('<a>').addClass('btn ga-btn-tree')
+      .attr('href', '/agregar-familia').attr('data-route', 'agregar-familia')
+      .html('<i class="bi bi-tree-fill me-2"></i>¿No aparecés? Construí tu árbol familiar');
+
+    if (rq) {
+      $btn.on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          localStorage.setItem('geneaazul_tree_state', JSON.stringify(_searchRqToTreeState(rq)));
+          sessionStorage.setItem('geneaazul_tree_from_search', '1');
+        } catch (ex) {}
+        GeneaAzul.router.navigate('agregar-familia');
+      });
+    }
+
+    return $('<div>').addClass('text-center mt-4').append($btn);
   }
 
   function doSearch() {
@@ -294,11 +333,11 @@ GeneaAzul.search = (function() {
             if (rq.individual && rq.individual.sex) {
               noResultBody += '<p class="mb-0 mt-1">Verificá también que el <span class="text-danger fw-semibold">sexo</span> seleccionado sea correcto.</p>';
             }
-            $resultBody.append($feedbackAlert('info', 'search', noResultBody)).append($treeBuilderCta());
+            $resultBody.append($feedbackAlert('info', 'search', noResultBody)).append($treeBuilderCta(rq));
           } else {
             var ambigBody = '<p class="mb-1 fw-semibold">La búsqueda es ambigua &mdash; ' + utils.escHtml(data.potentialResults) + ' posible' + (data.potentialResults === 1 ? '' : 's') + ' resultado' + (data.potentialResults === 1 ? '' : 's') + '.</p>'
               + '<p class="mb-0">Refiná la búsqueda agregando <strong>fechas</strong> o completando nombres de <strong>padres</strong> y <strong>parejas</strong>.</p>';
-            $resultBody.append($feedbackAlert('warning', 'exclamation-triangle-fill', ambigBody)).append($treeBuilderCta());
+            $resultBody.append($feedbackAlert('warning', 'exclamation-triangle-fill', ambigBody)).append($treeBuilderCta(rq));
           }
         }
 
