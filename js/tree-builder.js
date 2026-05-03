@@ -673,16 +673,17 @@ GeneaAzul.treeBuilder = (function() {
     $err.addClass('d-none').empty();
 
     if (!_state.ego || !_state.ego.givenName || !_state.ego.surname) {
+      if (_leaveModal) { try { _leaveModal.hide(); } catch (e) {} }
       $err.removeClass('d-none').text('Completá tu nombre y apellido antes de enviar.');
       return;
     }
     if (!contact) {
+      if (_leaveModal) { try { _leaveModal.hide(); } catch (e) {} }
       $err.removeClass('d-none').text('Ingresá tu contacto (email, WhatsApp o @instagram) para enviar.');
-      $('#ga-tree-contact').focus();
+      setTimeout(function() { $('#ga-tree-contact').focus(); }, 350);
       return;
     }
 
-    // Hide leave modal now that validation passed — only reaches here if POST will fire
     if (_leaveModal) { try { _leaveModal.hide(); } catch (e) {} }
     $btn.prop('disabled', true);
 
