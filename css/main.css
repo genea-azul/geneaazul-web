@@ -388,6 +388,11 @@ h3:hover .ga-anchor-link,
   color: #fff;
   border-bottom-color: rgba(255,255,255,.15);
 }
+.ga-card-header-muted {
+  background-color: var(--ga-primary-muted);
+  color: #fff;
+  border-bottom-color: rgba(255,255,255,.15);
+}
 
 /* Connection chain card */
 .ga-connection-step {
