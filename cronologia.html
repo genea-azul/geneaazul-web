@@ -10,8 +10,8 @@
   <link rel="canonical" href="https://geneaazul.com.ar/cronologia">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/img/logo-simple-2500x2500-no-bg.png">
-  <link rel="apple-touch-icon" href="/img/logo-simple-2500x2500-no-bg.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
 
   <!-- Open Graph / social sharing -->
   <meta property="og:type" content="website">
@@ -44,6 +44,7 @@
 
   <!-- Preconnect hints -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://gedcom-analyzer-app.fly.dev">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -52,8 +53,9 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" integrity="sha384-CK2SzKma4jA5H/MXDUU7i1TqZlCFaD4T01vtyDFvPlD97JQyS+IsSh1nI2EFbpyk" crossorigin="anonymous">
-  <!-- Leaflet (interactive map) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" integrity="sha384-b8ANgTJvdlAnWM5YGMpKn7Kodm+1k7NYNG9zdjTCcZcKatzYHwZ0RLdWarbJJVzU" crossorigin="anonymous">
+  <!-- Leaflet (interactive map) — deferred: only used on /mapa, not render-blocking -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" integrity="sha384-b8ANgTJvdlAnWM5YGMpKn7Kodm+1k7NYNG9zdjTCcZcKatzYHwZ0RLdWarbJJVzU" crossorigin="anonymous" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" integrity="sha384-b8ANgTJvdlAnWM5YGMpKn7Kodm+1k7NYNG9zdjTCcZcKatzYHwZ0RLdWarbJJVzU" crossorigin="anonymous"></noscript>
 
   <!-- App Styles -->
   <link rel="stylesheet" href="/css/main.css">
@@ -76,7 +78,10 @@
   <nav class="navbar navbar-expand-xl sticky-top ga-navbar" id="main-navbar">
     <div class="container-xl">
       <a class="navbar-brand ga-brand" href="/" data-route="inicio">
-        <img src="/img/logo-simple-2500x2500-no-bg.png" alt="Genea Azul" class="ga-logo-nav">
+        <picture>
+          <source srcset="/img/logo-simple-320-no-bg.webp" type="image/webp">
+          <img src="/img/logo-simple-2500x2500-no-bg.png" alt="Genea Azul" class="ga-logo-nav" fetchpriority="high">
+        </picture>
       </a>
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Abrir menú">
         <span class="navbar-toggler-icon"></span>
@@ -154,7 +159,10 @@
 
         <!-- Brand -->
         <div class="col-md-4">
-          <img src="/img/logo-simple-2500x2500-no-bg.png" alt="Genea Azul" class="ga-logo-footer mb-2">
+          <picture>
+            <source srcset="/img/logo-simple-320-no-bg.webp" type="image/webp">
+            <img src="/img/logo-simple-2500x2500-no-bg.png" alt="Genea Azul" class="ga-logo-footer mb-2" loading="lazy">
+          </picture>
           <p class="ga-footer-desc"><strong>Genea Azul</strong> es una iniciativa comunitaria sin fines de lucro con el fin de investigar, documentar y preservar la historia genealógica del partido de Azul.</p>
           <p class="ga-footer-declaration small">
             <i class="bi bi-award me-1"></i>
