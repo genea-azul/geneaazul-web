@@ -611,21 +611,20 @@ GeneaAzul.treeBuilder = (function() {
 
         if (people.length === 0) {
           if (data.errors && data.errors.length > 0) {
-            data.errors.forEach(function(code) { $body.append(i18n.displayErrorCodeInSpanish(code)); });
+            var errHtml = '';
+            data.errors.forEach(function(code) { errHtml += i18n.displayErrorCodeInSpanish(code); });
+            $body.html($feedbackAlert('danger', 'x-circle-fill', errHtml));
           } else if (data.potentialResults) {
-            $body.html('<p>⚠ La búsqueda es ambigua. Completá más datos para refinar.</p>');
+            $body.html($feedbackAlert('warning', 'exclamation-triangle-fill', 'La búsqueda es ambigua. Completá más datos para refinar.'));
           } else {
-            $body.html('<p>🔍 No se encontraron coincidencias todavía. Seguí agregando datos de familia.</p>');
+            $body.html($feedbackAlert('info', 'search', 'Sin coincidencias todavía. Seguí agregando datos de familia.'));
           }
         }
       },
       function(xhr) {
         if (seq !== _searchSeq) { return; }
-        if (xhr && xhr.status === 429) {
-          $body.html(i18n.displayErrorCodeInSpanish('TOO-MANY-REQUESTS'));
-        } else {
-          $body.html(i18n.displayErrorCodeInSpanish('ERROR'));
-        }
+        var errCode = xhr && xhr.status === 429 ? 'TOO-MANY-REQUESTS' : 'ERROR';
+        $body.html($feedbackAlert('danger', 'x-circle-fill', i18n.displayErrorCodeInSpanish(errCode)));
       }
     );
   }

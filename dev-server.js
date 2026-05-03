@@ -319,7 +319,13 @@ var server = http.createServer(function(req, res) {
   // POST routes — read body first
   if (method === 'POST') {
     return readBody(req, function(body) {
-      if (url === '/api/search/family')     return sendJson(res, MOCK_SEARCH_FAMILY);
+      if (url === '/api/search/family') {
+        var name = (body && body.individual && body.individual.givenName || '').toLowerCase();
+        if (name === 'noresult')  return sendJson(res, { people: [], errors: [], potentialResults: null });
+        if (name === 'ambiguous') return sendJson(res, { people: [], errors: [], potentialResults: 3 });
+        if (name === 'error')     return sendJson(res, { people: [], errors: ['SOME-ERROR-CODE'], potentialResults: null });
+        return sendJson(res, MOCK_SEARCH_FAMILY);
+      }
       if (url === '/api/search/connection') return sendJson(res, MOCK_CONNECTION);
       if (url === '/api/search/surnames') {
         var surnames = (body && body.surnames) ? body.surnames : [];
