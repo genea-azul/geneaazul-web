@@ -235,7 +235,8 @@ GeneaAzul.search = (function() {
       paternalGrandmother: toNode(rq.paternalGrandmother),
       maternalGrandfather: toNode(rq.maternalGrandfather),
       maternalGrandmother: toNode(rq.maternalGrandmother),
-      children:            []
+      children:            [],
+      _prefillContact:     rq.contact || undefined
     };
   }
 

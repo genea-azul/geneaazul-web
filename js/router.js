@@ -13,6 +13,7 @@ GeneaAzul.router = (function() {
   var routeMap = {
     'inicio':                      'inicio',
     'buscar':                      'buscar',
+    'agregar-familia':             'agregar-familia',
     'conexiones':                  'conexiones',
     'estadisticas':                'estadisticas',
     'estadisticas/inmigracion':    'estadisticas-inmigracion',
@@ -25,13 +26,13 @@ GeneaAzul.router = (function() {
     'recursos':                    'recursos',
     'cronologia':                  'cronologia',
     'sobre-nosotros':              'sobre-nosotros',
-    'agregar-familia':             'agregar-familia'
   };
 
   /* Per-route title + description for SEO */
   var routeMeta = {
     'inicio':                      { title: 'Genea Azul \u2014 Genealog\u00eda azule\u00f1a',     desc: 'Investigaci\u00f3n geneal\u00f3gica comunitaria del partido de Azul, Argentina. Busc\u00e1 tu familia, descubr\u00ed tu historia.' },
     'buscar':                      { title: 'Buscar personas \u2014 Genea Azul',                  desc: 'Busc\u00e1 personas en la base geneal\u00f3gica azule\u00f1a. Encontr\u00e1 familiares y antepasados del partido de Azul.' },
+    'agregar-familia':             { title: 'Agreg\u00e1 tu familia \u2014 Genea Azul',           desc: 'Complet\u00e1 los datos de tu familia y envianos la informaci\u00f3n para incorporarla al \u00e1rbol geneal\u00f3gico de Azul.' },
     'conexiones':                  { title: 'Conexiones entre personas \u2014 Genea Azul',        desc: 'Descubr\u00ed c\u00f3mo dos personas est\u00e1n emparentadas en el \u00e1rbol geneal\u00f3gico de Azul.' },
     'estadisticas':                { title: 'Estad\u00edsticas del \u00e1rbol \u2014 Genea Azul', desc: 'Estad\u00edsticas geneal\u00f3gicas del partido de Azul: personas, familias, apellidos e inmigraci\u00f3n.' },
     'estadisticas/inmigracion':    { title: 'Inmigraci\u00f3n en Azul \u2014 Genea Azul',         desc: 'Oleadas inmigratorias que llegaron al partido de Azul, Buenos Aires, Argentina.' },
@@ -44,7 +45,6 @@ GeneaAzul.router = (function() {
     'recursos':                    { title: 'Recursos geneal\u00f3gicos \u2014 Genea Azul',       desc: 'Recursos geneal\u00f3gicos \u00fatiles para investigar familias del partido de Azul.' },
     'cronologia':                  { title: 'Cronolog\u00eda de Azul \u2014 Genea Azul',          desc: 'L\u00ednea de tiempo hist\u00f3rica del partido de Azul: eventos, genealog\u00eda y curiosidades.' },
     'sobre-nosotros':              { title: 'Sobre nosotros \u2014 Genea Azul',                   desc: 'Conoc\u00e9 al equipo detr\u00e1s de Genea Azul, el proyecto geneal\u00f3gico comunitario de Azul.' },
-    'agregar-familia':             { title: 'Aport\u00e1 tu \u00e1rbol \u2014 Genea Azul', desc: 'Complet\u00e1 los datos de tu familia y envianos la informaci\u00f3n para incorporarla al \u00e1rbol geneal\u00f3gico de Azul.' }
   };
 
   /* Page initializers — called after HTML fragment is injected */
@@ -55,6 +55,7 @@ GeneaAzul.router = (function() {
       if (GeneaAzul.ephemerides) GeneaAzul.ephemerides.init();
     },
     'buscar':                      function() { if (GeneaAzul.search)      GeneaAzul.search.init(); },
+    'agregar-familia':             function() { if (GeneaAzul.treeBuilder) GeneaAzul.treeBuilder.init(); },
     'conexiones':                  function() { if (GeneaAzul.connections) GeneaAzul.connections.init(); },
     'estadisticas':                function() { if (GeneaAzul.stats)       GeneaAzul.stats.init(); },
     'estadisticas-inmigracion':    function() { if (GeneaAzul.stats)       GeneaAzul.stats.initImmigration(); },
@@ -63,7 +64,6 @@ GeneaAzul.router = (function() {
     'mapa':                        function() { if (GeneaAzul.map)         GeneaAzul.map.init(); },
     'historias':                   function() { if (GeneaAzul.stories)     GeneaAzul.stories.init(); },
     'cronologia':                  function() { if (GeneaAzul.cronologia)  GeneaAzul.cronologia.init(); },
-    'agregar-familia':             function() { if (GeneaAzul.treeBuilder) GeneaAzul.treeBuilder.init(); }
   };
 
   /* Fire a GA4 page_view event for the current route */

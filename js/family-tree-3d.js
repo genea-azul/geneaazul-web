@@ -26,7 +26,7 @@ GeneaAzul.familyTree3d = (function() {
   var _historyPushed = false;
 
   function init(uuid) {
-    if (_currentUuid) return;
+    if (!_modalEl || _currentUuid) return;
     _currentUuid = uuid;
     _cancelled = false;
     _userInitiated = true;

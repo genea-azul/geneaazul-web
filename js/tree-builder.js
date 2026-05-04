@@ -109,6 +109,12 @@ GeneaAzul.treeBuilder = (function() {
       if (fromSearch) sessionStorage.removeItem('geneaazul_tree_from_search');
     } catch (e) {}
 
+    if (fromSearch && _state._prefillContact) {
+      $('#ga-tree-contact').val(_state._prefillContact);
+      delete _state._prefillContact;
+      _saveToLocalStorage();
+    }
+
     $('#ga-tree-prefill-banner, #ga-tree-restored-banner').remove();
     if (fromSearch)     { _showPrefillBanner(); }
     else if (saved)     { _showRestoredBanner(); }
@@ -478,6 +484,7 @@ GeneaAzul.treeBuilder = (function() {
       renderNode(role, null);
     }
 
+    document.activeElement && document.activeElement.blur && document.activeElement.blur();
     _modal.hide();
     _saveToLocalStorage();
     triggerSearchIfReady();
@@ -501,6 +508,7 @@ GeneaAzul.treeBuilder = (function() {
       _state[role] = null;
       renderNode(role, null);
     }
+    document.activeElement && document.activeElement.blur && document.activeElement.blur();
     _modal.hide();
     _saveToLocalStorage();
     triggerSearchIfReady();
