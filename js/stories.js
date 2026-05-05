@@ -101,7 +101,10 @@ GeneaAzul.stories = (function() {
       url: '/stories/' + slug + '.md',
       method: 'GET',
       success: function(markdown) {
-        var sanitized = DOMPurify.sanitize(marked.parse(markdown));
+        var sanitized = DOMPurify.sanitize(marked.parse(markdown), {
+          FORBID_TAGS: ['iframe', 'object', 'embed', 'form', 'input', 'script', 'style', 'base'],
+          FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
+        });
         var html = sanitized;
         $container.html(
           '<section class="ga-section container-xl">'

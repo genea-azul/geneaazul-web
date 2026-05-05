@@ -41,8 +41,9 @@ GeneaAzul.birthdays = (function() {
 
     people.forEach(function(p) {
       var birthYear = extractYear(p.dateOfBirth);
-      var imgHtml = p.profilePicture
-        ? '<img src="' + GeneaAzul.utils.escHtml(p.profilePicture) + '" alt="' + GeneaAzul.utils.escHtml(p.name) + '" class="ga-birthday-photo" loading="lazy">'
+      var safePicture = /^https?:\/\//i.test(p.profilePicture) ? p.profilePicture : '';
+      var imgHtml = safePicture
+        ? '<img src="' + GeneaAzul.utils.escHtml(safePicture) + '" alt="' + GeneaAzul.utils.escHtml(p.name) + '" class="ga-birthday-photo" loading="lazy">'
         : '<div class="ga-birthday-photo-placeholder"><i class="bi bi-person"></i></div>';
 
       var yearHtml = birthYear

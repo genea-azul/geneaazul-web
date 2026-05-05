@@ -137,10 +137,6 @@ GeneaAzul.search = (function() {
 
   /* ── Backend readiness gate (unlocks form when /api/gedcom-analyzer responds) ─ */
   function initBackend() {
-    if (/[?&]f=0/.test(window.location.search)) {
-      cfg.obfuscateLiving = false;
-    }
-
     setTimeout(function() {
       if ($('#search-form-container').hasClass('d-none')) {
         $('#search-spinner').css('visibility', 'visible');
